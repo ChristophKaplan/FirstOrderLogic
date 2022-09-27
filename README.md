@@ -1,2 +1,2 @@
-An "First Order Logic" implementation in Unity C#. 
-Personal study of my University module called "knowledge based systems".
+A "First Order Logic" implementation in Unity C#. 
+Personal study for my university module "Knowledge Based Systems".
