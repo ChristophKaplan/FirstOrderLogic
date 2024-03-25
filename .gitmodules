@@ -1,0 +1,3 @@
+[submodule "PropositionalLogic/LRParser"]
+	path = PropositionalLogic/LRParser
+	url = https://github.com/ChristophKaplan/LRParser

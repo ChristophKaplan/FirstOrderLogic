@@ -1,6 +1,4 @@
-﻿using PropositionalLogic;
-
-var logic = new PropositionalLogic.PropositionalLogic();
+﻿var logic = new PropositionalLogic.PropositionalLogic();
 
 /*
 var c = InputCreator.GeneratePropositionalSentences(3);
