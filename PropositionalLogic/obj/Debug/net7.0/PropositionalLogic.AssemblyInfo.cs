@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("PropositionalLanguage")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("PropositionalLogic")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
-[assembly: System.Reflection.AssemblyProductAttribute("PropositionalLanguage")]
-[assembly: System.Reflection.AssemblyTitleAttribute("PropositionalLanguage")]
+[assembly: System.Reflection.AssemblyProductAttribute("PropositionalLogic")]
+[assembly: System.Reflection.AssemblyTitleAttribute("PropositionalLogic")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Von der MSBuild WriteCodeFragment-Klasse generiert.

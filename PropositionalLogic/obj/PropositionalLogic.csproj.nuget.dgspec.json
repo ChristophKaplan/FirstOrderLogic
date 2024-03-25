@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\Development\\PropositionalLogic\\PropositionalLanguage\\PropositionalLanguage\\PropositionalLanguage.csproj": {}
+    "E:\\Development\\PropositionalLogic\\PropositionalLogic\\PropositionalLogic.csproj": {}
   },
   "projects": {
-    "E:\\Development\\PropositionalLogic\\PropositionalLanguage\\PropositionalLanguage\\PropositionalLanguage.csproj": {
+    "E:\\Development\\PropositionalLogic\\PropositionalLogic\\PropositionalLogic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Development\\PropositionalLogic\\PropositionalLanguage\\PropositionalLanguage\\PropositionalLanguage.csproj",
-        "projectName": "PropositionalLanguage",
-        "projectPath": "E:\\Development\\PropositionalLogic\\PropositionalLanguage\\PropositionalLanguage\\PropositionalLanguage.csproj",
+        "projectUniqueName": "E:\\Development\\PropositionalLogic\\PropositionalLogic\\PropositionalLogic.csproj",
+        "projectName": "PropositionalLogic",
+        "projectPath": "E:\\Development\\PropositionalLogic\\PropositionalLogic\\PropositionalLogic.csproj",
         "packagesPath": "C:\\Users\\delphicmind\\.nuget\\packages\\",
-        "outputPath": "E:\\Development\\PropositionalLogic\\PropositionalLanguage\\PropositionalLanguage\\obj\\",
+        "outputPath": "E:\\Development\\PropositionalLogic\\PropositionalLogic\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\delphicmind\\AppData\\Roaming\\NuGet\\NuGet.Config",
