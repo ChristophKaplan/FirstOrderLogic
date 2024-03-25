@@ -1,3 +1,6 @@
 [submodule "LRParser"]
 	path = PropositionalLogic/
 	url = git@github.com:ChristophKaplan/LRParser.git
+[submodule "PropositionalLogic/LRParser"]
+	path = PropositionalLogic/LRParser
+	url = git@github.com:ChristophKaplan/LRParser.git
