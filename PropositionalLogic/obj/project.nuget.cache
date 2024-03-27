@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "3N5mXX79xtmawv+zmbM0wkyhPx1x2j+O+NKC4VGkn4fw5LqyXqGy9ak2l4I/1U8ud03eD2/MaD7RLh3phwYNEQ==",
+  "dgSpecHash": "M5TJ2r6ImKJvPzZUdmNXbcyVbqcUM446vf9n2QvXfTWTzR90z+K6i4ED26u//rWGGxKXiJA5TZu9hvoURRHs8g==",
   "success": true,
   "projectFilePath": "/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/Users/delphicmind/.nuget/packages/consoletables/2.6.1/consoletables.2.6.1.nupkg.sha512"
+  ],
   "logs": []
 }

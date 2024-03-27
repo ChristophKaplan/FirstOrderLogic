@@ -1,0 +1,5 @@
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.csproj.AssemblyReference.cache
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.GeneratedMSBuildEditorConfig.editorconfig
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.AssemblyInfoInputs.cache
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.AssemblyInfo.cs
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.csproj.CoreCompileInputs.cache
