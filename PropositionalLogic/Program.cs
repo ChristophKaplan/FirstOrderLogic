@@ -25,8 +25,7 @@ logic.Interpret(new []{
 */
 
 logic.Interpret(new []{
-    "Int((A OR B) AND C, Simplify(Forget((A OR B) AND C, A)))",
-    "Int(Simplify(Forget((A OR B) AND C, A)))",
+    "Int((A AND B) OR C, SkepForget((A AND B) OR C, A))",
 });
 
 /*

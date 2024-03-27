@@ -29,9 +29,17 @@ public static class PropositionalLogicExtensions {
         return new InterpretationSet(list, set.Sentences.ToArray());
     }
 
-    public static InterpretationSet Int(this PropositionalLogic logic, params Sentence[] sentences) {
-        var interpretations = logic.GenerateInterpretations(sentences);
-        return new InterpretationSet(interpretations, sentences);
+    public static InterpretationSet Int(this PropositionalLogic logic, params Sentence[] sentences)
+    {
+        var showChildren = true;
+        List<Sentence> list = new();
+        foreach (var sen in sentences)
+        {
+            list.Add(sen);
+            list.AddRange(sen.GetComplexChildren());
+        }
+        
+        return new InterpretationSet(logic.GenerateInterpretations(sentences), showChildren ? list.ToArray() : sentences);
     }
 
     public static Sentence Forget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
@@ -103,7 +111,8 @@ public static class PropositionalLogicExtensions {
 
     private static void SimplifyTruthValues(ref Sentence sentence) {
         if (sentence is AtomicSentence) return;
-
+        if(sentence is ComplexSentence { Operator: LogicSymbols.NOT }) return;
+        
         var lhs = sentence.Children[0];
         var rhs = sentence.Children[1];
 
@@ -160,7 +169,7 @@ public static class PropositionalLogicExtensions {
     }
 
     private static void Absorption(ref Sentence sentence) {
-        if (!sentence.IsAtomComplexRelation(sentence, out var atomicSentence, out var complex)) {
+        if (!sentence.IsAtomComplexRelation(out var atomicSentence, out var complex)) {
             return;
         }
 
@@ -173,7 +182,7 @@ public static class PropositionalLogicExtensions {
     }
     
     private static void Absorption2(ref Sentence sentence) {
-        if (!sentence.IsAtomComplexRelation(sentence, out var atomicSentence, out var complex)) {
+        if (!sentence.IsAtomComplexRelation(out var atomicSentence, out var complex)) {
             return;
         }
 

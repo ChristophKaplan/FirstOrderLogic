@@ -5,7 +5,9 @@ namespace PropositionalLogic;
 public enum LogicSymbols {
     AND,
     OR,
-    NOT
+    NOT,
+    TRUE,
+    FALSE
 }
 
 public class Function : ILanguageObject {
@@ -33,7 +35,6 @@ public abstract class Sentence : ILanguageObject {
     }
     
     public void Reparent(Sentence parentOfThis) {
-        
         if (parentOfThis._parent == null) {
             return;
         }
@@ -49,29 +50,6 @@ public abstract class Sentence : ILanguageObject {
         var index = parent.Children.IndexOf(found);
         parent.Children.RemoveAt(index);
         parent.InsertChild(index, this);
-    }
-
-    public bool IsAtomComplexRelation(Sentence sentence, out AtomicSentence atomicSentence, out ComplexSentence complex) {
-        atomicSentence = null;
-        complex = null;
-            
-        if (sentence is AtomicSentence) return false;
-
-        var lhs = sentence.Children[0];
-        var rhs = sentence.Children[1];
-
-        if((lhs is AtomicSentence && rhs is AtomicSentence) || (lhs is ComplexSentence && rhs is ComplexSentence)) return false;
-
-        if (lhs is AtomicSentence lhs1 && rhs is ComplexSentence rhs1) {
-            atomicSentence = lhs1;
-            complex = rhs1;
-        }
-        else if (rhs is AtomicSentence rhs2 && lhs is ComplexSentence lhs2) {
-            atomicSentence = rhs2;
-            complex = lhs2;
-        }
-
-        return true;
     }
     
     public override bool Equals(object? obj) {
@@ -92,7 +70,7 @@ public abstract class Sentence : ILanguageObject {
         }
 
         if (this is ComplexSentence complexSentence) {
-            if (complexSentence.Operator.Equals("NOT")) {
+            if (complexSentence.Operator.Equals(LogicSymbols.NOT)) {
                 return $"{complexSentence.Operator} {complexSentence.Children[0]}";
             }
 
@@ -106,8 +84,8 @@ public abstract class Sentence : ILanguageObject {
 public class AtomicSentence : Sentence {
     public string Symbol;
     public bool IsTruthValue { get => Tautology || Falsum; }
-    public bool Tautology { get => Symbol.Equals("True"); }
-    public bool Falsum { get => Symbol.Equals("False"); }
+    public bool Tautology { get => Symbol.Equals("True");}
+    public bool Falsum { get => Symbol.Equals("False");}
     
     public AtomicSentence(string symbol) {
         Symbol = symbol;

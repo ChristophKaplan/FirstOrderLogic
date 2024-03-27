@@ -40,19 +40,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/delphicmind/.nuget/packages/": {}
+    "/Users/christoph.kaplan/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj",
+      "projectUniqueName": "/Users/christoph.kaplan/development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj",
       "projectName": "PropositionalLogic",
-      "projectPath": "/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj",
-      "packagesPath": "/Users/delphicmind/.nuget/packages/",
-      "outputPath": "/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/",
+      "projectPath": "/Users/christoph.kaplan/development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj",
+      "packagesPath": "/Users/christoph.kaplan/.nuget/packages/",
+      "outputPath": "/Users/christoph.kaplan/development/PropositionalLogic/PropositionalLogic/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/delphicmind/.nuget/NuGet/NuGet.Config"
+        "/Users/christoph.kaplan/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net7.0"
@@ -97,7 +97,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.306/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/Users/christoph.kaplan/.dotnet/sdk/7.0.101/RuntimeIdentifierGraph.json"
       }
     }
   }
