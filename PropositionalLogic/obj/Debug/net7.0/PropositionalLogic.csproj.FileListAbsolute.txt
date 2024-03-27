@@ -3,3 +3,15 @@
 /Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.AssemblyInfoInputs.cache
 /Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.AssemblyInfo.cs
 /Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.csproj.CoreCompileInputs.cache
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/bin/Debug/net7.0/PropositionalLogic
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/bin/Debug/net7.0/PropositionalLogic.deps.json
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/bin/Debug/net7.0/PropositionalLogic.runtimeconfig.json
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/bin/Debug/net7.0/PropositionalLogic.dll
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/bin/Debug/net7.0/PropositionalLogic.pdb
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/bin/Debug/net7.0/ConsoleTables.dll
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.csproj.CopyComplete
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.dll
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/refint/PropositionalLogic.dll
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.pdb
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/PropositionalLogic.genruntimeconfig.cache
+/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/Debug/net7.0/ref/PropositionalLogic.dll
