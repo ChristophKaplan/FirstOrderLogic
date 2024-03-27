@@ -7,8 +7,8 @@ public class Interpretation : ILanguageObject{
     public readonly Dictionary<AtomicSentence, bool> _truthValues = new();
     
     public Interpretation() { }
-    
-    public Interpretation(Interpretation other) {
+
+    private Interpretation(Interpretation other) {
         foreach (var kv in other._truthValues) {
             _truthValues.Add(kv.Key, kv.Value);
         }

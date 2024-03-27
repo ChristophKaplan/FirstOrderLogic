@@ -24,13 +24,10 @@ logic.Interpret(new []{
 });
 */
 
-
 logic.Interpret(new []{
     "Int((A OR B) AND C, Simplify(Forget((A OR B) AND C, A)))",
-    
     "Int(Simplify(Forget((A OR B) AND C, A)))",
 });
-
 
 /*
 logic.Interpret(new []{
@@ -50,10 +47,4 @@ logic.Interpret(new []{
     "Int((P AND Q) OR Z)",
    "Int(Forget((P AND Q) OR Z, Z))",
    "Int(Simplify(Forget((P AND Q) OR Z, Z)))",
-*/
-
-/*    
-var other = new OtherLang.OtherLang();
-var languageObject = other.TryParse("Int A; A = 50;");
-Console.WriteLine(languageObject);
 */
