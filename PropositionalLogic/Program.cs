@@ -11,5 +11,5 @@ logic.Interpret(c.ToArray());
 
 
 logic.Interpret(new []{
-   "A && TRUE",
+   "Int(A => B)",
 });
