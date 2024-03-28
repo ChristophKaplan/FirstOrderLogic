@@ -2,13 +2,35 @@ using LRParser.Language;
 
 namespace PropositionalLogic;
 
-public enum LogicSymbols {
-    AND,
-    OR,
-    NOT,
-    IMPLIES,
-    TRUE,
-    FALSE
+public class LogicalConstant : ILanguageObject {
+    public enum LSymbol{
+        AND,
+        OR,
+        NOT,
+        IMPLIES,
+        TRUE,
+        FALSE
+    }
+    
+    private readonly LSymbol Symbol;
+    
+    public LogicalConstant(LSymbol symbol) {
+        Symbol = symbol;
+    }
+    
+    public static implicit operator LSymbol(LogicalConstant constant)
+    {
+        return constant.Symbol;
+    }
+    
+    public static implicit operator LogicalConstant(LSymbol symbol)
+    {
+        return new LogicalConstant(symbol);
+    }
+    
+    public override string ToString() {
+        return Symbol.ToString();
+    }
 }
 
 public class Function : ILanguageObject {
@@ -71,7 +93,7 @@ public abstract class Sentence : ILanguageObject {
         }
 
         if (this is ComplexSentence complexSentence) {
-            if (complexSentence.Operator.Equals(LogicSymbols.NOT)) {
+            if (complexSentence.Operator.Equals(LogicalConstant.LSymbol.NOT)) {
                 return $"{complexSentence.Operator} {complexSentence.Children[0]}";
             }
 
@@ -85,8 +107,8 @@ public abstract class Sentence : ILanguageObject {
 public class AtomicSentence : Sentence {
     public string Symbol;
     public bool IsTruthValue { get => Tautology || Falsum; }
-    public bool Tautology { get => Symbol.Equals("True");}
-    public bool Falsum { get => Symbol.Equals("False");}
+    public bool Tautology { get => Symbol.Equals(LogicalConstant.LSymbol.TRUE.ToString());}
+    public bool Falsum { get => Symbol.Equals(LogicalConstant.LSymbol.FALSE.ToString());}
     
     public AtomicSentence(string symbol) {
         Symbol = symbol;
@@ -97,20 +119,20 @@ public class AtomicSentence : Sentence {
 }
 
 public class ComplexSentence : Sentence {
-    public readonly LogicSymbols Operator;
+    public readonly LogicalConstant.LSymbol Operator;
 
-    public ComplexSentence(Sentence p, LogicSymbols @operator, Sentence q) {
+    public ComplexSentence(Sentence p, LogicalConstant.LSymbol @operator, Sentence q) {
         Operator = @operator;
         AddChild(p);
         AddChild(q);
     }
 
-    public ComplexSentence(LogicSymbols @operator, Sentence p) {
+    public ComplexSentence(LogicalConstant.LSymbol @operator, Sentence p) {
         Operator = @operator;
         AddChild(p);
     }
     
-    public ComplexSentence(LogicSymbols @operator) {
+    public ComplexSentence(LogicalConstant.LSymbol @operator) {
         Operator = @operator;
     }
 }

@@ -9,13 +9,16 @@ public enum Terminal {
     Open,
     Comma,
     Close,
-    Connective,
     Negation,
     AtomicSentence,
+    Implication,
+    Disjunction,
+    Conjunction,
+    TruthValue,
 }
 
 public enum NonTerminal {
-    LangObject, Sentence, ComplexSentence, Ext
+    LangObject, Sentence, ComplexSentence, Ext, Connective
 }
 
 public class PropositionalLogic : Language<Terminal, NonTerminal> {
@@ -27,8 +30,11 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             new TokenDefinition<Terminal>(Terminal.Open, "\\("),
             new TokenDefinition<Terminal>(Terminal.Comma, ","),
             new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
-            new TokenDefinition<Terminal>(Terminal.Connective, "AND|OR|IMPLIES"),
+            new TokenDefinition<Terminal>(Terminal.Conjunction, "AND|&&"),
+            new TokenDefinition<Terminal>(Terminal.Disjunction, "OR|\\|\\|"),
+            new TokenDefinition<Terminal>(Terminal.Implication, "IMPLIES|=>"),
             new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!"),
+            new TokenDefinition<Terminal>(Terminal.TruthValue, "TRUE|FALSE"),
             new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*") 
         };
     }
@@ -42,80 +48,41 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         var rule04 = AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
         var rule05 = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
         
-        var rule06 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, Terminal.Connective, NonTerminal.Sentence);
-        var rule07 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, Terminal.Connective, NonTerminal.Sentence);
+        var rule06 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, NonTerminal.Connective, NonTerminal.Sentence);
+        var rule07 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, NonTerminal.Connective, NonTerminal.Sentence);
         var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Negation, NonTerminal.Sentence);
 
         var rule09 = AddProductionRule(NonTerminal.LangObject, Terminal.Function, Terminal.Open, NonTerminal.LangObject, NonTerminal.Ext);
         var rule10 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.LangObject, NonTerminal.Ext);
         var rule11 = AddProductionRule(NonTerminal.Ext, Terminal.Close);
-
-
-
-        AtomicSentence LexValueToAtom(LexValue lexVal) {
-            if (!lexVal.AsLogicSymbol(out var logicSymbol)) {
-                return new AtomicSentence(lexVal);
-            }
-            //truthvalues?
-            return null;
-        }
+        
+        var rule12 = AddProductionRule(NonTerminal.Connective, Terminal.Conjunction);
+        var rule13 = AddProductionRule(NonTerminal.Connective, Terminal.Disjunction);
+        var rule14 = AddProductionRule(NonTerminal.Connective, Terminal.Implication);
+        
+        var rule15 = AddProductionRule(NonTerminal.Sentence, Terminal.TruthValue); //weird?
+        rule15.SetSemanticAction((lhs, rhs) => {
+            var lc = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+            lhs.SyntheticAttribute = new AtomicSentence(lc.ToString());
+        });
         
         rule01.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         rule02.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         rule03.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
 
-        rule04.SetSemanticAction((lhs, rhs) => {
-            lhs.SyntheticAttribute = LexValueToAtom((LexValue)rhs[0].SyntheticAttribute);
-        });
+        rule04.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute); });
 
         rule05.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
 
         rule06.SetSemanticAction((lhs, rhs) => {
-            if (!((LexValue)rhs[1].SyntheticAttribute).AsLogicSymbol(out var logicSymbol)) {
-                throw new Exception($"Error: {rhs[1].SyntheticAttribute} attribute is not a logic symbol!");
-            }
-            
-            var lhsAtom = LexValueToAtom((LexValue)rhs[0].SyntheticAttribute);
-            
-            switch (logicSymbol) {
-                case LogicSymbols.OR: {
-                    lhs.SyntheticAttribute = new ComplexSentence(lhsAtom, LogicSymbols.OR, (Sentence)rhs[2].SyntheticAttribute);
-                    return;
-                }
-                case LogicSymbols.AND: {
-                    lhs.SyntheticAttribute = new ComplexSentence(lhsAtom, LogicSymbols.AND, (Sentence)rhs[2].SyntheticAttribute);
-                    return;
-                }
-                case LogicSymbols.IMPLIES: {
-                    lhs.SyntheticAttribute = new ComplexSentence(lhsAtom, LogicSymbols.IMPLIES, (Sentence)rhs[2].SyntheticAttribute);
-                    return;
-                }
-                default:
-                    throw new Exception($"Error: {logicSymbol} operator not found!");
-            }
+            lhs.SyntheticAttribute = new ComplexSentence(new AtomicSentence((LexValue)rhs[0].SyntheticAttribute), (LogicalConstant)rhs[1].SyntheticAttribute, (Sentence)rhs[2].SyntheticAttribute);
         });
 
         rule07.SetSemanticAction((lhs, rhs) => {
-            if (!((LexValue)rhs[3].SyntheticAttribute).AsLogicSymbol(out var logicSymbol)) {
-                throw new Exception($"Error: {rhs[3].SyntheticAttribute} attribute is not a logic symbol!");
-            }
-            
-            switch (logicSymbol) {
-                case LogicSymbols.OR:
-                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, LogicSymbols.OR, (Sentence)rhs[4].SyntheticAttribute);
-                    return;
-                case LogicSymbols.AND:
-                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, LogicSymbols.AND, (Sentence)rhs[4].SyntheticAttribute);
-                    return;
-                case LogicSymbols.IMPLIES:
-                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, LogicSymbols.IMPLIES, (Sentence)rhs[4].SyntheticAttribute);
-                    return;
-                default:
-                    throw new Exception($"Error: {rhs[3].SyntheticAttribute} operator not found!");
-            }
+            lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, (LogicalConstant)rhs[3].SyntheticAttribute, (Sentence)rhs[4].SyntheticAttribute);
         });
 
-        rule08.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence(LogicSymbols.NOT, (Sentence)rhs[1].SyntheticAttribute));
+        rule08.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence(LogicalConstant.LSymbol.NOT, (Sentence)rhs[1].SyntheticAttribute));
 
         rule09.SetSemanticAction((lhs, rhs) => {
             var extArray = (ArrayValue)rhs[3].SyntheticAttribute;
@@ -140,12 +107,15 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         rule11.SetSemanticAction((lhs, rhs) => {
             lhs.SyntheticAttribute = new ArrayValue(Array.Empty<ILanguageObject>());
         });
+        
+        rule12.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant(); });
+        rule13.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant(); });
+        rule14.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant(); });
     }
 
     private ILanguageObject ExecuteFunction(Function function) {
         switch (function.Func) {
             case "Int": {
-
                 Sentence[] a = new Sentence[function.Parameters.Length];
                 for (var i = 0; i < function.Parameters.Length; i++) {
                     a[i] = (Sentence)function.Parameters[i];
@@ -167,10 +137,6 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             }
             case "SkepForget": {
                 var result = this.SkepForget((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
-                return result;
-            }
-            case "MyForget": {
-                var result = this.MyForget((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
                 return result;
             }
             case "SwitchMany": {

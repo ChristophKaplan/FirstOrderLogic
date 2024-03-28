@@ -3,13 +3,28 @@
 namespace PropositionalLogic;
 
 public static class PropositionalLogicExtensions {
-    public static bool AsLogicSymbol(this LexValue lexValue, out LogicSymbols logicSymbol) {
-        if (Enum.TryParse<LogicSymbols>(lexValue.Value, out var symbol)) {
-            logicSymbol = symbol;
-            return true;
+    
+    public static LogicalConstant ToLogicalConstant(this LexValue lexValue) {
+        switch (lexValue.Value) {
+            case "OR":
+            case "||":
+                return LogicalConstant.LSymbol.OR;
+            case "AND":
+            case "&&":
+                return LogicalConstant.LSymbol.AND;
+            case "NOT":
+            case "!":
+                return LogicalConstant.LSymbol.NOT;
+            case "IMPLIES":
+            case "=>":
+                return LogicalConstant.LSymbol.IMPLIES;
+            case "TRUE":
+                return LogicalConstant.LSymbol.TRUE;
+            case "FALSE":
+                return LogicalConstant.LSymbol.FALSE;
+            default:
+                throw new Exception($"Unknown Logic Symbol: {lexValue}");
         }
-        logicSymbol = LogicSymbols.NOT;
-        return false;
     }
 
     public static InterpretationSet Mod(this PropositionalLogic logic, Sentence sentence) {
@@ -49,54 +64,21 @@ public static class PropositionalLogicExtensions {
     public static Sentence Forget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
         var lhs = sentence.GetCopy();
         var rhs = sentence.GetCopy();
-        lhs.FindReplaceAtom(forgetMe, "True");
-        rhs.FindReplaceAtom(forgetMe, "False");
-        var n = new ComplexSentence(lhs, LogicSymbols.OR, rhs);
+        lhs.FindReplaceAtom(forgetMe, LogicalConstant.LSymbol.TRUE.ToString());
+        rhs.FindReplaceAtom(forgetMe, LogicalConstant.LSymbol.FALSE.ToString());
+        var n = new ComplexSentence(lhs, LogicalConstant.LSymbol.OR, rhs);
         return n;
     }
 
     public static Sentence SkepForget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
         var lhs = sentence.GetCopy();
         var rhs = sentence.GetCopy();
-        lhs.FindReplaceAtom(forgetMe, "True");
-        rhs.FindReplaceAtom(forgetMe, "False");
-        var n = new ComplexSentence(lhs, LogicSymbols.AND, rhs);
+        lhs.FindReplaceAtom(forgetMe, LogicalConstant.LSymbol.TRUE.ToString());
+        rhs.FindReplaceAtom(forgetMe, LogicalConstant.LSymbol.FALSE.ToString());
+        var n = new ComplexSentence(lhs, LogicalConstant.LSymbol.AND, rhs);
         return n;
     }
 
-    public static Sentence MyForget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
-        AtomicSentence find = null;
-        if (sentence is not ComplexSentence complexSentence) {
-            return sentence;
-        }
-
-        var lhs = complexSentence.Children[0];
-        var rhs = complexSentence.Children[1];
-        
-        if (lhs is ComplexSentence clhs) {
-            logic.MyForget(clhs, forgetMe);
-        }
-
-        if (rhs is ComplexSentence crhs) {
-            logic.MyForget(crhs, forgetMe);
-        }
-        
-        if (lhs is AtomicSentence aLhs && aLhs.Equals(forgetMe)) {
-            find = aLhs;
-        }
-        
-        else if (rhs is AtomicSentence aRhs && aRhs.Equals(forgetMe)) {
-            find = aRhs;
-        }
-
-        if (find != null) {
-            if(complexSentence.Operator == LogicSymbols.AND) find.Symbol = "True";
-            else if(complexSentence.Operator == LogicSymbols.OR) find.Symbol = "False";
-        }
-        
-        return sentence;
-    }
-    
     public static Sentence Simplify(this PropositionalLogic logic, Sentence sentence) {
         var old = sentence;
         var copy = sentence.GetCopy();
@@ -115,7 +97,7 @@ public static class PropositionalLogicExtensions {
 
     private static void SimplifyTruthValues(ref Sentence sentence) {
         if (sentence is AtomicSentence) return;
-        if(sentence is ComplexSentence { Operator: LogicSymbols.NOT }) return;
+        if(sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.NOT }) return;
         
         var lhs = sentence.Children[0];
         var rhs = sentence.Children[1];
@@ -141,16 +123,16 @@ public static class PropositionalLogicExtensions {
         (AtomicSentence truthValueSide, Sentence otherSide) _ = MapLhsRhs();
 
         switch (((ComplexSentence)sentence).Operator) {
-            case LogicSymbols.AND when _.truthValueSide.Tautology:
+            case LogicalConstant.LSymbol.AND when _.truthValueSide.Tautology:
                 Replace(ref sentence, _.otherSide);
                 break;
-            case LogicSymbols.AND when _.truthValueSide.Falsum:
+            case LogicalConstant.LSymbol.AND when _.truthValueSide.Falsum:
                 Replace(ref sentence, _.truthValueSide);
                 break;
-            case LogicSymbols.OR when _.truthValueSide.Tautology:
+            case LogicalConstant.LSymbol.OR when _.truthValueSide.Tautology:
                 Replace(ref sentence, _.truthValueSide);
                 break;
-            case LogicSymbols.OR when _.truthValueSide.Falsum:
+            case LogicalConstant.LSymbol.OR when _.truthValueSide.Falsum:
                 Replace(ref sentence, _.otherSide);
                 break;
             default:
@@ -178,8 +160,8 @@ public static class PropositionalLogicExtensions {
         }
 
         if (complex.Children.Contains(atomicSentence) &&
-            ((sentence is ComplexSentence { Operator: LogicSymbols.OR } && complex.Operator == LogicSymbols.AND) ||
-             (sentence is ComplexSentence { Operator: LogicSymbols.AND } && complex.Operator == LogicSymbols.OR))) {
+            ((sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.OR } && complex.Operator == LogicalConstant.LSymbol.AND) ||
+             (sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.AND } && complex.Operator == LogicalConstant.LSymbol.OR))) {
             atomicSentence.Reparent(sentence);
             sentence = atomicSentence;
         }
@@ -194,8 +176,8 @@ public static class PropositionalLogicExtensions {
         //(A OR (B OR A)) = (B OR A)
         
         if (complex.Children.Contains(atomicSentence) &&
-            ((sentence is ComplexSentence { Operator: LogicSymbols.AND } && complex.Operator == LogicSymbols.AND) ||
-             (sentence is ComplexSentence { Operator: LogicSymbols.OR } && complex.Operator == LogicSymbols.OR))) {
+            ((sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.AND } && complex.Operator == LogicalConstant.LSymbol.AND) ||
+             (sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.OR } && complex.Operator == LogicalConstant.LSymbol.OR))) {
             complex.Reparent(sentence);
             sentence = complex;
         }

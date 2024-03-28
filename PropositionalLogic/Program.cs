@@ -11,5 +11,5 @@ logic.Interpret(c.ToArray());
 
 
 logic.Interpret(new []{
-   "(A AND B) OR (C AND D)",
+   "A && TRUE",
 });

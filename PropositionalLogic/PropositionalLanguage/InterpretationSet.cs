@@ -14,13 +14,13 @@ public class InterpretationSet : ILanguageObject{
     }
 
     private string ToTable(List<Interpretation> interpretations, List<Sentence> sentences) {
-        var columns = interpretations[0]._truthValues.Keys.Select(key => key.ToString()).ToList();
+        var columns = interpretations[0].TruthValues.Keys.Select(key => key.ToString()).ToList();
         columns.AddRange(sentences.Select(sentence => sentence.ToString()));
 
         var table = new ConsoleTable(columns.ToArray());
     
         foreach (var interpretation in interpretations) {
-            var row = interpretation._truthValues.Values.Select(value => value.ToString()).ToList();
+            var row = interpretation.TruthValues.Values.Select(value => value.ToString()).ToList();
             row.AddRange(sentences.Select(sentence => interpretation.Evaluate(sentence).ToString()));
             table.AddRow(row.ToArray());
         }
