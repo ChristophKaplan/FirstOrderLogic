@@ -6,6 +6,7 @@ public enum LogicSymbols {
     AND,
     OR,
     NOT,
+    IMPLIES,
     TRUE,
     FALSE
 }

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/christoph.kaplan/development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj": {}
+    "/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj": {}
   },
   "projects": {
-    "/Users/christoph.kaplan/development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj": {
+    "/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/christoph.kaplan/development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj",
+        "projectUniqueName": "/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj",
         "projectName": "PropositionalLogic",
-        "projectPath": "/Users/christoph.kaplan/development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj",
-        "packagesPath": "/Users/christoph.kaplan/.nuget/packages/",
-        "outputPath": "/Users/christoph.kaplan/development/PropositionalLogic/PropositionalLogic/obj/",
+        "projectPath": "/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/PropositionalLogic.csproj",
+        "packagesPath": "/Users/delphicmind/.nuget/packages/",
+        "outputPath": "/Volumes/Data/Development/PropositionalLogic/PropositionalLogic/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/christoph.kaplan/.nuget/NuGet/NuGet.Config"
+          "/Users/delphicmind/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
@@ -59,7 +59,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/Users/christoph.kaplan/.dotnet/sdk/7.0.101/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.306/RuntimeIdentifierGraph.json"
         }
       }
     }

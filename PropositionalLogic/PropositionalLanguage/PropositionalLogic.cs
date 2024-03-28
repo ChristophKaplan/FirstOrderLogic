@@ -1,3 +1,4 @@
+using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
 
@@ -14,75 +15,100 @@ public enum Terminal {
 }
 
 public enum NonTerminal {
-    StartSymbol, LangObject, Sentence, ComplexSentence, Ext
+    LangObject, Sentence, ComplexSentence, Ext
 }
 
 public class PropositionalLogic : Language<Terminal, NonTerminal> {
-    public PropositionalLogic() : base(
-        new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|SkepForget|MyForget|Int|Simplify|SwitchMany"),
-        new TokenDefinition<Terminal>(Terminal.Open, "\\("),
-        new TokenDefinition<Terminal>(Terminal.Comma, ","),
-        new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
-        new TokenDefinition<Terminal>(Terminal.Connective, "AND|OR"),
-        new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!"),
-        new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*")) {
+    public PropositionalLogic() {}
+
+    protected override TokenDefinition<Terminal>[] SetUpTokenDefinitions() {
+        return new [] {
+            new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|SkepForget|MyForget|Int|Simplify|SwitchMany"),
+            new TokenDefinition<Terminal>(Terminal.Open, "\\("),
+            new TokenDefinition<Terminal>(Terminal.Comma, ","),
+            new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
+            new TokenDefinition<Terminal>(Terminal.Connective, "AND|OR|IMPLIES"),
+            new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!"),
+            new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*") 
+        };
     }
 
     protected override void SetUpGrammar() {
-        AddByEnumType(typeof(Terminal));
-        AddByEnumType(typeof(NonTerminal));
-        AddStartSymbol(NonTerminal.StartSymbol);
 
-        var rule01 = AddProductionRule(NonTerminal.StartSymbol, NonTerminal.LangObject);
-        var rule02 = AddProductionRule(NonTerminal.LangObject, NonTerminal.Sentence);
+        var rule01 = AddProductionRule(SpecialNonTerminal.Start, NonTerminal.LangObject);
         
+        var rule02 = AddProductionRule(NonTerminal.LangObject, NonTerminal.Sentence);
         var rule03 = AddProductionRule(NonTerminal.Sentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
         var rule04 = AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
         var rule05 = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
         
         var rule06 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, Terminal.Connective, NonTerminal.Sentence);
         var rule07 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, Terminal.Connective, NonTerminal.Sentence);
-        
         var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Negation, NonTerminal.Sentence);
 
         var rule09 = AddProductionRule(NonTerminal.LangObject, Terminal.Function, Terminal.Open, NonTerminal.LangObject, NonTerminal.Ext);
         var rule10 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.LangObject, NonTerminal.Ext);
         var rule11 = AddProductionRule(NonTerminal.Ext, Terminal.Close);
+
+
+
+        AtomicSentence LexValueToAtom(LexValue lexVal) {
+            if (!lexVal.AsLogicSymbol(out var logicSymbol)) {
+                return new AtomicSentence(lexVal);
+            }
+            //truthvalues?
+            return null;
+        }
         
         rule01.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         rule02.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         rule03.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
 
         rule04.SetSemanticAction((lhs, rhs) => {
-            lhs.SyntheticAttribute = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute);
+            lhs.SyntheticAttribute = LexValueToAtom((LexValue)rhs[0].SyntheticAttribute);
         });
 
         rule05.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
 
         rule06.SetSemanticAction((lhs, rhs) => {
-            switch (((LexValue)rhs[1].SyntheticAttribute).AsLogicSymbol()) {
+            if (!((LexValue)rhs[1].SyntheticAttribute).AsLogicSymbol(out var logicSymbol)) {
+                throw new Exception($"Error: {rhs[1].SyntheticAttribute} attribute is not a logic symbol!");
+            }
+            
+            var lhsAtom = LexValueToAtom((LexValue)rhs[0].SyntheticAttribute);
+            
+            switch (logicSymbol) {
                 case LogicSymbols.OR: {
-                    var p = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute);
-                    lhs.SyntheticAttribute = new ComplexSentence(p, LogicSymbols.OR, (Sentence)rhs[2].SyntheticAttribute);
+                    lhs.SyntheticAttribute = new ComplexSentence(lhsAtom, LogicSymbols.OR, (Sentence)rhs[2].SyntheticAttribute);
                     return;
                 }
                 case LogicSymbols.AND: {
-                    var p = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute);
-                    lhs.SyntheticAttribute = new ComplexSentence(p, LogicSymbols.AND, (Sentence)rhs[2].SyntheticAttribute);
+                    lhs.SyntheticAttribute = new ComplexSentence(lhsAtom, LogicSymbols.AND, (Sentence)rhs[2].SyntheticAttribute);
+                    return;
+                }
+                case LogicSymbols.IMPLIES: {
+                    lhs.SyntheticAttribute = new ComplexSentence(lhsAtom, LogicSymbols.IMPLIES, (Sentence)rhs[2].SyntheticAttribute);
                     return;
                 }
                 default:
-                    throw new Exception($"Error: {rhs[1].SyntheticAttribute} operator not found!");
+                    throw new Exception($"Error: {logicSymbol} operator not found!");
             }
         });
 
         rule07.SetSemanticAction((lhs, rhs) => {
-            switch (((LexValue)rhs[3].SyntheticAttribute).AsLogicSymbol()) {
+            if (!((LexValue)rhs[3].SyntheticAttribute).AsLogicSymbol(out var logicSymbol)) {
+                throw new Exception($"Error: {rhs[3].SyntheticAttribute} attribute is not a logic symbol!");
+            }
+            
+            switch (logicSymbol) {
                 case LogicSymbols.OR:
                     lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, LogicSymbols.OR, (Sentence)rhs[4].SyntheticAttribute);
                     return;
                 case LogicSymbols.AND:
                     lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, LogicSymbols.AND, (Sentence)rhs[4].SyntheticAttribute);
+                    return;
+                case LogicSymbols.IMPLIES:
+                    lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, LogicSymbols.IMPLIES, (Sentence)rhs[4].SyntheticAttribute);
                     return;
                 default:
                     throw new Exception($"Error: {rhs[3].SyntheticAttribute} operator not found!");
@@ -92,17 +118,16 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         rule08.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence(LogicSymbols.NOT, (Sentence)rhs[1].SyntheticAttribute));
 
         rule09.SetSemanticAction((lhs, rhs) => {
-            var func = (LexValue)rhs[0].SyntheticAttribute;
-            var ext = (ArrayValue)rhs[3].SyntheticAttribute;
-            ext.Insert(rhs[2].SyntheticAttribute,0);
+            var extArray = (ArrayValue)rhs[3].SyntheticAttribute;
+            extArray.Insert(rhs[2].SyntheticAttribute,0);
 
-            for (var i = 0; i < ext.Value.Length; i++) {
-                if (ext.Value[i] is Function f) {
-                    ext.Value[i] = ExecuteFunction(f);
+            for (var i = 0; i < extArray.Value.Length; i++) {
+                if (extArray.Value[i] is Function function) {
+                    extArray.Value[i] = ExecuteFunction(function);
                 }
             }
 
-            lhs.SyntheticAttribute = new Function(func.Value, ext.Value);
+            lhs.SyntheticAttribute = new Function((LexValue)rhs[0].SyntheticAttribute, extArray.Value);
         });
         
         rule10.SetSemanticAction((lhs, rhs) => {

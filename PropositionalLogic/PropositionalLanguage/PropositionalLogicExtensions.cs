@@ -3,9 +3,13 @@
 namespace PropositionalLogic;
 
 public static class PropositionalLogicExtensions {
-    public static LogicSymbols AsLogicSymbol(this LexValue lexValue) {
-        Enum.TryParse<LogicSymbols>(lexValue.Value, out var symbol);
-        return symbol;
+    public static bool AsLogicSymbol(this LexValue lexValue, out LogicSymbols logicSymbol) {
+        if (Enum.TryParse<LogicSymbols>(lexValue.Value, out var symbol)) {
+            logicSymbol = symbol;
+            return true;
+        }
+        logicSymbol = LogicSymbols.NOT;
+        return false;
     }
 
     public static InterpretationSet Mod(this PropositionalLogic logic, Sentence sentence) {
@@ -31,7 +35,7 @@ public static class PropositionalLogicExtensions {
 
     public static InterpretationSet Int(this PropositionalLogic logic, params Sentence[] sentences)
     {
-        var showChildren = true;
+        var showChildren = false;
         List<Sentence> list = new();
         foreach (var sen in sentences)
         {

@@ -9,41 +9,7 @@ Console.WriteLine("\n");
 logic.Interpret(c.ToArray());
 */
 
-/*logic.Interpret(new []{
-    "Mod(Forget(A AND B, B))",
-    "Mod(A AND B)",
-    "SwitchMany(Mod(A AND B), B)",
-});*/
-
-/*
-logic.Interpret(new []{
-    "Int(Forget((A OR B) AND C, A))",
-    "Int(SkepForget((A OR B) AND C, A))",
-    "Int(Forget((A AND B) OR C, A))",
-    "Int(SkepForget((A AND B) OR C, A))"
-});
-*/
 
 logic.Interpret(new []{
-    "Int((A AND B) OR C, SkepForget((A AND B) OR C, A))",
+   "(A AND B) OR (C AND D)",
 });
-
-/*
-logic.Interpret(new []{
-    "Simplify(Forget((A OR B) AND C, A))",
-    "Simplify(Forget((A OR B) AND C, B))",
-    "Simplify(Forget((A OR B) AND C, C))",
-});
-
-logic.Interpret(new []{
-    "Simplify(SkepForget((A AND B) OR C, A))",
-    "Simplify(SkepForget((A AND B) OR C, B))",
-    "Simplify(SkepForget((A AND B) OR C, C))",
-});
-*/
-
-/*
-    "Int((P AND Q) OR Z)",
-   "Int(Forget((P AND Q) OR Z, Z))",
-   "Int(Simplify(Forget((P AND Q) OR Z, Z)))",
-*/
