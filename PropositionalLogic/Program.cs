@@ -1,3 +1,5 @@
+using PropositionalLogic.Helpers;
+
 var logic = new PropositionalLogic.PropositionalLogic();
 
 /*
@@ -12,4 +14,7 @@ logic.Interpret(c.ToArray());
 
 logic.Interpret(new []{
    "Int(A => B)",
-});
+}, out var htmlOutput);
+
+InputOutput.WriteFile("test.html", htmlOutput);
+InputOutput.OpenFile("test.html");

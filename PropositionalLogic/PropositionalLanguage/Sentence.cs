@@ -31,6 +31,10 @@ public class LogicalConstant : ILanguageObject {
     public override string ToString() {
         return Symbol.ToString();
     }
+
+    public string ToHTML() {
+        throw new NotImplementedException();
+    }
 }
 
 public class Function : ILanguageObject {
@@ -40,6 +44,10 @@ public class Function : ILanguageObject {
     public Function(string func, params ILanguageObject[] parameters) {
         Func = func;
         Parameters = parameters;
+    }
+
+    public string ToHTML() {
+        throw new NotImplementedException();
     }
 }
 
@@ -101,6 +109,10 @@ public abstract class Sentence : ILanguageObject {
         }
 
         return "Sentence";
+    }
+
+    public string ToHTML() {
+        throw new NotImplementedException();
     }
 }
 

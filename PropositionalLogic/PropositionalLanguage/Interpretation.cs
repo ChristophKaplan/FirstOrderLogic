@@ -89,4 +89,8 @@ public class Interpretation : ILanguageObject{
 
         return sb.ToString();
     }
+
+    public string ToHTML() {
+        throw new NotImplementedException();
+    }
 }

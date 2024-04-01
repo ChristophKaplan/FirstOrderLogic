@@ -209,9 +209,15 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         return langObj;
     }
 
-    public void Interpret(string[] input) {
+    public void Interpret(string[] input, out string htmlOutput) {
+        var output = "";
+        htmlOutput = "";
+        
         foreach (var s in input) {
-            Console.WriteLine(TryParse(s));
+            var lo = TryParse(s);
+            output += lo;
+            htmlOutput += $"{lo.ToHTML()}<br>";
         }
+        Console.WriteLine(output);
     }
 }
