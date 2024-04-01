@@ -14,7 +14,7 @@ public class InputOutput {
     }
 
     public static void OpenFile(string fileName) {
-        var p = new ProcessStartInfo($"{path}{fileName}", "--n") { UseShellExecute = true };
+        var p = new ProcessStartInfo($"{path}{fileName}", "--new") { UseShellExecute = true };
         Process.Start(p);
     }
 }

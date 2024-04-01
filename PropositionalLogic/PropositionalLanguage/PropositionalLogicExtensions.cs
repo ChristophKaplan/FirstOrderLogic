@@ -27,17 +27,7 @@ public static class PropositionalLogicExtensions {
         }
     }
 
-    public static InterpretationSet Mod(this PropositionalLogic logic, Sentence sentence) {
-        var interpretations = logic.GenerateInterpretations(sentence);
-        var models = new List<Interpretation>();
 
-        foreach (var interpretation in interpretations) {
-            var mod = interpretation.Evaluate(sentence);
-            if (mod) { models.Add(interpretation); }
-        }
-
-        return new InterpretationSet(models, sentence);
-    }
 
     public static InterpretationSet SwitchMany(this PropositionalLogic logic, InterpretationSet set, AtomicSentence variable) {
         var list = new List<Interpretation>();
@@ -61,6 +51,11 @@ public static class PropositionalLogicExtensions {
         return new InterpretationSet(logic.GenerateInterpretations(sentences), showChildren ? list.ToArray() : sentences);
     }
 
+    public static InterpretationSet Mod(this PropositionalLogic logic, Sentence sentence) {
+       var i = Int(logic, sentence);
+        return new InterpretationSet(i.Models(sentence), sentence);
+    }
+    
     public static Sentence Forget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
         var lhs = sentence.GetCopy();
         var rhs = sentence.GetCopy();
@@ -123,13 +118,13 @@ public static class PropositionalLogicExtensions {
         (AtomicSentence truthValueSide, Sentence otherSide) _ = MapLhsRhs();
 
         switch (((ComplexSentence)sentence).Operator) {
-            case LogicalConstant.LSymbol.AND when _.truthValueSide.Tautology:
+            case LogicalConstant.LSymbol.AND when _.truthValueSide.Verum:
                 Replace(ref sentence, _.otherSide);
                 break;
             case LogicalConstant.LSymbol.AND when _.truthValueSide.Falsum:
                 Replace(ref sentence, _.truthValueSide);
                 break;
-            case LogicalConstant.LSymbol.OR when _.truthValueSide.Tautology:
+            case LogicalConstant.LSymbol.OR when _.truthValueSide.Verum:
                 Replace(ref sentence, _.truthValueSide);
                 break;
             case LogicalConstant.LSymbol.OR when _.truthValueSide.Falsum:

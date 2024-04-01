@@ -25,7 +25,7 @@ public class Interpretation : ILanguageObject{
     }
 
     private bool Evaluate(AtomicSentence atomicSentence) {
-        if (atomicSentence.Tautology) return true;
+        if (atomicSentence.Verum) return true;
         if (atomicSentence.Falsum) return false;
         
         if (TruthValues.TryGetValue(atomicSentence, out var value)) {

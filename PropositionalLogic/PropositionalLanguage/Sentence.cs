@@ -97,18 +97,30 @@ public abstract class Sentence : ILanguageObject {
 
     public override string ToString() {
         if (this is AtomicSentence atomicSentence) {
+            if (atomicSentence.Falsum) return "\u22A5";
+            if (atomicSentence.Verum) return "\u22A4";
             return atomicSentence.Symbol;
         }
 
         if (this is ComplexSentence complexSentence) {
             if (complexSentence.Operator.Equals(LogicalConstant.LSymbol.NOT)) {
-                return $"{complexSentence.Operator} {complexSentence.Children[0]}";
+                return $"{GetOperatorStringSymbol(complexSentence.Operator)} {complexSentence.Children[0]}";
             }
 
-            return $"({complexSentence.Children[0]} {complexSentence.Operator} {complexSentence.Children[1]})";
+            return $"({complexSentence.Children[0]} {GetOperatorStringSymbol(complexSentence.Operator)} {complexSentence.Children[1]})";
         }
 
         return "Sentence";
+    }
+    
+    private string GetOperatorStringSymbol(LogicalConstant.LSymbol @operator) {
+        return @operator switch {
+            LogicalConstant.LSymbol.AND => "\u2227",
+            LogicalConstant.LSymbol.OR => "\u2228",
+            LogicalConstant.LSymbol.NOT => "\u00ac",
+            LogicalConstant.LSymbol.IMPLIES => "\u21d2",
+            _ => throw new Exception($"Error: {this} not found.")
+        };
     }
 
     public string ToHTML() {
@@ -118,8 +130,8 @@ public abstract class Sentence : ILanguageObject {
 
 public class AtomicSentence : Sentence {
     public string Symbol;
-    public bool IsTruthValue { get => Tautology || Falsum; }
-    public bool Tautology { get => Symbol.Equals(LogicalConstant.LSymbol.TRUE.ToString());}
+    public bool IsTruthValue { get => Verum || Falsum; }
+    public bool Verum { get => Symbol.Equals(LogicalConstant.LSymbol.TRUE.ToString());}
     public bool Falsum { get => Symbol.Equals(LogicalConstant.LSymbol.FALSE.ToString());}
     
     public AtomicSentence(string symbol) {

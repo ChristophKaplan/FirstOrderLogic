@@ -33,7 +33,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             new TokenDefinition<Terminal>(Terminal.Conjunction, "AND|&&"),
             new TokenDefinition<Terminal>(Terminal.Disjunction, "OR|\\|\\|"),
             new TokenDefinition<Terminal>(Terminal.Implication, "IMPLIES|=>"),
-            new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!"),
+            new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!|-"),
             new TokenDefinition<Terminal>(Terminal.TruthValue, "TRUE|FALSE"),
             new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*") 
         };
@@ -177,7 +177,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             }
             
             foreach (var atom in collectedAtoms) {
-                if (atom.Tautology || atom.Falsum) {
+                if (atom.Verum || atom.Falsum) {
                     continue;
                 }
                 if(!reducedAtoms.Contains(atom)) reducedAtoms.Add(atom);
@@ -200,7 +200,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         }
     }
 
-    protected override ILanguageObject TryParse(string input) {
+    public override ILanguageObject TryParse(string input) {
         var langObj = base.TryParse(input);
         if (langObj is Function function) {
             return ExecuteFunction(function);
@@ -208,15 +208,12 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
 
         return langObj;
     }
-
-    public void Interpret(string[] input, out string htmlOutput) {
+    
+    public void Interpret(params string[] input) {
         var output = "";
-        htmlOutput = "";
-        
         foreach (var s in input) {
             var lo = TryParse(s);
-            output += lo;
-            htmlOutput += $"{lo.ToHTML()}<br>";
+            output += lo + "\n";
         }
         Console.WriteLine(output);
     }
