@@ -104,16 +104,16 @@ public abstract class Sentence : ILanguageObject {
 
         if (this is ComplexSentence complexSentence) {
             if (complexSentence.Operator.Equals(LogicalConstant.LSymbol.NOT)) {
-                return $"{GetOperatorStringSymbol(complexSentence.Operator)} {complexSentence.Children[0]}";
+                return $"{complexSentence.OperatorToString()} {complexSentence.Children[0]}";
             }
 
-            return $"({complexSentence.Children[0]} {GetOperatorStringSymbol(complexSentence.Operator)} {complexSentence.Children[1]})";
+            return $"({complexSentence.Children[0]} {complexSentence.OperatorToString()} {complexSentence.Children[1]})";
         }
 
         return "Sentence";
     }
-    
-    private string GetOperatorStringSymbol(LogicalConstant.LSymbol @operator) {
+
+    protected string GetOperatorStringSymbol(LogicalConstant.LSymbol @operator) {
         return @operator switch {
             LogicalConstant.LSymbol.AND => "\u2227",
             LogicalConstant.LSymbol.OR => "\u2228",
@@ -144,7 +144,8 @@ public class AtomicSentence : Sentence {
 
 public class ComplexSentence : Sentence {
     public readonly LogicalConstant.LSymbol Operator;
-
+    public string OperatorToString() => GetOperatorStringSymbol(Operator);
+    
     public ComplexSentence(Sentence p, LogicalConstant.LSymbol @operator, Sentence q) {
         Operator = @operator;
         AddChild(p);

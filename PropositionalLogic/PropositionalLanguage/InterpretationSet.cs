@@ -1,4 +1,3 @@
-using System.Text;
 using LRParser.Language;
 using ConsoleTables;
 using PropositionalLogic.Helpers;
@@ -17,7 +16,7 @@ public class InterpretationSet : ILanguageObject {
     public string Analyze() {
         string result = "";
         foreach ((Sentence p, Sentence q, bool truth) r in  GetSemanticConsequences()) {
-            result += $"{r.p} \u22a8 {r.q} = {r.truth} <br>\n";
+            result += $"{r.p} \u22a8 {r.q} = {r.truth}\n";
         }
         return result;
     }
@@ -70,22 +69,6 @@ public class InterpretationSet : ILanguageObject {
         var a = new AtomicSentence(variable);
         Interpretations.Sort((x, y) => x.TruthValues[a].CompareTo(y.TruthValues[a]));
     }
-    
-    private string ToHTMLTable((string[] col, string[][] rows) table) {
-        var htmlTable = new StringBuilder();
-        htmlTable.Append("<table style=\"border: 1px solid black;\">");
-        htmlTable.Append("<tr style=\"border: 1px solid black;\">");
-        foreach (var col in table.col) htmlTable.Append($"<th style=\"padding: 5px;\">{col}</th>");
-        htmlTable.Append("</tr>");
-        foreach (var row in table.rows) {
-            htmlTable.Append("<tr style=\"border: 1px solid black;\">");
-            foreach (var cell in row) htmlTable.Append($"<td style=\"padding: 5px; text-align: center;\">{cell}</td>");
-            htmlTable.Append("</tr>");
-        }
-        
-        htmlTable.Append("</table>");
-        return htmlTable.ToString();
-    }
 
     private string ToConsoleTable((string[] col, string[][] rows) table) {
         var columns = table.col;
@@ -119,6 +102,10 @@ public class InterpretationSet : ILanguageObject {
     }
 
     public string ToHTML() {
-        return ToHTMLTable(ToTable(Interpretations, Sentences));
+        return MarkUpGenerator.ToHTMLTable(ToTable(Interpretations, Sentences));
+    }
+    
+    public string ToLaTex(bool displayMath = true) {
+        return MarkUpGenerator.ToLaTexTable(ToTable(Interpretations, Sentences), displayMath);
     }
 }

@@ -29,15 +29,29 @@ public class ForgetCompare {
     }
     
     public string ToHTML() {
-        return $"F = {Formula} forgetting {forgetVar}<br> " +
-               
-               $"<table style=\"border: 1px solid black;\">" +
-               
-               $"<tr><td>Forget = {Forget} = {SimpForget}</td><td> SkepForget = {SkepForget} = {SimpSkepForget}</td></tr>" +
-               $"<tr><td>{IntForget.ToHTML()}</td><td>{IntSkepForget.ToHTML()}</td></tr>" +
-               $"<tr><td>{IntForget.Analyze()}</td><td>{IntSkepForget.Analyze()}</td></tr>" +
-               
-               $"</table>";
+        string[] cols = new []{$"{Formula} forgetting {forgetVar}"};
+        
+        string[][] rows = { 
+            new []{$"Forget = {Forget} = {SimpForget}", $"SkepForget = {SkepForget} = {SimpSkepForget}"},
+            new []{$"{IntForget.ToHTML()}",$"{IntSkepForget.ToHTML()}"},
+            new []{$"{IntForget.Analyze()}",$"{IntSkepForget.Analyze()}"},
+        };
+        
+        return MarkUpGenerator.ToHTMLTable((cols,rows));
     }
     
+    public string ToLatex() {
+
+        return MarkUpGenerator.FigureCompare(IntForget.ToLaTex(false), IntSkepForget.ToLaTex(false));
+        
+        string[] cols = new []{$"{Formula} forgetting {forgetVar}", "x"};
+        
+        string[][] rows = { 
+            new []{$"Forget = {Forget} = {SimpForget}", $"SkepForget = {SkepForget} = {SimpSkepForget}"},
+            new []{$"{IntForget.ToLaTex(false)}",$"{MarkUpGenerator.ReplaceUnicodeToLaTex(IntForget.Analyze())}"},
+            new []{$"{IntSkepForget.ToLaTex(false)}",$"{MarkUpGenerator.ReplaceUnicodeToLaTex(IntSkepForget.Analyze())}"},
+        };
+        
+        return MarkUpGenerator.ToLaTexTable((cols,rows));
+    }
 }

@@ -2,19 +2,36 @@ using System.Diagnostics;
 
 namespace PropositionalLogic.Helpers;
 
-public class InputOutput {
-    private const string path = "../../../SaveFiles/";
+public static class InputOutput {
+    public const string ExportFolderPath = "../../../ExportFiles/";
 
-    public static void WriteFile(string fileName, string text) {
-        File.WriteAllText(path + fileName, text);
+    public static void WriteFile(string fileName, string text, string folderPath) {
+        File.WriteAllText($"{ExportFolderPath}{folderPath}{fileName}", text);
     }
 
-    private static string ReadFile(string fileName) {
-        return File.ReadAllText(path + fileName);
+    private static string ReadFile(string fileName, string folderPath) {
+        return File.ReadAllText($"{ExportFolderPath}{folderPath}{fileName}");
     }
 
-    public static void OpenFile(string fileName) {
-        var p = new ProcessStartInfo($"{path}{fileName}", "--new") { UseShellExecute = true };
-        Process.Start(p);
+    public static void OpenFile(string fileName, string folderPath) {
+        RunCommand("open", fileName, ExportFolderPath + folderPath);
+    }
+    
+    public static void RunCommand(string command, string arguments, string workingDirectory)
+    {
+        var startInfo = new ProcessStartInfo()
+        {
+            FileName = command,
+            Arguments = arguments,
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = workingDirectory,
+        };
+
+        using Process process = Process.Start(startInfo);
+        process.WaitForExit();
+        string result = process.StandardOutput.ReadToEnd();
+        Console.WriteLine(result);
     }
 }

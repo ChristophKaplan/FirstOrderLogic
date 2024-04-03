@@ -60,11 +60,19 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         var rule13 = AddProductionRule(NonTerminal.Connective, Terminal.Disjunction);
         var rule14 = AddProductionRule(NonTerminal.Connective, Terminal.Implication);
         
+        //fix this in order
         var rule15 = AddProductionRule(NonTerminal.Sentence, Terminal.TruthValue); //weird?
+        var rule16 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.TruthValue, NonTerminal.Connective, NonTerminal.Sentence);
         rule15.SetSemanticAction((lhs, rhs) => {
             var lc = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
             lhs.SyntheticAttribute = new AtomicSentence(lc.ToString());
         });
+        rule16.SetSemanticAction((lhs, rhs) => {
+            var lc = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+            lhs.SyntheticAttribute = new ComplexSentence(new AtomicSentence(lc.ToString()), (LogicalConstant)rhs[1].SyntheticAttribute, (Sentence)rhs[2].SyntheticAttribute);
+        });
+        
+        
         
         rule01.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         rule02.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });

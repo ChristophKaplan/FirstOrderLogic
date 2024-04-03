@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="SaveFiles\" />
+      <Folder Include="ExportFiles\HTML\" />
     </ItemGroup>
 
 </Project>

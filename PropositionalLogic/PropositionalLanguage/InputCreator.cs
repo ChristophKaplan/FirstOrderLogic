@@ -4,7 +4,7 @@ public class InputCreator
 {
     public static List<string> GeneratePropositionalSentences(int n) {
         var atomicSentences = GenerateAtomicSentences(n).ToList();
-        atomicSentences[0] = "False";
+        atomicSentences[0] = LogicalConstant.LSymbol.FALSE.ToString();
         var connectives = GenerateConnectives(n - 1).ToList();
 
         var list = new List<string>();
@@ -12,7 +12,7 @@ public class InputCreator
         {
             var connectivesRow = c.ToList();
 
-            string newRow = "Simplify(";
+            string newRow = "(";
             for (int i = 0; i < n-1; i++) newRow += "(";
             newRow += atomicSentences[0] + " ";
             for (int i = 1; i < n; i++) newRow += $"{connectivesRow[i-1]} {atomicSentences[i]}) ";
