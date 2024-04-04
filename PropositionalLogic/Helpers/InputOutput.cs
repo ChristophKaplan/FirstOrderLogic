@@ -29,9 +29,17 @@ public static class InputOutput {
             WorkingDirectory = workingDirectory,
         };
 
-        using Process process = Process.Start(startInfo);
+        using Process process = new Process { StartInfo = startInfo };
+        process.OutputDataReceived += (sender, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                Console.WriteLine(e.Data);
+            }
+        };
+
+        process.Start();
+        process.BeginOutputReadLine();
         process.WaitForExit();
-        string result = process.StandardOutput.ReadToEnd();
-        Console.WriteLine(result);
     }
 }

@@ -4,6 +4,17 @@ namespace PropositionalLogic;
 
 public static class PropositionalLogicExtensions {
     
+    public static List<Sentence> UnfoldEquivalence(this PropositionalLogic logic, Sentence sentence, bool completeSteps = false) {
+        var simplified = logic.Simplify(sentence, out var steps);
+        
+        var transformationSteps = new List<Sentence> { sentence };
+        if(completeSteps) transformationSteps.AddRange(steps);
+        transformationSteps.Add(simplified);
+        transformationSteps = transformationSteps.Distinct().ToList();
+        
+        return transformationSteps;
+    }
+    
     public static LogicalConstant ToLogicalConstant(this LexValue lexValue) {
         switch (lexValue.Value) {
             case "OR":
@@ -26,8 +37,6 @@ public static class PropositionalLogicExtensions {
                 throw new Exception($"Unknown Logic Symbol: {lexValue}");
         }
     }
-
-
 
     public static InterpretationSet SwitchMany(this PropositionalLogic logic, InterpretationSet set, AtomicSentence variable) {
         var list = new List<Interpretation>();
@@ -74,19 +83,24 @@ public static class PropositionalLogicExtensions {
         return n;
     }
 
-    public static Sentence Simplify(this PropositionalLogic logic, Sentence sentence) {
+    public static Sentence Simplify(this PropositionalLogic logic, Sentence sentence, out List<Sentence> steps) {
         var old = sentence;
         var copy = sentence.GetCopy();
         var changed = true;
-
+        steps = new List<Sentence>();
+        
         while (changed) {
             SimplifyTruthValues(ref copy);
             changed = !old.Equals(copy);
+            if(changed) steps.Add(old);
             old = copy.GetCopy();
         }
-
+        
+        steps.Add(copy.GetCopy());
         Absorption(ref copy);
-        Absorption2(ref copy);
+        steps.Add(copy.GetCopy());
+        Absorption_Ish(ref copy);
+        
         return copy;
     }
 
@@ -150,31 +164,62 @@ public static class PropositionalLogicExtensions {
     }
 
     private static void Absorption(ref Sentence sentence) {
-        if (!sentence.IsAtomComplexRelation(out var atomicSentence, out var complex)) {
-            return;
-        }
+        if(sentence is AtomicSentence) return;
+        
+        var complex = sentence as ComplexSentence;
+        var lhs = sentence.Children[0];
+        var rhs = sentence.Children[1];
 
-        if (complex.Children.Contains(atomicSentence) &&
-            ((sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.OR } && complex.Operator == LogicalConstant.LSymbol.AND) ||
-             (sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.AND } && complex.Operator == LogicalConstant.LSymbol.OR))) {
-            atomicSentence.Reparent(sentence);
-            sentence = atomicSentence;
+        if (rhs is ComplexSentence rhsComplex && IsOpposite(complex.Operator, rhsComplex.Operator) && rhsComplex.Children.Contains(lhs)) {
+            lhs.Reparent(sentence);
+            sentence = lhs;
+        }
+               
+       if (lhs is ComplexSentence lhsComplex && IsOpposite(complex.Operator, lhsComplex.Operator) && lhsComplex.Children.Contains(rhs)) { 
+           rhs.Reparent(sentence);
+           sentence = rhs;
+       }
+
+       bool IsOpposite(LogicalConstant.LSymbol o1, LogicalConstant.LSymbol o2) {
+            switch (o1) {
+                case LogicalConstant.LSymbol.AND when o2 == LogicalConstant.LSymbol.OR:
+                case LogicalConstant.LSymbol.OR when o2 == LogicalConstant.LSymbol.AND:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
     
-    private static void Absorption2(ref Sentence sentence) {
-        if (!sentence.IsAtomComplexRelation(out var atomicSentence, out var complex)) {
-            return;
-        }
+    private static void Absorption_Ish(ref Sentence sentence) {
 
         //(A AND (B AND A)) = (B AND A)
         //(A OR (B OR A)) = (B OR A)
         
-        if (complex.Children.Contains(atomicSentence) &&
-            ((sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.AND } && complex.Operator == LogicalConstant.LSymbol.AND) ||
-             (sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.OR } && complex.Operator == LogicalConstant.LSymbol.OR))) {
-            complex.Reparent(sentence);
-            sentence = complex;
+        if(sentence is AtomicSentence) return;
+        
+        var complex = sentence as ComplexSentence;
+        var lhs = sentence.Children[0];
+        var rhs = sentence.Children[1];
+
+        if (rhs is ComplexSentence rhsComplex && IsSame(complex.Operator, rhsComplex.Operator) && rhsComplex.Children.Contains(lhs)) {
+            rhs.Reparent(sentence);
+            sentence = rhs;
+        }
+               
+        if (lhs is ComplexSentence lhsComplex && IsSame(complex.Operator, lhsComplex.Operator) && lhsComplex.Children.Contains(rhs)) { 
+            lhs.Reparent(sentence);
+            sentence = lhs;
+        }
+
+        bool IsSame(LogicalConstant.LSymbol o1, LogicalConstant.LSymbol o2) {
+            switch (o1) {
+                case LogicalConstant.LSymbol.AND when o2 == LogicalConstant.LSymbol.AND:
+                case LogicalConstant.LSymbol.OR when o2 == LogicalConstant.LSymbol.OR:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

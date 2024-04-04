@@ -54,27 +54,4 @@ public static class SentenceExtensions {
                 throw new Exception("Sentence type not found!");
         }
     }
-    
-    public static bool IsAtomComplexRelation(this Sentence sentence, out AtomicSentence atomicSentence, out ComplexSentence complex) {
-        atomicSentence = null;
-        complex = null;
-            
-        if (sentence is AtomicSentence) return false;
-
-        var lhs = sentence.Children[0];
-        var rhs = sentence.Children[1];
-
-        if((lhs is AtomicSentence && rhs is AtomicSentence) || (lhs is ComplexSentence && rhs is ComplexSentence)) return false;
-
-        if (lhs is AtomicSentence lhs1 && rhs is ComplexSentence rhs1) {
-            atomicSentence = lhs1;
-            complex = rhs1;
-        }
-        else if (rhs is AtomicSentence rhs2 && lhs is ComplexSentence lhs2) {
-            atomicSentence = rhs2;
-            complex = lhs2;
-        }
-
-        return true;
-    }
 }

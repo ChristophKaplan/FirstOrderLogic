@@ -35,7 +35,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             new TokenDefinition<Terminal>(Terminal.Implication, "IMPLIES|=>"),
             new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!|-"),
             new TokenDefinition<Terminal>(Terminal.TruthValue, "TRUE|FALSE"),
-            new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*") 
+            new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*|[a-z]*") 
         };
     }
 
@@ -121,7 +121,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         rule14.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant(); });
     }
 
-    private ILanguageObject ExecuteFunction(Function function) {
+    public ILanguageObject ExecuteFunction(Function function) {
         switch (function.Func) {
             case "Int": {
                 Sentence[] a = new Sentence[function.Parameters.Length];
@@ -135,7 +135,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
                 return this.Mod((Sentence)function.Parameters[0]);
             }
             case "Simplify": {
-                var result = this.Simplify((Sentence)function.Parameters[0]);
+                var result = this.Simplify((Sentence)function.Parameters[0], out var steps);
                 //Console.WriteLine($"Simplify: {function.Parameters[0]} equals: {result}");
                 return result;
             }

@@ -2,9 +2,9 @@
 
 public class InputCreator
 {
-    public static List<string> GeneratePropositionalSentences(int n) {
+    public static List<string> GeneratePropositionalSentences(int n, LogicalConstant.LSymbol truthValue = LogicalConstant.LSymbol.TRUE) {
         var atomicSentences = GenerateAtomicSentences(n).ToList();
-        atomicSentences[0] = LogicalConstant.LSymbol.FALSE.ToString();
+        atomicSentences[0] = truthValue.ToString();
         var connectives = GenerateConnectives(n - 1).ToList();
 
         var list = new List<string>();
@@ -24,7 +24,7 @@ public class InputCreator
     }
     
     public static IEnumerable<string> GenerateAtomicSentences(int n) {
-        return Enumerable.Range(0, n).Select(i => ((char)('A' + i)).ToString());
+        return Enumerable.Range(0, n).Select(i => ((char)('a' + i)).ToString());
     }
     
     private static IEnumerable<IEnumerable<string>> GenerateConnectives(int n) {

@@ -1,12 +1,16 @@
+using System.Numerics;
 using System.Text;
+using System.Globalization;
 
 namespace PropositionalLogic.Helpers;
 
 public class MarkUpGenerator {
     public const string latexPath = "Latex/AIG_thesis/";
     public const string htmlPath = "HTML/";
-
+    static PropositionalLogic _logicTEMP = new();
+    
     public static void ExportLaTex(string fileName) {
+        Console.WriteLine("generate pdf...");
         string pdfFileName = fileName.Substring(0, fileName.Length - 3) + "pdf";
         InputOutput.RunCommand("rm", pdfFileName, InputOutput.ExportFolderPath + latexPath);
         InputOutput.RunCommand("texify", $"--clean --pdf {fileName}", InputOutput.ExportFolderPath + latexPath);
@@ -34,16 +38,74 @@ public class MarkUpGenerator {
         return htmlTable.ToString();
     }
 
-    public static string ToLaTexTable((string[] col, string[][] rows) table, bool displayMath = true) {
-        var latexTable = new StringBuilder();
-
-        var x = "|";
-        for (var i = 0; i < table.col.Length; i++) {
-            x += " c |";
+    public class TkizMarkerManager {
+        private struct Marker {
+            public string name;
+            public string shape;
+            public string color;
+            public float opacity;
+            public Vector2 From;
+            public Vector2 To;
         }
 
-        if (displayMath) latexTable.Append("\\begin{displaymath}\n");
-        latexTable.Append($"\\begin{{tabular}}{{{x}}}\n");
+        List<Marker> markers = new();
+
+        public void AddMarker(Vector2 from, Vector2 to, string shape = "line", string color = "black", float opacity = 1.0f) {
+            markers.Add(new Marker() {
+                name = Random.Shared.Next().ToString(),
+                shape = shape,
+                color = color,
+                opacity = opacity,
+                From = from,
+                To = to
+            });
+        }
+
+        public string GetMarker(int x, int y) {
+            var search = new Vector2(x, y);
+            string marker = string.Empty;
+            foreach (var m in markers) {
+                if (m.From == search) {
+                    marker += $"\\tikzmark{{{m.name}Start}}";
+                }
+                if (m.To == search) {
+                    marker+= $"\\tikzmark{{{m.name}End}}";
+                }
+            }
+
+            return marker;
+        }
+
+        public string GetMarkerDefs() {
+            var result = string.Empty;
+            foreach (var marker in markers) {
+                switch (marker.shape) {
+                    case "line":
+                        result +=
+                            $"\\tikz[remember picture] \\draw[overlay, line width=1pt, {marker.color}] ([xshift=.25em,yshift=1.0em]pic cs:{marker.name}Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:{marker.name}End);\n";
+                        break;
+                    case "rectangle":
+                        result +=
+                            $"\\tikz[remember picture, overlay] \\fill[{marker.color}, opacity={marker.opacity.ToString(CultureInfo.InvariantCulture)}] ([xshift=-0.5em,yshift=1.0em]pic cs:{marker.name}Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:{marker.name}End);\n";
+                        break;
+                }
+            }
+
+            return result;
+        }
+    }
+
+
+    public static string ToLaTexTable((string[] col, string[][] rows) table, TkizMarkerManager tkizMarker, string tableLineColor = "black") {
+        var latexTable = new StringBuilder();
+
+        var defC = "|";
+        for (var i = 0; i < table.col.Length; i++) {
+            defC += " c |";
+        }
+        
+        latexTable.Append($"\\arrayrulecolor{{{tableLineColor}}}\n"); // Set the color of the lines to white
+        latexTable.Append($"\\begin{{tabular}}{{{defC}}}\n");
 
         for (var i = 0; i < table.col.Length - 1; i++) {
             latexTable.Append($"{table.col[i]} & ");
@@ -53,76 +115,121 @@ public class MarkUpGenerator {
 
         latexTable.Append("\\hline\n");
 
-        foreach (var row in table.rows) {
-            for (var i = 0; i < row.Length - 1; i++) {
-                latexTable.Append($"{row[i]} & ");
+        for (var y = 0; y < table.rows.Length; y++) {
+            var row = table.rows[y];
+            for (var x = 0; x < row.Length - 1; x++) {
+                latexTable.Append($"{tkizMarker.GetMarker(x, y)}{row[x]} & ");
             }
 
-            latexTable.Append($"{row[^1]} \\\\\n");
+            latexTable.Append($"{tkizMarker.GetMarker(row.Length - 1, y)}{row[^1]}\\\\\n");
         }
 
-        latexTable.Append("\\end{tabular}\n");
-        if (displayMath) latexTable.Append("\\end{displaymath}\n");
+        latexTable.Append("\\end{tabular}\\\n");
+        latexTable.Append(tkizMarker.GetMarkerDefs());
 
-        
-        
-        return ReplaceUnicodeToLaTex(latexTable.ToString());
+        return ReplaceUnicodeToLaTex(latexTable.ToString(), true);
     }
 
-    public static string ReplaceUnicodeToLaTex(string input) {
-        return input.Replace("∧", @"$\land$")
-            .Replace("∨", @"$\lor$")
-            .Replace("¬", @"$\lnot$")
-            .Replace("→", @"$\rightarrow$")
-            .Replace("↔", @"$\leftrightarrow$")
-            .Replace("⊤", @"$\top$")
-            .Replace("⊥", @"$\bot$")
-            .Replace("⊨", @"$\models$");
+    public static string ReplaceUnicodeToLaTex(string input, bool mathMode = false) {
+        List<string> replaceSymbols = new() {
+            "∧",
+            "∨",
+            "¬",
+            "→",
+            "↔",
+            "⊤",
+            "⊥",
+            "⊨",
+            "AND",
+            "OR"
+        };
+
+        foreach (var symbol in replaceSymbols) {
+            input = input.Replace(symbol, mathMode ? $"${GetSubstitute(symbol)}$" : GetSubstitute(symbol));
+        }
+
+        string GetSubstitute(string input) {
+            return input switch {
+                "∧" => @"\land",
+                "∨" => @"\lor",
+                "¬" => @"\lnot",
+                "→" => @"\rightarrow",
+                "↔" => @"\leftrightarrow",
+                "⊤" => @"\top",
+                "⊥" => @"\bot",
+                "⊨" => @"\models",
+                "AND" => @"\land",
+                "OR" => @"\lor",
+                _ => input
+            };
+        }
+
+        return input;
     }
 
-    public static string FigureCompare(string a, string b) {
-        return @"\begin{figure}
-                \centering
-                \begin{minipage}{0.45\textwidth}
-                    \centering
-                    \resizebox{\textwidth}{!}{" +
-               a +
-               @"}
-                \caption{first figure}
-                \end{minipage}\hfill
-                \begin{minipage}{0.45\textwidth}
-                    \centering
-                    \resizebox{\textwidth}{!}{" +
-               b +
-               @"}
-                \caption{second figure}
-                \end{minipage}
-            \end{figure}";
+    public static string FigureCompare(string figureLeft, string figureRight, string captionLeft, string captionRight) {
+        return @"\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{" + figureLeft +
+               "}" + $"\\caption{{{captionLeft}}}" +
+               @"\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{" + figureRight +
+               "}" + $"\\caption{{{captionRight}}}" + @"\end{minipage}\end{figure}";
     }
-    
-    public static string SentenceToLaTex(Sentence sentence) {
-        return ReplaceUnicodeToLaTex(sentence.ToString());
+
+    public static string Figurize(string content, string caption = "caption") {
+        return @"\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{\textwidth}\centering
+\resizebox{\textwidth}{!}{" + content+ $"}}\\caption{{{caption}}}"+ @"\end{minipage}\end{figure}";
     }
-    
+
     public static string SentenceToForest(Sentence sentence) {
+        bool triggered = false;
         void DFS(Sentence sentence, ref string result) {
             result += "[";
             if (sentence is AtomicSentence atomic) {
-                result += $"{SentenceToLaTex(atomic)}]";
+                if (atomic.IsTruthValue) {
+                    result += $"{ReplaceUnicodeToLaTex(atomic.ToString(), true)}, name=TruthV]";
+                    return;
+                }
+                result += $"{ReplaceUnicodeToLaTex(atomic.ToString(), true)}]";
                 return;
-            } 
-            
+            }
+
             result += ((ComplexSentence)sentence).OperatorToString();
+
+            if (!triggered) {
+                var copy = _logicTEMP.Simplify(sentence, out var steps);
+                if (copy is AtomicSentence atomicSentence && atomicSentence.IsTruthValue) {
+                    //result += ",for tree={circle,draw=red,outer sep=1pt}";
+                    result += ",name=BlockC ,tikz={\\node [draw,red,inner sep=0,fit to=tree]{};}";
+                    triggered = true;
+                }
+                else {
+                    //result += ",for tree={circle,draw,outer sep=1pt}";
+                }
+            }
             
             foreach (var child in sentence.Children) {
                 DFS(child, ref result);
             }
-            
+
             result += "]";
         }
 
         var result = "";
         DFS(sentence, ref result);
-        return @"\begin{forest}" + ReplaceUnicodeToLaTex(result) + @"\end{forest}";
+
+        var linkage = "\\draw[->,red] (TruthV) to[out=west,in=south west] (BlockC);";
+        if(!triggered) linkage = string.Empty;
+        return @"\begin{forest}" + ReplaceUnicodeToLaTex(result, true) +linkage+ @"\end{forest}";
+    }
+
+    public static string LaTexEquations(List<string[]> equations) {
+        var equiv = string.Empty;
+        foreach (var eq in equations) {
+            equiv += eq[0] + " &\\equiv " + eq[1] + " \\\\\n";
+            for (int i = 2; i < eq.Length; i++) {
+                equiv += " &\\equiv " + eq[i] + " \\\\\n";
+            }
+        }
+
+        return "\\begin{align*}\n" + equiv + "\\end{align*}";
     }
 }

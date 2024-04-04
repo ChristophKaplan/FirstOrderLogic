@@ -1,11 +1,12 @@
 namespace PropositionalLogic.Helpers;
 
 
-public class Section01 : Section {
+public class SemanticInvestigation : Section {
     
-    public Section01(PropositionalLogic logic):base(logic) { }
+    public SemanticInvestigation(PropositionalLogic logic):base(logic) { }
 
     protected override string Content() {
+        
         var f1 = "(A OR B) AND C";
         var f2 = "(A AND B) OR C";
         
@@ -17,10 +18,10 @@ public class Section01 : Section {
         ForgetCompare fc3 = new ForgetCompare(f1, forgetVar);
         ForgetCompare fc4 = new ForgetCompare(f2, forgetVar);
 
-        //HTMLGen.Export("forgetCompare.html", fc1.ToHTML() + "<br>" + fc2.ToHTML() + "<br>" + fc3.ToHTML() + "<br>" + fc4.ToHTML() );
 
-        //_logic.Interpret($"Int({f1}, Forget({f1},{forgetVar}))");
+        var m = $"$Mod(Forget(F, x)) = Mod(F) \\cup \\{{Switch(w, x) | w \\models F\\}}$ \\\\\n " +
+                $"$Mod({BachelorThesis.SkepForgetName}(F, x)) = Mod(F) \\cap \\{{Switch(w, x) | w \\models F\\}}$";
         
-        return MarkUpGenerator.SentenceToForest((Sentence)_logic.TryParse(f1));
+        return fc1.ToLatex() + fc2.ToLatex() + fc3.ToLatex() + fc4.ToLatex() + m;
     }
 }

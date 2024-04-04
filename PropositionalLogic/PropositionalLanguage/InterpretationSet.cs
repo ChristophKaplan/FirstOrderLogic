@@ -1,3 +1,4 @@
+using System.Numerics;
 using LRParser.Language;
 using ConsoleTables;
 using PropositionalLogic.Helpers;
@@ -7,6 +8,19 @@ namespace PropositionalLogic;
 public class InterpretationSet : ILanguageObject {
     public readonly List<Interpretation> Interpretations;
     public readonly List<Sentence> Sentences;
+    public List<AtomicSentence> GetSignature() {
+        return Interpretations.Count > 0 ? Interpretations[0].TruthValues.Keys.ToList() : new List<AtomicSentence>();
+    }
+
+    public int FindPosInSignature(string variable) {
+        var signature = GetSignature();
+        for (var i = 0; i < signature.Count; i++) {
+            if (signature[i].Symbol == variable) {
+                return i;
+            }
+        }
+        return -1;
+    }
     
     public InterpretationSet(List<Interpretation> interpretations, params Sentence[] sentences) {
         Interpretations = interpretations;
@@ -81,9 +95,23 @@ public class InterpretationSet : ILanguageObject {
         return consoleTable.ToMinimalString();
     }
 
+    public (string[] col, string[][] rows) ToTable() => ToTable(Interpretations, Sentences);
     private (string[] col, string[][] rows) ToTable(List<Interpretation> interpretations, List<Sentence> sentences) {
-        var columns = interpretations[0].TruthValues.Keys.Select(key => key.ToString()).ToList();
-        columns.AddRange(sentences.Select(sentence => sentence.ToString()));
+        var columns = GetSignature().Select(key => key.ToString()).ToList();
+
+        //TEMP
+        PropositionalLogic logic = new();
+        foreach (var sen in sentences) {
+            string result = "";
+            var list = logic.UnfoldEquivalence(sen);
+            for (var i = 0; i < list.Count-1; i++) {
+                result += $"{list[i]} $\\equiv$ ";
+            }
+            result += list[^1];
+            
+            columns.Add(result);
+        }
+        //columns.AddRange(sentences.Select(sentence => sentence.ToString()));
 
         var rows = new List<string[]>();
 
@@ -98,14 +126,16 @@ public class InterpretationSet : ILanguageObject {
     }
 
     public override string ToString() {
-        return ToConsoleTable(ToTable(Interpretations, Sentences));
+        return ToConsoleTable(ToTable());
     }
 
     public string ToHTML() {
-        return MarkUpGenerator.ToHTMLTable(ToTable(Interpretations, Sentences));
+        return MarkUpGenerator.ToHTMLTable(ToTable());
     }
     
-    public string ToLaTex(bool displayMath = true) {
-        return MarkUpGenerator.ToLaTexTable(ToTable(Interpretations, Sentences), displayMath);
+    public string ToLaTex(){
+        var table = ToTable();
+        var manager = new MarkUpGenerator.TkizMarkerManager();
+        return MarkUpGenerator.ToLaTexTable(table, manager);
     }
 }
