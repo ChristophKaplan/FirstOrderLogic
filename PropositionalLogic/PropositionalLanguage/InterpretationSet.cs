@@ -130,12 +130,12 @@ public class InterpretationSet : ILanguageObject {
     }
 
     public string ToHTML() {
-        return MarkUpGenerator.ToHTMLTable(ToTable());
+        return MRKUPGen.ToHTMLTable(ToTable());
     }
     
     public string ToLaTex(){
         var table = ToTable();
-        var manager = new MarkUpGenerator.TkizMarkerManager();
-        return MarkUpGenerator.ToLaTexTable(table, manager);
+        var manager = new MRKUPGen.TkizMarkerManager();
+        return MRKUPGen.ToLaTexTable(table, manager);
     }
 }

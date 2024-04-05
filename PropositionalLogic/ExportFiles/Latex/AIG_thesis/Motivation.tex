@@ -16,16 +16,16 @@ Let F be a formula, p an atomic variable and S as Set of Variables. The \emph{sk
  \item $\mathit{SkepForget(F,S \cup \{p\})} = \mathit{SkepForget(SkepForget(F,\{p\}), S)}$
  \end{itemize}For some formulas $F$, this operation of variable elimination can lead to a notable reductive or drastic results. 
                 We start by considering an example where $\mathit{Forget}$ behaves quite appropriate. 
-                Let a sentence $F_1$ be $a \land b$ and we choose to forget about $b$:\begin{align*}
-Forget(a \land b,b)&=F_1[b/\top] \lor F_1[b/\bot]\\ &\equiv ((a \land \top) \lor (a \land \bot)) \\
+                Let a sentence $F_1$ be $a \land b$ and we choose to forget about $b$:\begin{center}$\begin{array}{l l}
+Forget(F_1,b)&=F_1[b/\top] \lor F_1[b/\bot]\\ &\equiv ((a \land \top) \lor (a \land \bot)) \\
  &\equiv (a \lor \bot) \\
  &\equiv a \\
-\end{align*}We can see, as shown above, that $\mathit{Forget(F_1,b)}$ is equivalent to $a$ which seems to be the intuitive result when thinking of forgetting about $b$ in $F_1$. 
-                    Next, we consider forgetting of $b$ in the formula $F_2 = a \lor b$\begin{align*}
-Forget(a \lor b,b)&=F_2[b/\top] \lor F_2[b/\bot]\\ &\equiv ((a \lor \top) \lor (a \lor \bot)) \\
+\end{array}$\end{center}We can see, as shown above, that $\mathit{Forget(F_1,b)}$ is equivalent to $a$ which seems to be the intuitive result when thinking of forgetting about $b$ in $F_1$. 
+                    Next, we consider forgetting of $b$ in the formula $F_2 = a \lor b$\begin{center}$\begin{array}{l l}
+Forget(F_2,b)&=F_2[b/\top] \lor F_2[b/\bot]\\ &\equiv ((a \lor \top) \lor (a \lor \bot)) \\
  &\equiv (\top \lor a) \\
  &\equiv \top \\
-\end{align*}We observe that $\mathit{Forget(F_2,b)}$ is \emph{tautological}, which can be seen as a rather drastic result when we choose to forget $b$ only.
+\end{array}$\end{center}We observe that $\mathit{Forget(F_2,b)}$ is \emph{tautological}, which can be seen as a rather drastic result when we choose to forget $b$ only.
                 A variation of a forget operation could be defined as follows:\begin{definition}[Skeptical Variable Forgetting]
 Let F be a formula, p an atomic variable and S as Set of Variables. The \emph{skeptical forgetting of p in F $\mathit{SkepForget}(F,p)$}, respectively, the \emph{skeptical forgetting of S in F} $\mathit{SkepForget(F,S)}$, is given inductively by:
 \end{definition}
@@ -35,14 +35,14 @@ Let F be a formula, p an atomic variable and S as Set of Variables. The \emph{sk
  \item $\mathit{SkepForget(F,\{p\})} = F[p/\top] \land F[p/\bot]$
  \item $\mathit{SkepForget}(F,p) = \mathit{SkepForget}(F,\{p\})$
  \item $\mathit{SkepForget(F,S \cup \{p\})} = \mathit{SkepForget(SkepForget(F,\{p\}), S)}$
- \end{itemize}The idea is to use conjunction instead of disjunction. The consequences for our previous examples are the following:\begin{align*}
-SkepForget(a \land b,b)&=F_1[b/\top] \lor F_1[b/\bot]\\ &\equiv ((a \land \top) \lor (a \land \bot)) \\
- &\equiv (a \lor \bot) \\
+ \end{itemize}The idea is to use conjunction instead of disjunction. The consequences for our previous examples are the following:\begin{center}$\begin{array}{l l}
+SkepForget(F_1,b)&=F_1[b/\top] \lor F_1[b/\bot]\\ &\equiv ((a \land \top) \land (a \land \bot)) \\
+ &\equiv (a \land \bot) \\
+ &\equiv \bot \\
+\end{array}$\end{center}\begin{center}$\begin{array}{l l}
+SkepForget(F_2,b)&=F_2[b/\top] \lor F_2[b/\bot]\\ &\equiv ((a \lor \top) \land (a \lor \bot)) \\
+ &\equiv (\top \land a) \\
  &\equiv a \\
-\end{align*}\begin{align*}
-SkepForget(a \lor b,b)&=F_2[b/\top] \lor F_2[b/\bot]\\ &\equiv ((a \lor \top) \lor (a \lor \bot)) \\
- &\equiv (\top \lor a) \\
- &\equiv \top \\
-\end{align*}We observe that our alternative operation, at least in these examples, doesn't necessarily entail less drastic results. 
+\end{array}$\end{center}We observe that our alternative operation, at least in these examples, doesn't necessarily entail less drastic results. 
             We obtain a contradiction in the first case and in the second case, our equivalent to $a$. 
             It suggests a duality between the two operations.

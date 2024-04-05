@@ -29,9 +29,9 @@ public class ForgetCompare {
     }
     
     public string ToLatex() {
-        var f = MarkUpGenerator.ReplaceUnicodeToLaTex(forgetFunc, true);
-        var sf = MarkUpGenerator.ReplaceUnicodeToLaTex(skepForgetFunc, true);
-        return MarkUpGenerator.FigureCompare(ForgetToLaTex(), SkepForgetToLaTex(), $"{f}", $"{sf}");
+        var f = MRKUPGen.ReplaceUnicodeToLaTex(forgetFunc, true);
+        var sf = MRKUPGen.ReplaceUnicodeToLaTex(skepForgetFunc, true);
+        return MRKUPGen.FigureCompare(ForgetToLaTex(), SkepForgetToLaTex(), $"{f}", $"{sf}",forgetFunc);
     }
     
     private string ForgetToLaTex(){
@@ -40,10 +40,10 @@ public class ForgetCompare {
         var height = table.rows.Length-1;
         
         int forgetVarPos = IntForget.FindPosInSignature(forgetVar);
-        var manager = new MarkUpGenerator.TkizMarkerManager();
+        var manager = new MRKUPGen.TkizMarkerManager();
         manager.AddMarker(new Vector2(forgetVarPos, 0), new Vector2(forgetVarPos, height), "line", "red");
         manager.AddMarker(new Vector2(0, MathF.Floor(height/2f)+1), new Vector2(length, height), "rectangle", "yellow", 0.25f);
-        return MarkUpGenerator.ToLaTexTable(table, manager);
+        return MRKUPGen.ToLaTexTable(table, manager);
     }
     
     private string SkepForgetToLaTex(){
@@ -52,9 +52,9 @@ public class ForgetCompare {
         var height = table.rows.Length-1;
 
         int forgetVarPos = IntSkepForget.FindPosInSignature(forgetVar);
-        var manager = new MarkUpGenerator.TkizMarkerManager();
+        var manager = new MRKUPGen.TkizMarkerManager();
         manager.AddMarker(new Vector2(forgetVarPos, 0), new Vector2(forgetVarPos, height), "line", "red");
         manager.AddMarker(new Vector2(0, 0), new Vector2(length, MathF.Floor(height/2f)), "rectangle", "yellow", 0.25f);
-        return MarkUpGenerator.ToLaTexTable(table, manager);
+        return MRKUPGen.ToLaTexTable(table, manager);
     }
 }

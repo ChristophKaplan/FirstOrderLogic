@@ -1,39 +1,79 @@
 \section{SyntacticAnalysis}
-what are good examples to start of with the semantical analysis ? 
- When does deeper nesting affect the result of the semantical analysis ? 
-$F_1$ = a\\
-$F_2$ = a $\land$ b\\
-$F_3$ = (x $\lor$ y) $\land$ (w $\lor$ z)\\
-\begin{align*}
-Forget(a,a)&=F_1[a/\top] \lor F_1[a/\bot]\\ &\equiv (\top \lor \bot) \\
- &\equiv \top \\
-Forget(a \land b,a)&=F_2[a/\top] \lor F_2[a/\bot]\\ &\equiv ((\top \land b) \lor (\bot \land b)) \\
- &\equiv (b \lor \bot) \\
- &\equiv b \\
-Forget((x \lor y) \land (w \lor z),x)&=F_3[x/\top] \lor F_3[x/\bot]\\ &\equiv (((\top \lor y) \land (w \lor z)) \lor ((\bot \lor y) \land (w \lor z))) \\
- &\equiv ((\top \land (w \lor z)) \lor (y \land (w \lor z))) \\
- &\equiv ((w \lor z) \lor (y \land (w \lor z))) \\
- &\equiv (w \lor z) \\
-\end{align*}\subsection{Behavior of Truth Values in Abstract Syntax Trees}
+In the previous section we gave examples of sentences with only one connective.But what about more complex sentences. Does the
+outcome predominantly correlate with the top layer of connectives in the syntax tree?
+What is the effect or influence of deeper nested expressions on the final result?To take the investigation a step further, and also for the semantic analysis, we need to identify examples that are at least general enough to to make some valuable statementsBut how to find them, what is important ? First lets experiment with some more sentence and also deeper nesting and compare the results!\\\begin{adjustbox}{width=\textwidth}
+\arrayrulecolor{white}
+\begin{tabular}{| c | c | c |}
+ &  &  \\
+\hline
+$\begin{array}{l l}
+F_1 &\equiv a\\
+F_{1b} &\equiv \lnot a\\
+F_2 &\equiv (a \land b)\\
+F_{2b} &\equiv \lnot (a \land b)\\
+F_3 &\equiv (a \land (c \land d))\\
+F_5 &\equiv (a \lor b)\\
+F_6 &\equiv (a \lor (c \lor d))\\
+F_7 &\equiv (a \lor (c \land d))\\
+F_8 &\equiv (a \land (c \lor d))\\
+\end{array}$ & $\begin{array}{l l}
+Forget(F_1,a) &\equiv \top\\
+Forget(F_{1b},a) &\equiv \top\\
+Forget(F_2,a) &\equiv b\\
+Forget(F_{2b},a) &\equiv ((\bot \lor \lnot b) \lor (\top \lor \lnot b))\\
+Forget(F_3,a) &\equiv (c \land d)\\
+Forget(F_5,a) &\equiv \top\\
+Forget(F_6,a) &\equiv \top\\
+Forget(F_7,a) &\equiv \top\\
+Forget(F_8,a) &\equiv (c \lor d)\\
+\end{array}$ & $\begin{array}{l l}
+SkepForget(F_1,a) &\equiv \bot\\
+SkepForget(F_{1b},a) &\equiv \bot\\
+SkepForget(F_2,a) &\equiv \bot\\
+SkepForget(F_{2b},a) &\equiv ((\bot \lor \lnot b) \land (\top \lor \lnot b))\\
+SkepForget(F_3,a) &\equiv \bot\\
+SkepForget(F_5,a) &\equiv b\\
+SkepForget(F_6,a) &\equiv (c \lor d)\\
+SkepForget(F_7,a) &\equiv (c \land d)\\
+SkepForget(F_8,a) &\equiv \bot\\
+\end{array}$\\
+\end{tabular}\
+\end{adjustbox}
+Now here we can see... this and that\subsection{Behavior of Truth Values in Abstract Syntax Trees}
+
+
                     The behavior of truth values presents notably insights when considering their interactions with logical connectives. 
                     We know that $\top \land \bot \equiv \bot$ and $\top \lor \bot \equiv \top$. 
-                    To investigate the behaviour abstract syntax trees are a great way to visualize sentences.\\\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{\textwidth}\centering
+
+
+                    To investigate the behaviour abstract syntax trees are a great way to visualize sentences.
+To get a good overview we will try any permutation of connectives over a certain variable amount $n$ wich is $2^(n-1)$ possibilities. \\\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{\textwidth}\centering
 \resizebox{\textwidth}{!}{\arrayrulecolor{white}
 \begin{tabular}{| c | c | c | c |}
  &  &  &  \\
 \hline
-\begin{forest}[$\land$[$\land$[$\top$, name=TruthV][b]][c]]\end{forest} & \begin{forest}[$\lor$[$\land$[$\top$, name=TruthV][b]][c]]\end{forest} & \begin{forest}[$\land$[$\lor$,name=BlockC ,tikz={\node [draw,red,inner sep=0,fit to=tree]{};}[$\top$, name=TruthV][b]][c]]\draw[->,red] (TruthV) to[out=west,in=south west] (BlockC);\end{forest} & \begin{forest}[$\lor$,name=BlockC ,tikz={\node [draw,red,inner sep=0,fit to=tree]{};}[$\lor$[$\top$, name=TruthV][b]][c]]\draw[->,red] (TruthV) to[out=west,in=south west] (BlockC);\end{forest}\\
+\begin{forest}[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]]\end{forest} & \begin{forest}[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]]\end{forest} & \begin{forest}[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\lor$,name=BlockC,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]]\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);\end{forest} & \begin{forest}[$\lor$,name=BlockC,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\lor$,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]]\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);\end{forest}\\
 \tiny (($\top$ $\land$ b) $\land$ c) $\equiv$ (b $\land$ c) & \tiny (($\top$ $\land$ b) $\lor$ c) $\equiv$ (b $\lor$ c) & \tiny (($\top$ $\lor$ b) $\land$ c) $\equiv$ c & \tiny (($\top$ $\lor$ b) $\lor$ c) $\equiv$ $\top$\\
 \end{tabular}\
-}\caption{caption}\end{minipage}\end{figure}In these examples we can observe the propagation of truth values, in this case $\top$. Starting from the leafes 
+}\caption{$\top$ propagation}\label{fig:topProp}\end{minipage}\end{figure}In figure \ref{fig:topProp} we can observe the propagation of truth values, in this case $\top$. Starting from the leafes 
                     @$\top$ effectively "absorbs" all siblings in conjunction with $\lor$ and stops propagating at $\land$.\\\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{\textwidth}\centering
 \resizebox{\textwidth}{!}{\arrayrulecolor{white}
 \begin{tabular}{| c | c | c | c |}
  &  &  &  \\
 \hline
-\begin{forest}[$\land$,name=BlockC ,tikz={\node [draw,red,inner sep=0,fit to=tree]{};}[$\land$[$\bot$, name=TruthV][b]][c]]\draw[->,red] (TruthV) to[out=west,in=south west] (BlockC);\end{forest} & \begin{forest}[$\lor$[$\land$,name=BlockC ,tikz={\node [draw,red,inner sep=0,fit to=tree]{};}[$\bot$, name=TruthV][b]][c]]\draw[->,red] (TruthV) to[out=west,in=south west] (BlockC);\end{forest} & \begin{forest}[$\land$[$\lor$[$\bot$, name=TruthV][b]][c]]\end{forest} & \begin{forest}[$\lor$[$\lor$[$\bot$, name=TruthV][b]][c]]\end{forest}\\
+\begin{forest}[$\land$,name=BlockC,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\land$,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\bot$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]]\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);\end{forest} & \begin{forest}[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,name=BlockC,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\bot$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]]\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);\end{forest} & \begin{forest}[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\bot$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]]\end{forest} & \begin{forest}[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\bot$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]]\end{forest}\\
 \tiny (($\bot$ $\land$ b) $\land$ c) $\equiv$ $\bot$ & \tiny (($\bot$ $\land$ b) $\lor$ c) $\equiv$ c & \tiny (($\bot$ $\lor$ b) $\land$ c) $\equiv$ (b $\land$ c) & \tiny (($\bot$ $\lor$ b) $\lor$ c) $\equiv$ (b $\lor$ c)\\
 \end{tabular}\
-}\caption{caption}\end{minipage}\end{figure}Dual to that, $\bot$ "annihilates" all siblings when paired with a logical $\land$ and halts at $\lor$.
+}\caption{$\bot$ propagation}\label{fig:botProp}\end{minipage}\end{figure}Figure \ref{fig:botProp} shows, dual to \ref{fig:topProp}, how $\bot$ "annihilates" all siblings when paired with a logical $\land$ and halts at $\lor$.
                     This dynamic interaction implies that truth values possess the capability to selectively "eliminate" 
-                    variables and entire propositions.
+                    variables and entire propositions.\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{\textwidth}\centering
+\resizebox{\textwidth}{!}{\arrayrulecolor{white}
+\begin{tabular}{| c | c | c | c |}
+ &  &  &  \\
+\hline
+\begin{forest}[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]][d, circle, draw, minimum size=0.2cm, font=\tiny]]\end{forest} & \begin{forest}[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]][d, circle, draw, minimum size=0.2cm, font=\tiny]]\end{forest} & \begin{forest}[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]][d, circle, draw, minimum size=0.2cm, font=\tiny]]\end{forest} & \begin{forest}[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]][d, circle, draw, minimum size=0.2cm, font=\tiny]]\end{forest}\\
+\tiny ((($\top$ $\land$ b) $\land$ c) $\land$ d) $\equiv$ ((b $\land$ c) $\land$ d) & \tiny ((($\top$ $\land$ b) $\land$ c) $\lor$ d) $\equiv$ ((b $\land$ c) $\lor$ d) & \tiny ((($\top$ $\land$ b) $\lor$ c) $\land$ d) $\equiv$ ((b $\lor$ c) $\land$ d) & \tiny ((($\top$ $\land$ b) $\lor$ c) $\lor$ d) $\equiv$ ((b $\lor$ c) $\lor$ d)\\
+\begin{forest}[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\lor$,name=BlockC,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]][d, circle, draw, minimum size=0.2cm, font=\tiny]]\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);\end{forest} & \begin{forest}[$\lor$,circle, draw, minimum size=0.2cm, font=\tiny[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\lor$,name=BlockC,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]][d, circle, draw, minimum size=0.2cm, font=\tiny]]\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);\end{forest} & \begin{forest}[$\land$,circle, draw, minimum size=0.2cm, font=\tiny[$\lor$,name=BlockC,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\lor$,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]][d, circle, draw, minimum size=0.2cm, font=\tiny]]\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);\end{forest} & \begin{forest}[$\lor$,name=BlockC,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\lor$,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\lor$,circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed[$\top$, name=TruthV, circle, draw, dashed, minimum size=0.2cm, font=\tiny, edge=dashed][b, circle, draw, minimum size=0.2cm, font=\tiny]][c, circle, draw, minimum size=0.2cm, font=\tiny]][d, circle, draw, minimum size=0.2cm, font=\tiny]]\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);\end{forest}\\
+\tiny ((($\top$ $\lor$ b) $\land$ c) $\land$ d) $\equiv$ (c $\land$ d) & \tiny ((($\top$ $\lor$ b) $\land$ c) $\lor$ d) $\equiv$ (c $\lor$ d) & \tiny ((($\top$ $\lor$ b) $\lor$ c) $\land$ d) $\equiv$ d & \tiny ((($\top$ $\lor$ b) $\lor$ c) $\lor$ d) $\equiv$ $\top$\\
+\end{tabular}\
+}\caption{$\top$ propagation}\label{fig:topProp}\end{minipage}\end{figure}

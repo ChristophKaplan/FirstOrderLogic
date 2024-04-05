@@ -18,7 +18,7 @@ public enum Terminal {
 }
 
 public enum NonTerminal {
-    LangObject, Sentence, ComplexSentence, Ext, Connective
+    LangObject, Sentence, ComplexSentence, Ext, Connective, NegatedSentence
 }
 
 public class PropositionalLogic : Language<Terminal, NonTerminal> {
@@ -42,57 +42,57 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
     protected override void SetUpGrammar() {
 
         var rule01 = AddProductionRule(SpecialNonTerminal.Start, NonTerminal.LangObject);
-        
         var rule02 = AddProductionRule(NonTerminal.LangObject, NonTerminal.Sentence);
         var rule03 = AddProductionRule(NonTerminal.Sentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
-        var rule04 = AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
-        var rule05 = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
-        
-        var rule06 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, NonTerminal.Connective, NonTerminal.Sentence);
-        var rule07 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, NonTerminal.Connective, NonTerminal.Sentence);
-        var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Negation, NonTerminal.Sentence);
-
-        var rule09 = AddProductionRule(NonTerminal.LangObject, Terminal.Function, Terminal.Open, NonTerminal.LangObject, NonTerminal.Ext);
-        var rule10 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.LangObject, NonTerminal.Ext);
-        var rule11 = AddProductionRule(NonTerminal.Ext, Terminal.Close);
-        
-        var rule12 = AddProductionRule(NonTerminal.Connective, Terminal.Conjunction);
-        var rule13 = AddProductionRule(NonTerminal.Connective, Terminal.Disjunction);
-        var rule14 = AddProductionRule(NonTerminal.Connective, Terminal.Implication);
-        
-        //fix this in order
-        var rule15 = AddProductionRule(NonTerminal.Sentence, Terminal.TruthValue); //weird?
-        var rule16 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.TruthValue, NonTerminal.Connective, NonTerminal.Sentence);
-        rule15.SetSemanticAction((lhs, rhs) => {
+        var rule04 = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
+        var rule05 = AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
+        var rule06 = AddProductionRule(NonTerminal.Sentence, NonTerminal.NegatedSentence);
+        var rule07 = AddProductionRule(NonTerminal.Sentence, Terminal.TruthValue);
+        var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.TruthValue, NonTerminal.Connective, NonTerminal.Sentence);
+        var rule09 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, NonTerminal.Connective, NonTerminal.Sentence);
+        var rule10 = AddProductionRule(NonTerminal.ComplexSentence, NonTerminal.NegatedSentence, NonTerminal.Connective, NonTerminal.Sentence);
+        var rule11 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, NonTerminal.Connective, NonTerminal.Sentence);
+        var rule12 = AddProductionRule(NonTerminal.NegatedSentence, Terminal.Negation,Terminal.Open, NonTerminal.Sentence, Terminal.Close); //Negation musst be scoped (?) otherwise i get dangling else
+        var rule13 = AddProductionRule(NonTerminal.Connective, Terminal.Conjunction);
+        var rule14 = AddProductionRule(NonTerminal.Connective, Terminal.Disjunction);
+        var rule15 = AddProductionRule(NonTerminal.Connective, Terminal.Implication);
+        var rule16 = AddProductionRule(NonTerminal.LangObject, Terminal.Function, Terminal.Open, NonTerminal.LangObject, NonTerminal.Ext);
+        var rule17 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.LangObject, NonTerminal.Ext);
+        var rule18 = AddProductionRule(NonTerminal.Ext, Terminal.Close);
+       
+        rule07.SetSemanticAction((lhs, rhs) => {
             var lc = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
             lhs.SyntheticAttribute = new AtomicSentence(lc.ToString());
         });
-        rule16.SetSemanticAction((lhs, rhs) => {
+       
+        rule08.SetSemanticAction((lhs, rhs) => {
             var lc = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
             lhs.SyntheticAttribute = new ComplexSentence(new AtomicSentence(lc.ToString()), (LogicalConstant)rhs[1].SyntheticAttribute, (Sentence)rhs[2].SyntheticAttribute);
         });
         
-        
+        rule10.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[0].SyntheticAttribute, (LogicalConstant)rhs[1].SyntheticAttribute, (Sentence)rhs[2].SyntheticAttribute); });
+        rule06.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         
         rule01.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         rule02.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        
         rule03.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
 
-        rule04.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute); });
+        rule05.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = new AtomicSentence((LexValue)rhs[0].SyntheticAttribute); });
 
-        rule05.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+        rule04.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
 
-        rule06.SetSemanticAction((lhs, rhs) => {
+        rule09.SetSemanticAction((lhs, rhs) => {
             lhs.SyntheticAttribute = new ComplexSentence(new AtomicSentence((LexValue)rhs[0].SyntheticAttribute), (LogicalConstant)rhs[1].SyntheticAttribute, (Sentence)rhs[2].SyntheticAttribute);
         });
 
-        rule07.SetSemanticAction((lhs, rhs) => {
+        rule11.SetSemanticAction((lhs, rhs) => {
             lhs.SyntheticAttribute = new ComplexSentence((Sentence)rhs[1].SyntheticAttribute, (LogicalConstant)rhs[3].SyntheticAttribute, (Sentence)rhs[4].SyntheticAttribute);
         });
-
-        rule08.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence(LogicalConstant.LSymbol.NOT, (Sentence)rhs[1].SyntheticAttribute));
-
-        rule09.SetSemanticAction((lhs, rhs) => {
+        
+        rule12.SetSemanticAction((lhs, rhs) => lhs.SyntheticAttribute = new ComplexSentence(LogicalConstant.LSymbol.NOT, (Sentence)rhs[2].SyntheticAttribute));
+        
+        rule16.SetSemanticAction((lhs, rhs) => {
             var extArray = (ArrayValue)rhs[3].SyntheticAttribute;
             extArray.Insert(rhs[2].SyntheticAttribute,0);
 
@@ -105,20 +105,20 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             lhs.SyntheticAttribute = new Function((LexValue)rhs[0].SyntheticAttribute, extArray.Value);
         });
         
-        rule10.SetSemanticAction((lhs, rhs) => {
+        rule17.SetSemanticAction((lhs, rhs) => {
             var second = rhs[1].SyntheticAttribute;
             var ext = (ArrayValue)rhs[2].SyntheticAttribute;
             ext.Add(second);
             lhs.SyntheticAttribute = ext;
         });
         
-        rule11.SetSemanticAction((lhs, rhs) => {
+        rule18.SetSemanticAction((lhs, rhs) => {
             lhs.SyntheticAttribute = new ArrayValue(Array.Empty<ILanguageObject>());
         });
         
-        rule12.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant(); });
         rule13.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant(); });
         rule14.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant(); });
+        rule15.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant(); });
     }
 
     public ILanguageObject ExecuteFunction(Function function) {

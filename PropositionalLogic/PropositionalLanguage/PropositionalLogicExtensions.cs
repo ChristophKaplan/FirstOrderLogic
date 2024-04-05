@@ -97,6 +97,10 @@ public static class PropositionalLogicExtensions {
         }
         
         steps.Add(copy.GetCopy());
+        PushNegation(ref copy);
+        steps.Add(copy.GetCopy());
+        DoubleNegation(ref copy);
+        steps.Add(copy.GetCopy());
         Absorption(ref copy);
         steps.Add(copy.GetCopy());
         Absorption_Ish(ref copy);
@@ -106,7 +110,13 @@ public static class PropositionalLogicExtensions {
 
     private static void SimplifyTruthValues(ref Sentence sentence) {
         if (sentence is AtomicSentence) return;
-        if(sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.NOT }) return;
+        if (sentence is ComplexSentence { IsNegation: true } c) {
+            if (c.Children[0] is AtomicSentence {IsTruthValue: true } truthValue) {
+                truthValue.FlipTruthValue();
+                Replace(ref sentence, truthValue);
+            }
+            return;
+        }
         
         var lhs = sentence.Children[0];
         var rhs = sentence.Children[1];
@@ -129,20 +139,20 @@ public static class PropositionalLogicExtensions {
             return result;
         }
 
-        (AtomicSentence truthValueSide, Sentence otherSide) _ = MapLhsRhs();
+        (AtomicSentence truthValueSide, Sentence otherSide) mapping = MapLhsRhs();
 
         switch (((ComplexSentence)sentence).Operator) {
-            case LogicalConstant.LSymbol.AND when _.truthValueSide.Verum:
-                Replace(ref sentence, _.otherSide);
+            case LogicalConstant.LSymbol.AND when mapping.truthValueSide.Verum:
+                Replace(ref sentence, mapping.otherSide);
                 break;
-            case LogicalConstant.LSymbol.AND when _.truthValueSide.Falsum:
-                Replace(ref sentence, _.truthValueSide);
+            case LogicalConstant.LSymbol.AND when mapping.truthValueSide.Falsum:
+                Replace(ref sentence, mapping.truthValueSide);
                 break;
-            case LogicalConstant.LSymbol.OR when _.truthValueSide.Verum:
-                Replace(ref sentence, _.truthValueSide);
+            case LogicalConstant.LSymbol.OR when mapping.truthValueSide.Verum:
+                Replace(ref sentence, mapping.truthValueSide);
                 break;
-            case LogicalConstant.LSymbol.OR when _.truthValueSide.Falsum:
-                Replace(ref sentence, _.otherSide);
+            case LogicalConstant.LSymbol.OR when mapping.truthValueSide.Falsum:
+                Replace(ref sentence, mapping.otherSide);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -163,8 +173,49 @@ public static class PropositionalLogicExtensions {
         StepDown(ref sentence);
     }
 
+    private static void PushNegation(ref Sentence sentence) {
+        if (sentence is ComplexSentence { IsNegation: true } negatedSentence) {
+            
+            if (negatedSentence.Children[0] is AtomicSentence {IsTruthValue: true } truthValue) {
+                truthValue.FlipTruthValue();
+                truthValue.Reparent(sentence);
+                sentence = truthValue;
+                return;
+            }
+            
+            if (negatedSentence.Children[0] is ComplexSentence { IsNegation: false } inner) {
+                inner.FlipOperator(); //deMorgan
+                var p = new ComplexSentence(LogicalConstant.LSymbol.NOT,inner.Children[0]);
+                var q = new ComplexSentence(LogicalConstant.LSymbol.NOT,inner.Children[1]);
+                var pq = new ComplexSentence(p, inner.Operator, q);
+                pq.Reparent(sentence);
+                sentence = pq;
+            }
+        }
+        
+        for (var i = 0; i < sentence.Children.Count; i++) {
+            var c = sentence.Children[i];
+            PushNegation(ref c);
+        }
+    }
+
+    private static void DoubleNegation(ref Sentence sentence) {
+        if (sentence is ComplexSentence { IsNegation: true } negation) {
+            if (negation.Children[0] is ComplexSentence { IsNegation: true } doubleNegation) {
+
+                int i = negation.Parent.Children.IndexOf(negation);
+                negation.Parent.Children[i] = doubleNegation.Children[0];
+            }
+        }
+        
+        for (var i = 0; i < sentence.Children.Count; i++) {
+            var c = sentence.Children[i];
+            DoubleNegation(ref c);
+        }
+    }
+
     private static void Absorption(ref Sentence sentence) {
-        if(sentence is AtomicSentence) return;
+        if(sentence is AtomicSentence || sentence is ComplexSentence { IsNegation: true }) return;
         
         var complex = sentence as ComplexSentence;
         var lhs = sentence.Children[0];
@@ -196,7 +247,7 @@ public static class PropositionalLogicExtensions {
         //(A AND (B AND A)) = (B AND A)
         //(A OR (B OR A)) = (B OR A)
         
-        if(sentence is AtomicSentence) return;
+        if(sentence is AtomicSentence || sentence is ComplexSentence { IsNegation: true }) return;
         
         var complex = sentence as ComplexSentence;
         var lhs = sentence.Children[0];

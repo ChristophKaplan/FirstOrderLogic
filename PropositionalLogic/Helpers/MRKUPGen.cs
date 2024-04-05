@@ -4,11 +4,11 @@ using System.Globalization;
 
 namespace PropositionalLogic.Helpers;
 
-public class MarkUpGenerator {
+public class MRKUPGen {
     public const string latexPath = "Latex/AIG_thesis/";
     public const string htmlPath = "HTML/";
     static PropositionalLogic _logicTEMP = new();
-    
+
     public static void ExportLaTex(string fileName) {
         Console.WriteLine("generate pdf...");
         string pdfFileName = fileName.Substring(0, fileName.Length - 3) + "pdf";
@@ -68,8 +68,9 @@ public class MarkUpGenerator {
                 if (m.From == search) {
                     marker += $"\\tikzmark{{{m.name}Start}}";
                 }
+
                 if (m.To == search) {
-                    marker+= $"\\tikzmark{{{m.name}End}}";
+                    marker += $"\\tikzmark{{{m.name}End}}";
                 }
             }
 
@@ -103,7 +104,7 @@ public class MarkUpGenerator {
         for (var i = 0; i < table.col.Length; i++) {
             defC += " c |";
         }
-        
+
         latexTable.Append($"\\arrayrulecolor{{{tableLineColor}}}\n"); // Set the color of the lines to white
         latexTable.Append($"\\begin{{tabular}}{{{defC}}}\n");
 
@@ -167,45 +168,57 @@ public class MarkUpGenerator {
         return input;
     }
 
-    public static string FigureCompare(string figureLeft, string figureRight, string captionLeft, string captionRight) {
-        return @"\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{" + figureLeft +
-               "}" + $"\\caption{{{captionLeft}}}" +
-               @"\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{" + figureRight +
-               "}" + $"\\caption{{{captionRight}}}" + @"\end{minipage}\end{figure}";
+    public static string FigureCompare(string figureLeft, string figureRight, string captionLeft, string captionRight, string label) {
+        return @"\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{" +
+               figureLeft +
+               "}" +
+               $"\\caption{{{captionLeft}}}" +
+               @"\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{" +
+               figureRight +
+               "}" +
+               $"\\caption{{{captionRight}}}\\label{{fig:{label}}}" +
+               @"\end{minipage}\end{figure}";
     }
 
-    public static string Figurize(string content, string caption = "caption") {
+    public static string Figurize(string content, string caption, string label) {
         return @"\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{\textwidth}\centering
-\resizebox{\textwidth}{!}{" + content+ $"}}\\caption{{{caption}}}"+ @"\end{minipage}\end{figure}";
+\resizebox{\textwidth}{!}{" +
+               content +
+               $"}}\\caption{{{caption}}}\\label{{fig:{label}}}" +
+               @"\end{minipage}\end{figure}";
     }
 
     public static string SentenceToForest(Sentence sentence) {
         bool triggered = false;
+
         void DFS(Sentence sentence, ref string result) {
             result += "[";
             if (sentence is AtomicSentence atomic) {
                 if (atomic.IsTruthValue) {
-                    result += $"{ReplaceUnicodeToLaTex(atomic.ToString(), true)}, name=TruthV]";
-                    return;
+                    result += $"{ReplaceUnicodeToLaTex(atomic.ToString(), true)}, name=TruthV" +
+                              ", circle, draw, dotted, minimum size=0.2cm, font=\\tiny, edge=dotted]";
                 }
-                result += $"{ReplaceUnicodeToLaTex(atomic.ToString(), true)}]";
+                else {
+                    result += $"{ReplaceUnicodeToLaTex(atomic.ToString(), true)}" +
+                              ", circle, draw, minimum size=0.2cm, font=\\tiny" +
+                              "]";
+                }
                 return;
             }
 
             result += ((ComplexSentence)sentence).OperatorToString();
 
-            if (!triggered) {
-                var copy = _logicTEMP.Simplify(sentence, out var steps);
-                if (copy is AtomicSentence atomicSentence && atomicSentence.IsTruthValue) {
-                    //result += ",for tree={circle,draw=red,outer sep=1pt}";
-                    result += ",name=BlockC ,tikz={\\node [draw,red,inner sep=0,fit to=tree]{};}";
-                    triggered = true;
-                }
-                else {
-                    //result += ",for tree={circle,draw,outer sep=1pt}";
-                }
+            var simplified = _logicTEMP.Simplify(sentence, out var steps);
+            if (simplified is AtomicSentence atomicSentence && atomicSentence.IsTruthValue) {
+                if (!triggered) result += ",name=BlockC";
+                result += ",circle, draw, dotted, minimum size=0.2cm, font=\\tiny, edge=dotted";
+                //result += ",tikz={\\node [draw,red,inner sep=0,fit to=tree]{};}";
+                triggered = true;
             }
-            
+            else {
+                result += ",circle, draw, minimum size=0.2cm, font=\\tiny";
+            }
+
             foreach (var child in sentence.Children) {
                 DFS(child, ref result);
             }
@@ -216,20 +229,30 @@ public class MarkUpGenerator {
         var result = "";
         DFS(sentence, ref result);
 
-        var linkage = "\\draw[->,red] (TruthV) to[out=west,in=south west] (BlockC);";
-        if(!triggered) linkage = string.Empty;
-        return @"\begin{forest}" + ReplaceUnicodeToLaTex(result, true) +linkage+ @"\end{forest}";
+        var linkage = "\\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);";
+        if (!triggered) linkage = string.Empty;
+        return @"\begin{forest}" + ReplaceUnicodeToLaTex(result, true) + linkage + @"\end{forest}";
     }
 
-    public static string LaTexEquations(List<string[]> equations) {
+    public static string LaTexEquations(List<string[]> equations, bool inLine = false) {
         var equiv = string.Empty;
         foreach (var eq in equations) {
-            equiv += eq[0] + " &\\equiv " + eq[1] + " \\\\\n";
-            for (int i = 2; i < eq.Length; i++) {
-                equiv += " &\\equiv " + eq[i] + " \\\\\n";
+            if (inLine) {
+                equiv += eq[0] + " &\\equiv " + eq[1];
+                for (int i = 2; i < eq.Length; i++) {
+                    equiv += " \\equiv " + eq[i];
+                }
+
+                equiv += "\\\\\n";
+            }
+            else {
+                equiv += eq[0] + " &\\equiv " + eq[1] + " \\\\\n";
+                for (int i = 2; i < eq.Length; i++) {
+                    equiv += " &\\equiv " + eq[i] + " \\\\\n";
+                }
             }
         }
 
-        return "\\begin{align*}\n" + equiv + "\\end{align*}";
+        return "$\\begin{array}{l l}\n" + equiv + "\\end{array}$";
     }
 }

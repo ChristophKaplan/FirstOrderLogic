@@ -21,15 +21,15 @@ public class Motivation : Section {
             @"For some formulas $F$, this operation of variable elimination can lead to a notable reductive or drastic results. 
                 We start by considering an example where $\mathit{Forget}$ behaves quite appropriate. 
                 Let a sentence $F_1$ be $a \land b$ and we choose to forget about $b$:" +
-            ForgetLaTexWriter(false,false,F1)+
+            ForgetLaTexWriter(false,false,true, true,F1) +
             @"We can see, as shown above, that $\mathit{Forget(F_1,b)}$ is equivalent to $a$ which seems to be the intuitive result when thinking of forgetting about $b$ in $F_1$. 
                     Next, we consider forgetting of $b$ in the formula $F_2 = a \lor b$" +
-            ForgetLaTexWriter(false, false,F2)+
+            ForgetLaTexWriter(false, false,true, true,F2) +
             @"We observe that $\mathit{Forget(F_2,b)}$ is \emph{tautological}, which can be seen as a rather drastic result when we choose to forget $b$ only.
                 A variation of a forget operation could be defined as follows:" +
             SkepForgetDefinition() +
-            @"The idea is to use conjunction instead of disjunction. The consequences for our previous examples are the following:" +
-            ForgetLaTexWriter(true,false,F1) + ForgetLaTexWriter(true,false,F2) +
+            "The idea is to use conjunction instead of disjunction. The consequences for our previous examples are the following:" +
+            ForgetLaTexWriter(true,false,true, true,F1) + ForgetLaTexWriter(true,false,true, true,F2) +
             @"We observe that our alternative operation, at least in these examples, doesn't necessarily entail less drastic results. 
             We obtain a contradiction in the first case and in the second case, our equivalent to $a$. 
             It suggests a duality between the two operations.";

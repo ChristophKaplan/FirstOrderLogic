@@ -52,25 +52,27 @@ public class Function : ILanguageObject {
 }
 
 public abstract class Sentence : ILanguageObject {
-    private Sentence _parent;
+
+    public Sentence Parent { get; private set; }
+    
     public readonly List<Sentence> Children = new();
 
     public void AddChild(Sentence sentence) {
         Children.Add(sentence);
-        sentence._parent = this;
+        sentence.Parent = this;
     }
     
     public void InsertChild(int index, Sentence sentence) {
         Children.Insert(index,sentence);
-        sentence._parent = this;
+        sentence.Parent = this;
     }
     
     public void Reparent(Sentence parentOfThis) {
-        if (parentOfThis._parent == null) {
+        if (parentOfThis.Parent == null) {
             return;
         }
         
-        Sentence parent = parentOfThis._parent;
+        Sentence parent = parentOfThis.Parent;
         Sentence found = null;
         foreach (var childInParent in parent.Children) {
             if (childInParent.Equals(parentOfThis)) {
@@ -78,6 +80,10 @@ public abstract class Sentence : ILanguageObject {
             }
         }
 
+        if (found == null) {
+            throw new Exception($"this not found in Parent.Children");
+        }
+        
         var index = parent.Children.IndexOf(found);
         parent.Children.RemoveAt(index);
         parent.InsertChild(index, this);
@@ -103,7 +109,7 @@ public abstract class Sentence : ILanguageObject {
         }
 
         if (this is ComplexSentence complexSentence) {
-            if (complexSentence.Operator.Equals(LogicalConstant.LSymbol.NOT)) {
+            if (complexSentence.IsNegation) {
                 return $"{complexSentence.OperatorToString()} {complexSentence.Children[0]}";
             }
 
@@ -140,11 +146,21 @@ public class AtomicSentence : Sentence {
     public AtomicSentence(LexValue symbol) {
         Symbol = symbol.Value;
     }
+    
+    public void FlipTruthValue() {
+        if (Verum) {
+            Symbol = LogicalConstant.LSymbol.FALSE.ToString();
+        } else if (Falsum) {
+            Symbol = LogicalConstant.LSymbol.TRUE.ToString();
+        }
+    }
 }
 
 public class ComplexSentence : Sentence {
-    public readonly LogicalConstant.LSymbol Operator;
+    public LogicalConstant.LSymbol Operator;
     public string OperatorToString() => GetOperatorStringSymbol(Operator);
+    
+    public bool IsNegation { get => Children.Count == 1; }
     
     public ComplexSentence(Sentence p, LogicalConstant.LSymbol @operator, Sentence q) {
         Operator = @operator;
@@ -159,5 +175,13 @@ public class ComplexSentence : Sentence {
     
     public ComplexSentence(LogicalConstant.LSymbol @operator) {
         Operator = @operator;
+    }
+    
+    public void FlipOperator() {
+        Operator = Operator switch {
+            LogicalConstant.LSymbol.AND => LogicalConstant.LSymbol.OR,
+            LogicalConstant.LSymbol.OR => LogicalConstant.LSymbol.AND,
+            _ => throw new Exception($"Error: {this} not found.")
+        };
     }
 }
