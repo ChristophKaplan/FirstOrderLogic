@@ -38,15 +38,6 @@ public static class PropositionalLogicExtensions {
         }
     }
 
-    public static InterpretationSet SwitchMany(this PropositionalLogic logic, InterpretationSet set, AtomicSentence variable) {
-        var list = new List<Interpretation>();
-        foreach (var model in set.Interpretations) {
-            list.Add(model.Switch(variable));
-        }
-
-        return new InterpretationSet(list, set.Sentences.ToArray());
-    }
-
     public static InterpretationSet Int(this PropositionalLogic logic, params Sentence[] sentences)
     {
         var showChildren = false;
@@ -104,6 +95,15 @@ public static class PropositionalLogicExtensions {
         Absorption(ref copy);
         steps.Add(copy.GetCopy());
         Absorption_Ish(ref copy);
+        
+        //temp
+        changed = true;
+        while (changed) {
+            SimplifyTruthValues(ref copy);
+            changed = !old.Equals(copy);
+            if(changed) steps.Add(old);
+            old = copy.GetCopy();
+        }
         
         return copy;
     }

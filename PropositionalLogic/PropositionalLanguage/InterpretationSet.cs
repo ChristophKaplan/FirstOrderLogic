@@ -9,7 +9,7 @@ public class InterpretationSet : ILanguageObject {
     public readonly List<Interpretation> Interpretations;
     public readonly List<Sentence> Sentences;
     public List<AtomicSentence> GetSignature() {
-        return Interpretations.Count > 0 ? Interpretations[0].TruthValues.Keys.ToList() : new List<AtomicSentence>();
+        return Interpretations.Count > 0 ? Interpretations[0].Assignment.Keys.ToList() : new List<AtomicSentence>();
     }
 
     public int FindPosInSignature(string variable) {
@@ -36,7 +36,7 @@ public class InterpretationSet : ILanguageObject {
     }
 
     public List <(Sentence p, Sentence q, bool truth)> GetSemanticConsequences(bool onlyTrue = false) {
-        List<AtomicSentence> atomsFromInts = Interpretations.SelectMany(x => x.TruthValues.Keys).Distinct().ToList();
+        List<AtomicSentence> atomsFromInts = Interpretations.SelectMany(x => x.Assignment.Keys).Distinct().ToList();
         List<Sentence> merged = new(Sentences);
         merged.AddRange(atomsFromInts);
         var comb = merged.DifferentCombinations(2);
@@ -79,9 +79,30 @@ public class InterpretationSet : ILanguageObject {
         return models;
     }
 
+    public InterpretationSet ForceAll(AtomicSentence variable) {
+        var list = new List<Interpretation>();
+        foreach (var interpretation in Interpretations) {
+            var f = interpretation.Force(interpretation, variable);
+            if (f != null) list.Add(f);
+        }
+
+        return new InterpretationSet(list, Sentences.ToArray());
+    }
+    
+    public InterpretationSet SwitchAll(AtomicSentence variable) {
+        var list = new List<Interpretation>();
+        foreach (var interpretation in Interpretations) {
+            var s = interpretation.Switch(interpretation, variable);
+            if (s != null)list.Add(s);
+        }
+        return new InterpretationSet(list, Sentences.ToArray());
+    }
+    
+
+    
     public void SortBy(string variable) {
         var a = new AtomicSentence(variable);
-        Interpretations.Sort((x, y) => x.TruthValues[a].CompareTo(y.TruthValues[a]));
+        Interpretations.Sort((x, y) => x.Assignment[a].CompareTo(y.Assignment[a]));
     }
 
     private string ToConsoleTable((string[] col, string[][] rows) table) {
@@ -94,30 +115,23 @@ public class InterpretationSet : ILanguageObject {
         
         return consoleTable.ToMinimalString();
     }
-
-    public (string[] col, string[][] rows) ToTable() => ToTable(Interpretations, Sentences);
-    private (string[] col, string[][] rows) ToTable(List<Interpretation> interpretations, List<Sentence> sentences) {
+    
+    public (string[] col, string[][] rows) ToTable(List<string> altSenColumn = null) => ToTable(Interpretations, Sentences, altSenColumn);
+    private (string[] col, string[][] rows) ToTable(List<Interpretation> interpretations, List<Sentence> sentences, List<string> altSenColumn) {
         var columns = GetSignature().Select(key => key.ToString()).ToList();
-
-        //TEMP
-        PropositionalLogic logic = new();
-        foreach (var sen in sentences) {
-            string result = "";
-            var list = logic.UnfoldEquivalence(sen);
-            for (var i = 0; i < list.Count-1; i++) {
-                result += $"{list[i]} $\\equiv$ ";
-            }
-            result += list[^1];
-            
-            columns.Add(result);
+        
+        if (altSenColumn == null) {
+            columns.AddRange(sentences.Select(sentence => sentence.ToString()));
         }
-        //columns.AddRange(sentences.Select(sentence => sentence.ToString()));
+        else {
+            columns.AddRange(altSenColumn);
+        }
 
         var rows = new List<string[]>();
 
         foreach (var interpretation in interpretations) {
             var row = new List<string>();
-            row.AddRange(interpretation.TruthValues.Values.Select(value => value ? "1":"0").ToList());
+            row.AddRange(interpretation.Assignment.Values.Select(value => value ? "1":"0").ToList());
             row.AddRange(sentences.Select(sentence => interpretation.Evaluate(sentence)? "1":"0"));
             rows.Add(row.ToArray());
         }

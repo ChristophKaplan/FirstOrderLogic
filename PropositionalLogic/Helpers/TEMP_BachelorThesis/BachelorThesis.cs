@@ -7,7 +7,6 @@ public abstract class Section {
     protected readonly PropositionalLogic _logic;
     private bool IsSubsection;
 
-
     protected Section(PropositionalLogic logic) {
         _logic = logic;
         Name = GetType().Name;
@@ -46,7 +45,7 @@ public abstract class Section {
         
         var table =  MRKUPGen.ToLaTexTable((new string[3],row), new MRKUPGen.TkizMarkerManager(), "white");
 
-        return "\\begin{adjustbox}{width=\\textwidth}\n" + table + "\\end{adjustbox}\n";
+        return "\\begin{adjustbox}{width=\\textwidth}\n" + table + "\\end{adjustbox}\\newline\\newline\n";
     }
     
     protected string ForgetLaTexWriter(bool isSkepForget, bool showOverview, bool completeSteps, bool center, params (string sentenceName, string sentence, string variable)[] input) {
@@ -94,10 +93,9 @@ public class BachelorThesis {
     public static string SkepForgetName => "SkepForget";
 
     public BachelorThesis() {
-
-        //logic.Interpret("Forget(a AND b, b)");
-
-
+        //logic.Interpret("Forget(NOT(a AND b), a)");
+        //logic.Interpret("Simplify(Forget(NOT(a AND b), a))");
+        
         Sections.Add(new Motivation(logic));
         Sections.Add(new SyntacticAnalysis(logic));
         Sections.Add(new SemanticInvestigation(logic));

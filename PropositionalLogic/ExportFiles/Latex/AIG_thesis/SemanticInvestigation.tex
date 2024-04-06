@@ -1,123 +1,117 @@
 \section{SemanticInvestigation}
 \begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c |}
-A & B & C & ((A $\lor$ B) $\land$ C) & ((($\top$ $\lor$ B) $\land$ C) $\lor$ (($\bot$ $\lor$ B) $\land$ C)) $\equiv$ C \\
+\begin{tabular}{| c | c | c | c | c | c |}
+a & b & c & d & (a $\land$ b) $\land$ (c $\land$ d) & Forget((a $\land$ b) $\land$ (c $\land$ d), a) \\
 \hline
-\tikzmark{1918720624Start}0 & 1 & 1 & 1 & 1\\
-0 & 1 & 0 & 0 & 0\\
-0 & 0 & 1 & 0 & 1\\
-0 & 0 & 0 & 0 & 0\\
-\tikzmark{1747198659Start}1 & 1 & 1 & 1 & 1\\
-1 & 1 & 0 & 0 & 0\\
-1 & 0 & 1 & 1 & 1\\
-\tikzmark{1918720624End}1 & 0 & 0 & 0 & \tikzmark{1747198659End}0\\
+\tikzmark{397172090Start}0 & 1 & 1 & 1 & 0 & \tikzmark{851032069Start}1\\
+0 & 1 & 1 & 0 & 0 & 0\\
+0 & 1 & 0 & 1 & 0 & 0\\
+0 & 1 & 0 & 0 & 0 & 0\\
+0 & 0 & 1 & 1 & 0 & 0\\
+0 & 0 & 1 & 0 & 0 & 0\\
+0 & 0 & 0 & 1 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & \tikzmark{851032069End}0\\
+\tikzmark{1918269100Start}1 & 1 & 1 & 1 & \tikzmark{1774937217Start}1 & \tikzmark{1365022135Start}1\\
+1 & 1 & 1 & 0 & 0 & 0\\
+1 & 1 & 0 & 1 & 0 & 0\\
+1 & 1 & 0 & 0 & 0 & 0\\
+1 & 0 & 1 & 1 & 0 & 0\\
+1 & 0 & 1 & 0 & 0 & 0\\
+1 & 0 & 0 & 1 & 0 & 0\\
+\tikzmark{397172090End}\tikzmark{1918269100End}1 & 0 & 0 & 0 & \tikzmark{1774937217End}0 & \tikzmark{1365022135End}0\\
 \end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:1918720624Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:1918720624End);
-\tikz[remember picture, overlay] \fill[yellow, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1747198659Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1747198659End);
-}\caption{Forget((A $\lor$ B) $\land$ C, A)}\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c |}
-A & B & C & ((A $\lor$ B) $\land$ C) & ((($\top$ $\lor$ B) $\land$ C) $\land$ (($\bot$ $\lor$ B) $\land$ C)) $\equiv$ (B $\land$ C) \\
+\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:397172090Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:397172090End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.75] ([xshift=-0.5em,yshift=1.0em]pic cs:1918269100Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1918269100End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1774937217Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1774937217End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1365022135Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1365022135End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:851032069Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:851032069End);
+}\caption{Forget((a $\land$ b) $\land$ (c $\land$ d), a)}\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
+\begin{tabular}{| c | c | c | c |}
+b & c & d & Forget((a $\land$ b) $\land$ (c $\land$ d), a) \\
 \hline
-\tikzmark{1489759625Start}\tikzmark{524775699Start}0 & 1 & 1 & 1 & 1\\
-0 & 1 & 0 & 0 & 0\\
-0 & 0 & 1 & 0 & 0\\
-0 & 0 & 0 & 0 & \tikzmark{524775699End}0\\
-1 & 1 & 1 & 1 & 1\\
-1 & 1 & 0 & 0 & 0\\
-1 & 0 & 1 & 1 & 0\\
-\tikzmark{1489759625End}1 & 0 & 0 & 0 & 0\\
+\tikzmark{242459481Start}1 & 1 & 1 & 1\\
+1 & 1 & 0 & 0\\
+1 & 0 & 1 & 0\\
+1 & 0 & 0 & 0\\
+\tikzmark{1004553011Start}0 & 1 & 1 & 0\\
+0 & 1 & 0 & 0\\
+0 & 0 & 1 & 0\\
+\tikzmark{242459481End}\tikzmark{1004553011End}0 & 0 & 0 & 0\\
 \end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:1489759625Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:1489759625End);
-\tikz[remember picture, overlay] \fill[yellow, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:524775699Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:524775699End);
-}\caption{SkepForget((A $\lor$ B) $\land$ C, A)}\label{fig:Forget((A OR B) AND C, A)}\end{minipage}\end{figure}\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c |}
-A & B & C & ((A $\land$ B) $\lor$ C) & ((($\top$ $\land$ B) $\lor$ C) $\lor$ (($\bot$ $\land$ B) $\lor$ C)) $\equiv$ (B $\lor$ C) \\
+\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:242459481Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:242459481End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.75] ([xshift=-0.5em,yshift=1.0em]pic cs:1004553011Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1004553011End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:238508700Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:238508700End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:13522694Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:13522694End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1952806237Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1952806237End);
+}\caption{Forget((a $\land$ b) $\land$ (c $\land$ d), a)}\label{fig:Forget((a AND b) AND (c AND d), a)}\end{minipage}\end{figure}\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
+\begin{tabular}{| c | c | c | c | c | c |}
+a & b & c & d & (a $\land$ b) $\lor$ (c $\land$ d) & Forget((a $\land$ b) $\lor$ (c $\land$ d), a) \\
 \hline
-\tikzmark{799404946Start}0 & 1 & 1 & 1 & 1\\
-0 & 1 & 0 & 0 & 1\\
-0 & 0 & 1 & 1 & 1\\
-0 & 0 & 0 & 0 & 0\\
-\tikzmark{1578289825Start}1 & 1 & 1 & 1 & 1\\
-1 & 1 & 0 & 1 & 1\\
-1 & 0 & 1 & 1 & 1\\
-\tikzmark{799404946End}1 & 0 & 0 & 0 & \tikzmark{1578289825End}0\\
+\tikzmark{1248887672Start}0 & 1 & 1 & 1 & 1 & \tikzmark{1017207990Start}1\\
+0 & 1 & 1 & 0 & 0 & 1\\
+0 & 1 & 0 & 1 & 0 & 1\\
+0 & 1 & 0 & 0 & 0 & 1\\
+0 & 0 & 1 & 1 & 1 & 1\\
+0 & 0 & 1 & 0 & 0 & 0\\
+0 & 0 & 0 & 1 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & \tikzmark{1017207990End}0\\
+\tikzmark{1479241872Start}1 & 1 & 1 & 1 & \tikzmark{1691693685Start}1 & \tikzmark{499344836Start}1\\
+1 & 1 & 1 & 0 & 1 & 1\\
+1 & 1 & 0 & 1 & 1 & 1\\
+1 & 1 & 0 & 0 & 1 & 1\\
+1 & 0 & 1 & 1 & 1 & 1\\
+1 & 0 & 1 & 0 & 0 & 0\\
+1 & 0 & 0 & 1 & 0 & 0\\
+\tikzmark{1248887672End}\tikzmark{1479241872End}1 & 0 & 0 & 0 & \tikzmark{1691693685End}0 & \tikzmark{499344836End}0\\
 \end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:799404946Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:799404946End);
-\tikz[remember picture, overlay] \fill[yellow, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1578289825Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1578289825End);
-}\caption{Forget((A $\land$ B) $\lor$ C, A)}\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c |}
-A & B & C & ((A $\land$ B) $\lor$ C) & ((($\top$ $\land$ B) $\lor$ C) $\land$ (($\bot$ $\land$ B) $\lor$ C)) $\equiv$ C \\
+\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:1248887672Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:1248887672End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.75] ([xshift=-0.5em,yshift=1.0em]pic cs:1479241872Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1479241872End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1691693685Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1691693685End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:499344836Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:499344836End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1017207990Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1017207990End);
+}\caption{Forget((a $\land$ b) $\lor$ (c $\land$ d), a)}\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
+\begin{tabular}{| c | c | c | c |}
+b & c & d & Forget((a $\land$ b) $\lor$ (c $\land$ d), a) \\
 \hline
-\tikzmark{1639192303Start}\tikzmark{2113182324Start}0 & 1 & 1 & 1 & 1\\
-0 & 1 & 0 & 0 & 0\\
-0 & 0 & 1 & 1 & 1\\
-0 & 0 & 0 & 0 & \tikzmark{2113182324End}0\\
-1 & 1 & 1 & 1 & 1\\
-1 & 1 & 0 & 1 & 0\\
-1 & 0 & 1 & 1 & 1\\
-\tikzmark{1639192303End}1 & 0 & 0 & 0 & 0\\
+\tikzmark{270006838Start}1 & 1 & 1 & 1\\
+1 & 1 & 0 & 1\\
+1 & 0 & 1 & 1\\
+1 & 0 & 0 & 1\\
+\tikzmark{357128617Start}0 & 1 & 1 & 1\\
+0 & 1 & 0 & 0\\
+0 & 0 & 1 & 0\\
+\tikzmark{270006838End}\tikzmark{357128617End}0 & 0 & 0 & 0\\
 \end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:1639192303Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:1639192303End);
-\tikz[remember picture, overlay] \fill[yellow, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:2113182324Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:2113182324End);
-}\caption{SkepForget((A $\land$ B) $\lor$ C, A)}\label{fig:Forget((A AND B) OR C, A)}\end{minipage}\end{figure}\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c |}
-A & B & C & ((A $\lor$ B) $\land$ C) & (((A $\lor$ B) $\land$ $\top$) $\lor$ ((A $\lor$ B) $\land$ $\bot$)) $\equiv$ (A $\lor$ B) \\
+\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:270006838Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:270006838End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.75] ([xshift=-0.5em,yshift=1.0em]pic cs:357128617Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:357128617End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1412675834Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1412675834End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1174907724Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1174907724End);
+\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:360626845Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:360626845End);
+}\caption{Forget((a $\land$ b) $\lor$ (c $\land$ d), a)}\label{fig:Forget((a AND b) OR (c AND d), a)}\end{minipage}\end{figure}$Mod(Forget(F, x)) = Mod(F) \cup \{Switch(w, x) | w \models F\}$ \\
+ $Mod(SkepForget(F, x)) = Mod(F) \cap \{Switch(w, x) | w \models F\}$$Int_{\Sigma_2}(Forget(F,a)) = Mod_{\Sigma_1}(a)$\\$\forall w w \models a, w(Forget(F,a)) = w(F)$\\$\forall w w \not\models a, w(Forget(F,a)) = Force(w,A)(F)$\\\\\arrayrulecolor{black}
+\begin{tabular}{| c | c | c |}
+a & b & (a $\land$ b) \\
 \hline
-1 & 1 & \tikzmark{296764856Start}0 & 0 & 1\\
-1 & 0 & 0 & 0 & 1\\
-0 & 1 & 0 & 0 & 1\\
-0 & 0 & 0 & 0 & 0\\
-\tikzmark{1138116080Start}1 & 1 & 1 & 1 & 1\\
-1 & 0 & 1 & 1 & 1\\
-0 & 1 & 1 & 1 & 1\\
-0 & 0 & \tikzmark{296764856End}1 & 0 & \tikzmark{1138116080End}0\\
+1 & 1 & 1\\
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 0\\
 \end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:296764856Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:296764856End);
-\tikz[remember picture, overlay] \fill[yellow, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1138116080Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1138116080End);
-}\caption{Forget((A $\lor$ B) $\land$ C, C)}\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c |}
-A & B & C & ((A $\lor$ B) $\land$ C) & (((A $\lor$ B) $\land$ $\top$) $\land$ ((A $\lor$ B) $\land$ $\bot$)) $\equiv$ $\bot$ \\
+\\\arrayrulecolor{black}
+\begin{tabular}{| c | c | c |}
+a & b & (a $\land$ b) \\
 \hline
-\tikzmark{141705060Start}1 & 1 & \tikzmark{535636995Start}0 & 0 & 0\\
-1 & 0 & 0 & 0 & 0\\
-0 & 1 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & \tikzmark{141705060End}0\\
-1 & 1 & 1 & 1 & 0\\
-1 & 0 & 1 & 1 & 0\\
-0 & 1 & 1 & 1 & 0\\
-0 & 0 & \tikzmark{535636995End}1 & 0 & 0\\
+1 & 1 & 1\\
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 0\\
 \end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:535636995Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:535636995End);
-\tikz[remember picture, overlay] \fill[yellow, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:141705060Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:141705060End);
-}\caption{SkepForget((A $\lor$ B) $\land$ C, C)}\label{fig:Forget((A OR B) AND C, C)}\end{minipage}\end{figure}\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c |}
-A & B & C & ((A $\land$ B) $\lor$ C) & (((A $\land$ B) $\lor$ $\top$) $\lor$ ((A $\land$ B) $\lor$ $\bot$)) $\equiv$ $\top$ \\
+\\\arrayrulecolor{black}
+\begin{tabular}{| c | c | c |}
+a & b & (a $\land$ b) \\
 \hline
-1 & 1 & \tikzmark{274717233Start}0 & 1 & 1\\
-1 & 0 & 0 & 0 & 1\\
-0 & 1 & 0 & 0 & 1\\
-0 & 0 & 0 & 0 & 1\\
-\tikzmark{1195207602Start}1 & 1 & 1 & 1 & 1\\
-1 & 0 & 1 & 1 & 1\\
-0 & 1 & 1 & 1 & 1\\
-0 & 0 & \tikzmark{274717233End}1 & 1 & \tikzmark{1195207602End}1\\
+0 & 1 & 0\\
+0 & 0 & 0\\
+1 & 1 & 1\\
+1 & 0 & 0\\
 \end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:274717233Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:274717233End);
-\tikz[remember picture, overlay] \fill[yellow, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1195207602Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1195207602End);
-}\caption{Forget((A $\land$ B) $\lor$ C, C)}\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c |}
-A & B & C & ((A $\land$ B) $\lor$ C) & (((A $\land$ B) $\lor$ $\top$) $\land$ ((A $\land$ B) $\lor$ $\bot$)) $\equiv$ (A $\land$ B) \\
-\hline
-\tikzmark{1003970332Start}1 & 1 & \tikzmark{1628504203Start}0 & 1 & 1\\
-1 & 0 & 0 & 0 & 0\\
-0 & 1 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & \tikzmark{1003970332End}0\\
-1 & 1 & 1 & 1 & 1\\
-1 & 0 & 1 & 1 & 0\\
-0 & 1 & 1 & 1 & 0\\
-0 & 0 & \tikzmark{1628504203End}1 & 1 & 0\\
-\end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:1628504203Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:1628504203End);
-\tikz[remember picture, overlay] \fill[yellow, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1003970332Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1003970332End);
-}\caption{SkepForget((A $\land$ B) $\lor$ C, C)}\label{fig:Forget((A AND B) OR C, C)}\end{minipage}\end{figure}$Mod(Forget(F, x)) = Mod(F) \cup \{Switch(w, x) | w \models F\}$ \\
- $Mod(SkepForget(F, x)) = Mod(F) \cap \{Switch(w, x) | w \models F\}$

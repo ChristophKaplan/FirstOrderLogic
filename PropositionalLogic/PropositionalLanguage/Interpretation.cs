@@ -4,31 +4,25 @@ using LRParser.Language;
 namespace PropositionalLogic;
 
 public class Interpretation : ILanguageObject{
-    public readonly Dictionary<AtomicSentence, bool> TruthValues = new();
+    public readonly Dictionary<AtomicSentence, bool> Assignment = new();
     
     public Interpretation() { }
 
-    private Interpretation(Interpretation other) {
-        foreach (var kv in other.TruthValues) {
-            TruthValues.Add(kv.Key, kv.Value);
+    public Interpretation(Interpretation other) {
+        foreach (var kv in other.Assignment) {
+            Assignment.Add(kv.Key, kv.Value);
         }
     }
     
-    public Interpretation Switch(AtomicSentence variable) {
-        var interpretation = new Interpretation(this);
-        interpretation.TruthValues[variable] = !interpretation.TruthValues[variable];
-        return interpretation;
-    }
-    
     public void Add(AtomicSentence atom, bool truthValue) {
-        TruthValues.TryAdd(atom, truthValue);
+        Assignment.TryAdd(atom, truthValue);
     }
 
     private bool Evaluate(AtomicSentence atomicSentence) {
         if (atomicSentence.Verum) return true;
         if (atomicSentence.Falsum) return false;
         
-        if (TruthValues.TryGetValue(atomicSentence, out var value)) {
+        if (Assignment.TryGetValue(atomicSentence, out var value)) {
             return value;
         }
 
@@ -54,11 +48,11 @@ public class Interpretation : ILanguageObject{
     }
 
     public bool EqualVariables(Interpretation other) {
-        if (TruthValues.Count != other.TruthValues.Count) {
+        if (Assignment.Count != other.Assignment.Count) {
             return false;
         }
-        foreach (var kv in TruthValues) {
-            if (!other.TruthValues.TryGetValue(kv.Key, out var value)) {
+        foreach (var kv in Assignment) {
+            if (!other.Assignment.TryGetValue(kv.Key, out var value)) {
                 return false;
             }
         }
@@ -72,7 +66,7 @@ public class Interpretation : ILanguageObject{
 
     public override int GetHashCode() {
         var hash = 17;
-        foreach (var kv in TruthValues) {
+        foreach (var kv in Assignment) {
             var (key, value) = kv;
             hash = HashCode.Combine(hash ,key, value);
         }
@@ -83,7 +77,7 @@ public class Interpretation : ILanguageObject{
     public override string ToString()
     {
         var sb = new StringBuilder();
-        foreach (var (key, value) in TruthValues) {
+        foreach (var (key, value) in Assignment) {
             sb.Append($"{key}={value}, ");
         }
 
@@ -92,5 +86,35 @@ public class Interpretation : ILanguageObject{
 
     public string ToHTML() {
         throw new NotImplementedException();
+    }
+    
+    public Interpretation Switch(Interpretation other, AtomicSentence variable) {
+        if(!AgreeExceptPossibly(other, variable)) return null;
+        var interpretation = new Interpretation(this);
+        interpretation.Assignment[variable] = !interpretation.Assignment[variable];
+        return interpretation;
+    }
+    
+    public Interpretation Force(Interpretation other, AtomicSentence variable) {
+        if(!AgreeExceptPossibly(other, variable)) return null;
+        var interpretation = new Interpretation(this);
+        interpretation.Assignment[variable] = other.Assignment[variable];
+        return interpretation;
+    }
+
+    private bool AgreeExceptPossibly(Interpretation other, AtomicSentence variable) {
+        foreach (var key in Assignment.Keys) {
+            if(Assignment.TryGetValue(key,out var value1) && other.Assignment.TryGetValue(key,out var value2))
+            {
+                if(key.Equals(variable)) continue;
+                if (value1 != value2) return false;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

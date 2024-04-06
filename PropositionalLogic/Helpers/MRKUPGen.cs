@@ -190,12 +190,12 @@ public class MRKUPGen {
 
     public static string SentenceToForest(Sentence sentence) {
         bool triggered = false;
-
+        var i = 0;
         void DFS(Sentence sentence, ref string result) {
             result += "[";
             if (sentence is AtomicSentence atomic) {
                 if (atomic.IsTruthValue) {
-                    result += $"{ReplaceUnicodeToLaTex(atomic.ToString(), true)}, name=TruthV" +
+                    result += $"{ReplaceUnicodeToLaTex(atomic.ToString(), true)}, name=TruthV" + i++ +
                               ", circle, draw, dotted, minimum size=0.2cm, font=\\tiny, edge=dotted]";
                 }
                 else {
@@ -210,8 +210,8 @@ public class MRKUPGen {
 
             var simplified = _logicTEMP.Simplify(sentence, out var steps);
             if (simplified is AtomicSentence atomicSentence && atomicSentence.IsTruthValue) {
-                if (!triggered) result += ",name=BlockC";
-                result += ",circle, draw, dotted, minimum size=0.2cm, font=\\tiny, edge=dotted";
+                if (!triggered) result += ",name=BlockC"+i;
+                result += ",for tree={circle, draw, dotted, minimum size=0.2cm, font=\\tiny, edge=dotted}";
                 //result += ",tikz={\\node [draw,red,inner sep=0,fit to=tree]{};}";
                 triggered = true;
             }
@@ -229,7 +229,10 @@ public class MRKUPGen {
         var result = "";
         DFS(sentence, ref result);
 
-        var linkage = "\\draw[->,gray] (TruthV) to[out=west,in=south west] (BlockC);";
+        var linkage = string.Empty;
+        for (int j = 0; j < i; j++) {
+            linkage+= $"\\draw[->,gray] (TruthV{j}) to[out=west,in=south west] (BlockC{j});" + "\n";
+        }
         if (!triggered) linkage = string.Empty;
         return @"\begin{forest}" + ReplaceUnicodeToLaTex(result, true) + linkage + @"\end{forest}";
     }

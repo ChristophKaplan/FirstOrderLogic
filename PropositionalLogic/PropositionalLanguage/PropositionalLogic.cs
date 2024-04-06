@@ -148,7 +148,8 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
                 return result;
             }
             case "SwitchMany": {
-                var result = this.SwitchMany((InterpretationSet)function.Parameters[0], (AtomicSentence)function.Parameters[1]);
+                InterpretationSet s = (InterpretationSet)function.Parameters[0];
+                var result = s.SwitchAll((AtomicSentence)function.Parameters[1]);
                 return result;
             }
         }
