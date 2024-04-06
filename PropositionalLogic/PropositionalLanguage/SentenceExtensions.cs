@@ -1,7 +1,20 @@
 namespace PropositionalLogic;
 
 public static class SentenceExtensions {
+    public static List<AtomicSentence> GenerateSignature(this Sentence sentence) {
+        var reducedAtoms = new List<AtomicSentence>();
+        var collectedAtoms = GetAtoms(sentence);
+            
+        foreach (var atom in collectedAtoms) {
+            if (atom.Verum || atom.Falsum) {
+                continue;
+            }
+            if(!reducedAtoms.Contains(atom)) reducedAtoms.Add(atom);
+        }
 
+        return reducedAtoms;
+    }
+    
     public static void FindReplaceAtom(this Sentence sentence, AtomicSentence replaceMe, string replaceWith) {
         foreach (var child in sentence.Children) {
             child.FindReplaceAtom(replaceMe, replaceWith);

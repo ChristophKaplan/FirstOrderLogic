@@ -4,6 +4,26 @@ namespace PropositionalLogic;
 
 public static class PropositionalLogicExtensions {
     
+    public static InterpretationSet ForceAll(this PropositionalLogic logic, InterpretationSet set, AtomicSentence variable) {
+        var list = new List<Interpretation>();
+        foreach (var interpretation in set.Interpretations) {
+            var f = interpretation.Force(interpretation, variable);
+            if (f != null) list.Add(f);
+        }
+
+        return new InterpretationSet(list, set.Sentences.ToArray());
+    }
+    
+    public static InterpretationSet SwitchAll(this PropositionalLogic logic, InterpretationSet set, AtomicSentence variable) {
+        var list = new List<Interpretation>();
+        foreach (var interpretation in set.Interpretations) {
+            var s = interpretation.Switch(interpretation, variable);
+            if (s != null)list.Add(s);
+        }
+        return new InterpretationSet(list, set.Sentences.ToArray());
+    }
+
+    
     public static List<Sentence> UnfoldEquivalence(this PropositionalLogic logic, Sentence sentence, bool completeSteps = false) {
         var simplified = logic.Simplify(sentence, out var steps);
         
@@ -38,7 +58,7 @@ public static class PropositionalLogicExtensions {
         }
     }
 
-    public static InterpretationSet Int(this PropositionalLogic logic, params Sentence[] sentences)
+    public static InterpretationSet Int(this PropositionalLogic logic,List<AtomicSentence> signature, params Sentence[] sentences)
     {
         var showChildren = false;
         List<Sentence> list = new();
@@ -47,12 +67,13 @@ public static class PropositionalLogicExtensions {
             list.Add(sen);
             list.AddRange(sen.GetComplexChildren());
         }
-        
-        return new InterpretationSet(logic.GenerateInterpretations(sentences), showChildren ? list.ToArray() : sentences);
+
+        signature ??= logic.GenerateSignature(sentences);
+        return new InterpretationSet(logic.GenerateInterpretations(signature), showChildren ? list.ToArray() : sentences);
     }
 
-    public static InterpretationSet Mod(this PropositionalLogic logic, Sentence sentence) {
-       var i = Int(logic, sentence);
+    public static InterpretationSet Mod(this PropositionalLogic logic,List<AtomicSentence> signature, Sentence sentence) {
+       var i = Int(logic, signature, sentence);
         return new InterpretationSet(i.Models(sentence), sentence);
     }
     

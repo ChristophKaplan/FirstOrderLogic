@@ -124,15 +124,15 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
     public ILanguageObject ExecuteFunction(Function function) {
         switch (function.Func) {
             case "Int": {
-                Sentence[] a = new Sentence[function.Parameters.Length];
+                var sentences = new Sentence[function.Parameters.Length];
                 for (var i = 0; i < function.Parameters.Length; i++) {
-                    a[i] = (Sentence)function.Parameters[i];
+                    sentences[i] = (Sentence)function.Parameters[i];
                 }
 
-                return this.Int(a);
+                return this.Int(null,sentences);
             }
             case "Mod": {
-                return this.Mod((Sentence)function.Parameters[0]);
+                return this.Mod(null,(Sentence)function.Parameters[0]);
             }
             case "Simplify": {
                 var result = this.Simplify((Sentence)function.Parameters[0], out var steps);
@@ -149,7 +149,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             }
             case "SwitchMany": {
                 InterpretationSet s = (InterpretationSet)function.Parameters[0];
-                var result = s.SwitchAll((AtomicSentence)function.Parameters[1]);
+                var result = this.SwitchAll(s,(AtomicSentence)function.Parameters[1]);
                 return result;
             }
         }
@@ -158,16 +158,15 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         return null;
     }
 
-    public List<Interpretation> GenerateInterpretations(params Sentence[] sentences) {
+    public List<Interpretation> GenerateInterpretations(List<AtomicSentence> signature) {
         var interpretations = new List<Interpretation>();
-        var cleanAtoms = GetAtoms(sentences);        
-        var truthTable = GenerateTruthTable(cleanAtoms.Count);
+        var truthTable = GenerateTruthTable(signature.Count);
         
         foreach (var truthValues in truthTable) {
             var interpretation = new Interpretation();
             var list = truthValues.ToArray();
-            for (var i = 0; i < cleanAtoms.Count; i++) {
-                interpretation.Add(cleanAtoms[i], list[i]);
+            for (var i = 0; i < signature.Count; i++) {
+                interpretation.Add(signature[i], list[i]);
             }
 
             if (!interpretations.Contains(interpretation)) {
@@ -176,26 +175,16 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         }
 
         return interpretations;
-
-        List<AtomicSentence> GetAtoms(params Sentence[] sentences) {
-            var reducedAtoms = new List<AtomicSentence>();
-            var collectedAtoms = new List<AtomicSentence>();
-            
-            foreach (var s in sentences) {
-                collectedAtoms.AddRange(s.GetAtoms());
-            }
-            
-            foreach (var atom in collectedAtoms) {
-                if (atom.Verum || atom.Falsum) {
-                    continue;
-                }
-                if(!reducedAtoms.Contains(atom)) reducedAtoms.Add(atom);
-            }
-
-            return reducedAtoms;
-        }
     }
-
+    
+    public List<AtomicSentence> GenerateSignature(params Sentence[] sentences) {
+        var list = new List<AtomicSentence>();
+        foreach (var s in sentences) {
+            list.AddRange(s.GenerateSignature());
+        }
+        return list.Distinct().ToList();
+    }
+    
     private IEnumerable<IEnumerable<bool>> GenerateTruthTable(int n) {
         switch (n) {
             case 0:

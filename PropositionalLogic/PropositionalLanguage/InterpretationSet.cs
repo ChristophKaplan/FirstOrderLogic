@@ -78,27 +78,6 @@ public class InterpretationSet : ILanguageObject {
 
         return models;
     }
-
-    public InterpretationSet ForceAll(AtomicSentence variable) {
-        var list = new List<Interpretation>();
-        foreach (var interpretation in Interpretations) {
-            var f = interpretation.Force(interpretation, variable);
-            if (f != null) list.Add(f);
-        }
-
-        return new InterpretationSet(list, Sentences.ToArray());
-    }
-    
-    public InterpretationSet SwitchAll(AtomicSentence variable) {
-        var list = new List<Interpretation>();
-        foreach (var interpretation in Interpretations) {
-            var s = interpretation.Switch(interpretation, variable);
-            if (s != null)list.Add(s);
-        }
-        return new InterpretationSet(list, Sentences.ToArray());
-    }
-    
-
     
     public void SortBy(string variable) {
         var a = new AtomicSentence(variable);
