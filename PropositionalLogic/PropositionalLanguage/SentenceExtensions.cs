@@ -1,6 +1,7 @@
 namespace PropositionalLogic;
 
 public static class SentenceExtensions {
+    
     public static List<AtomicSentence> GenerateSignature(this Sentence sentence) {
         var reducedAtoms = new List<AtomicSentence>();
         var collectedAtoms = GetAtoms(sentence);

@@ -43,7 +43,7 @@ public abstract class Section {
             }
         };
         
-        var table =  MRKUPGen.ToLaTexTable((new string[3],row), new MRKUPGen.TkizMarkerManager(), "white");
+        var table =  MRKUPGen.ToLaTexTable((new string[3],row), new MRKUPGen.TkizMarkerManager(), false);
 
         return "\\begin{adjustbox}{width=\\textwidth}\n" + table + "\\end{adjustbox}\\newline\\newline\n";
     }
@@ -93,7 +93,7 @@ public class BachelorThesis {
     public static string SkepForgetName => "SkepForget";
 
     public BachelorThesis() {
-        //logic.Interpret("Forget(NOT(a AND b), a)");
+
         //logic.Interpret("Simplify(Forget(NOT(a AND b), a))");
         
         Sections.Add(new Motivation(logic));

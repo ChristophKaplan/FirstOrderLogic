@@ -1,128 +1,109 @@
 \section{SemanticInvestigation}
-\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c | c |}
-a & b & c & d & (a $\land$ b) $\land$ (c $\land$ d) & Forget((a $\land$ b) $\land$ (c $\land$ d), a) \\
+In \cite{lang2003propositional}, the authors denote two semantic functions, Force and Switch, as follows:
+Given in interpretation w and a literal l, we let Force(w,l) denote the interpretation that gives the same truth value as w 
+for all variables except the variable of l, and such that Force(w,l) $\models$ l. Meaning Force(w,l) is the interpretation that 
+satisfying l that is closest to w, If w $\models$ l then Force(w,l)=w.\\ $Switch(w, l)$ denotes the interpretation that maintains 
+the same truth value as $w$ for all variables except $x$, just like Force, but assigns to $x$ the opposite truth value given by $w$.\\\subsection{Properties of Forget}In \cite{lin1994forget} the authors state the following properties of Forget:\\\begin{itemize}
+\item $T \models forget(T,p)$
+\item For any sentence $\phi$, $T \models \phi \downarrow p iff forget(T;p) \models \phi \downarrow p$ (works for FOL, not pl ???)
+\end{itemize}
+\cite{eiter2019brief}\\\begin{itemize}
+\item $M_1 \sim_p M_2 , M_1 and M_2$ agree on all variables except possibly $p$
+\end{itemize}
+In \cite{lang2003propositional} the authors state the following properties of Forget:\\\begin{itemize}
+\item Proposition 14: The set of models of $ForgetLit(\\Sigma,\{ l \})$ can be expressed as:\\Corollary 5: $Mod(ForgetLit(\Sigma,\{l\})) = Mod(\Sigma) \cup \{Force(w,-l) | w \models \Sigma\} = \{w | Force(w,l) \models \Sigma\}$
+\item $Mod(Forget(F, x)) = Mod(F) \cup \{Switch(w, x) | w \models F\}$\\
+\end{itemize}
+$Int_{\Sigma_2}(Forget(F,a)) = Mod_{\Sigma_1}(a)$\\$\forall w : w \models a, w(Forget(F,a)) = w(F)$\\$\forall w : w \not\models a, w(Forget(F,a)) = Force(w,A)(F)$\\\\\subsection{Properties of SkepForget}Proposition: $Mod({SkepForget}(F, x)) = Mod(F) \cap \{Switch(w, x) | w \models F\}$ \\\\
+ Let F be a propositional sentence, over a signature $\Sigma=\{a,b\}$, a propositional variable $x$ $\in \Sigma$ and w be an interpretation.\\\\Using structural induction, we can prove that the proposition holds. We consider the following cases:\\
+            \begin{enumerate}
+        \item \textbf{Base Case:} F is a propositional atomic variable.\\$\begin{array}{l l}
+Mod_{\Sigma_1}(a) &\equiv \begin{tabular}{| c | c |}
+a & a \\
 \hline
-\tikzmark{18414963Start}0 & 1 & 1 & 1 & 0 & \tikzmark{1945662645Start}1\\
-0 & 1 & 1 & 0 & 0 & 0\\
-0 & 1 & 0 & 1 & 0 & 0\\
-0 & 1 & 0 & 0 & 0 & 0\\
-0 & 0 & 1 & 1 & 0 & 0\\
-0 & 0 & 1 & 0 & 0 & 0\\
-0 & 0 & 0 & 1 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & \tikzmark{1945662645End}0\\
-\tikzmark{975981040Start}1 & 1 & 1 & 1 & \tikzmark{178883422Start}1 & \tikzmark{1819087502Start}1\\
-1 & 1 & 1 & 0 & 0 & 0\\
-1 & 1 & 0 & 1 & 0 & 0\\
-1 & 1 & 0 & 0 & 0 & 0\\
-1 & 0 & 1 & 1 & 0 & 0\\
-1 & 0 & 1 & 0 & 0 & 0\\
-1 & 0 & 0 & 1 & 0 & 0\\
-\tikzmark{18414963End}\tikzmark{975981040End}1 & 0 & 0 & 0 & \tikzmark{178883422End}0 & \tikzmark{1819087502End}0\\
-\end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:18414963Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:18414963End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.75] ([xshift=-0.5em,yshift=1.0em]pic cs:975981040Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:975981040End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:178883422Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:178883422End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1819087502Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1819087502End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1945662645Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1945662645End);
-}\caption{Forget((a $\land$ b) $\land$ (c $\land$ d), a)}\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c |}
-b & c & d & Forget((a $\land$ b) $\land$ (c $\land$ d), a) \\
+1 & 1\\
+\end{tabular}
+ \\[15pt]
+Switch(w,a) | w \models a &\equiv \begin{tabular}{| c | c |}
+a & a \\
 \hline
-\tikzmark{2128445715Start}1 & 1 & 1 & 1\\
-1 & 1 & 0 & 0\\
-1 & 0 & 1 & 0\\
-1 & 0 & 0 & 0\\
-\tikzmark{151840453Start}0 & 1 & 1 & 0\\
-0 & 1 & 0 & 0\\
-0 & 0 & 1 & 0\\
-\tikzmark{2128445715End}\tikzmark{151840453End}0 & 0 & 0 & 0\\
-\end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:2128445715Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:2128445715End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.75] ([xshift=-0.5em,yshift=1.0em]pic cs:151840453Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:151840453End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:397910059Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:397910059End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:857874094Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:857874094End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1384789485Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1384789485End);
-}\caption{Forget((a $\land$ b) $\land$ (c $\land$ d), a)}\label{fig:Forget((a AND b) AND (c AND d), a)}\end{minipage}\end{figure}\begin{figure}[H]\captionsetup{font=small}\centering\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c | c | c |}
-a & b & c & d & (a $\land$ b) $\lor$ (c $\land$ d) & Forget((a $\land$ b) $\lor$ (c $\land$ d), a) \\
+0 & 0\\
+\end{tabular}
+ \\[15pt]
+Mod_{\Sigma_1}({SkepForget}(a)) &\equiv \emptyset \\[15pt]
+Mod(F)_{\Sigma_1} \cap \{Switch(w, a) | w \models a\} &\equiv \emptyset \\[15pt]
+\end{array}$\\with $\Sigma_{1}\{a\}$\item \textbf{Negation Case:}\\$\begin{array}{l l}
+Mod_{\Sigma_1}(\lnot a) &\equiv \begin{tabular}{| c | c |}
+a & $\lnot$ a \\
 \hline
-\tikzmark{1631674000Start}0 & 1 & 1 & 1 & 1 & \tikzmark{1946143543Start}1\\
-0 & 1 & 1 & 0 & 0 & 1\\
-0 & 1 & 0 & 1 & 0 & 1\\
-0 & 1 & 0 & 0 & 0 & 1\\
-0 & 0 & 1 & 1 & 1 & 1\\
-0 & 0 & 1 & 0 & 0 & 0\\
-0 & 0 & 0 & 1 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & \tikzmark{1946143543End}0\\
-\tikzmark{1356932175Start}1 & 1 & 1 & 1 & \tikzmark{1348500477Start}1 & \tikzmark{304570407Start}1\\
-1 & 1 & 1 & 0 & 1 & 1\\
-1 & 1 & 0 & 1 & 1 & 1\\
-1 & 1 & 0 & 0 & 1 & 1\\
-1 & 0 & 1 & 1 & 1 & 1\\
-1 & 0 & 1 & 0 & 0 & 0\\
-1 & 0 & 0 & 1 & 0 & 0\\
-\tikzmark{1631674000End}\tikzmark{1356932175End}1 & 0 & 0 & 0 & \tikzmark{1348500477End}0 & \tikzmark{304570407End}0\\
-\end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:1631674000Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:1631674000End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.75] ([xshift=-0.5em,yshift=1.0em]pic cs:1356932175Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1356932175End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1348500477Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1348500477End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:304570407Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:304570407End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1946143543Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1946143543End);
-}\caption{Forget((a $\land$ b) $\lor$ (c $\land$ d), a)}\end{minipage}\hfill\begin{minipage}{0.49\textwidth}\centering\resizebox{\textwidth}{!}{\arrayrulecolor{black}
-\begin{tabular}{| c | c | c | c |}
-b & c & d & Forget((a $\land$ b) $\lor$ (c $\land$ d), a) \\
+0 & 1\\
+\end{tabular}
+ \\[15pt]
+Switch(w,a) | w \models \lnot a &\equiv \begin{tabular}{| c | c |}
+a & $\lnot$ a \\
 \hline
-\tikzmark{557814934Start}1 & 1 & 1 & 1\\
-1 & 1 & 0 & 1\\
-1 & 0 & 1 & 1\\
-1 & 0 & 0 & 1\\
-\tikzmark{1891063361Start}0 & 1 & 1 & 1\\
-0 & 1 & 0 & 0\\
-0 & 0 & 1 & 0\\
-\tikzmark{557814934End}\tikzmark{1891063361End}0 & 0 & 0 & 0\\
-\end{tabular}\
-\tikz[remember picture] \draw[overlay, line width=1pt, red] ([xshift=.25em,yshift=1.0em]pic cs:557814934Start) -- ([xshift=.25em,yshift=-0.5em]pic cs:557814934End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.75] ([xshift=-0.5em,yshift=1.0em]pic cs:1891063361Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1891063361End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:677079830Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:677079830End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:2009892431Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:2009892431End);
-\tikz[remember picture, overlay] \fill[cyan, opacity=0.25] ([xshift=-0.5em,yshift=1.0em]pic cs:1713691437Start) rectangle ([xshift=1.0em,yshift=-0.5em]pic cs:1713691437End);
-}\caption{Forget((a $\land$ b) $\lor$ (c $\land$ d), a)}\label{fig:Forget((a AND b) OR (c AND d), a)}\end{minipage}\end{figure}$Mod(Forget(F, x)) = Mod(F) \cup \{Switch(w, x) | w \models F\}$ \\
- $Mod(SkepForget(F, x)) = Mod(F) \cap \{Switch(w, x) | w \models F\}$Proposition 14: The set of models of $ForgetLit(\Sigma,\{ l \})$ can be expressed as:
+1 & 0\\
+\end{tabular}
+ \\[15pt]
+Mod_{\Sigma_1}({SkepForget}(\lnot a)) &\equiv \emptyset \\[15pt]
+Mod(F)_{\Sigma_1} \cap \{Switch(w, a) | w \models \lnot a\} &\equiv \emptyset \\[15pt]
+\end{array}$\\with $\Sigma_{1}\{a\}$\item \textbf{$\lor$ Case:}\\$\begin{array}{l l}
+Mod_{\Sigma_2}((a \lor b)) &\equiv \begin{tabular}{| c | c | c |}
+a & b & (a $\lor$ b) \\
+\hline
+1 & 1 & 1\\
+1 & 0 & 1\\
+0 & 1 & 1\\
+\end{tabular}
+ \\[15pt]
+Switch(w,a) | w \models (a \lor b) &\equiv \begin{tabular}{| c | c | c |}
+a & b & (a $\lor$ b) \\
+\hline
+0 & 1 & 1\\
+0 & 0 & 0\\
+1 & 1 & 1\\
+\end{tabular}
+ \\[15pt]
+Mod_{\Sigma_2}({SkepForget}((a \lor b))) &\equiv \begin{tabular}{| c | c | c |}
+a & b & (($\top$ $\lor$ b) $\land$ ($\bot$ $\lor$ b)) \\
+\hline
+1 & 1 & 1\\
+0 & 1 & 1\\
+\end{tabular}
+ \\[15pt]
+Mod(F)_{\Sigma_2} \cap \{Switch(w, a) | w \models (a \lor b)\} &\equiv \begin{tabular}{| c | c | c |}
+a & b & (a $\lor$ b) \\
+\hline
+1 & 1 & 1\\
+0 & 1 & 1\\
+\end{tabular}
+ \\[15pt]
+\end{array}$\\with $\Sigma_{2}\{a, b\}$\item \textbf{$\land$ Case:}\\$\begin{array}{l l}
+Mod_{\Sigma_2}((a \land b)) &\equiv \begin{tabular}{| c | c | c |}
+a & b & (a $\land$ b) \\
+\hline
+1 & 1 & 1\\
+\end{tabular}
+ \\[15pt]
+Switch(w,a) | w \models (a \land b) &\equiv \begin{tabular}{| c | c | c |}
+a & b & (a $\land$ b) \\
+\hline
+0 & 1 & 0\\
+\end{tabular}
+ \\[15pt]
+Mod_{\Sigma_2}({SkepForget}((a \land b))) &\equiv \emptyset \\[15pt]
+Mod(F)_{\Sigma_2} \cap \{Switch(w, a) | w \models (a \land b)\} &\equiv \emptyset \\[15pt]
+\end{array}$\\with $\Sigma_{2}\{a, b\}$\end{enumerate}\begin{minipage}{0.9\textwidth}
+\centering
+\begin{tabular}{| c | c | c | c | c | c | c | c |}
+a & b & $\lnot$ a & (($\top$ $\land$ b) $\land$ ($\bot$ $\land$ b)) & (($\top$ $\lor$ b) $\land$ ($\bot$ $\lor$ b)) & ($\lnot$ $\top$ $\land$ $\lnot$ $\bot$) & (a $\land$ b) & (a $\lor$ b) \\
+\hline
+1 & 1 & 0 & 0 & 1 & 0 & 1 & 1\\
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+0 & 1 & 1 & 0 & 1 & 0 & 0 & 1\\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+\end{tabular}
 
-$Mod(ForgetLit(\Sigma,\{ l \})) = Mod(\Sigma) U {Force(w,-l) | w|= \Sigma}
-= {w | Force(w,l) |= \Sigma}$$Int_{\Sigma_2}(Forget(F,a)) = Mod_{\Sigma_1}(a)$\\$\forall w : w \models a, w(Forget(F,a)) = w(F)$\\$\forall w : w \not\models a, w(Forget(F,a)) = Force(w,A)(F)$\\\\\subsection{check}$Mod(Forget(F, x)) = Mod(F) \cup \{Switch(w, x) | w \models F\}$ \\
- Int((a $\lor$ b))\\\arrayrulecolor{black}
-\begin{tabular}{| c | c | c |}
-a & b & (a $\lor$ b) \\
-\hline
-1 & 1 & 1\\
-1 & 0 & 1\\
-0 & 1 & 1\\
-0 & 0 & 0\\
-\end{tabular}\
-\\Mod(Forget((a $\lor$ b))) under $\Sigma_1$a, b, \\\arrayrulecolor{black}
-\begin{tabular}{| c | c | c |}
-a & b & (($\top$ $\lor$ b) $\lor$ ($\bot$ $\lor$ b)) \\
-\hline
-1 & 1 & 1\\
-1 & 0 & 1\\
-0 & 1 & 1\\
-0 & 0 & 1\\
-\end{tabular}\
-\\Mod((a $\lor$ b))\\\arrayrulecolor{black}
-\begin{tabular}{| c | c | c |}
-a & b & (a $\lor$ b) \\
-\hline
-1 & 1 & 1\\
-1 & 0 & 1\\
-0 & 1 & 1\\
-\end{tabular}\
-\\$Switch(w,a) | w \models F $\\\arrayrulecolor{black}
-\begin{tabular}{| c | c | c |}
-a & b & (a $\lor$ b) \\
-\hline
-0 & 1 & 1\\
-0 & 0 & 0\\
-1 & 1 & 1\\
-\end{tabular}\
+\captionsetup{font=small,labelformat=empty}
+\captionof{table}{reference}
+\end{minipage}

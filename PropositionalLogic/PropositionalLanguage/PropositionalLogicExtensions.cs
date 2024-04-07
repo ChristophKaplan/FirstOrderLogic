@@ -77,6 +77,10 @@ public static class PropositionalLogicExtensions {
         return new InterpretationSet(i.Models(sentence), sentence);
     }
     
+    public static InterpretationSet Intersection(this PropositionalLogic logic,InterpretationSet a, InterpretationSet b) {
+        return new InterpretationSet( a.Interpretations.Intersect(b.Interpretations).ToList(), a.Sentences.Intersect(b.Sentences).ToArray());
+    }
+    
     public static Sentence Forget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
         var lhs = sentence.GetCopy();
         var rhs = sentence.GetCopy();

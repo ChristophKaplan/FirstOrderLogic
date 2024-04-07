@@ -40,12 +40,12 @@ public class ForgetCompare {
         var sf = MRKUPGen.ReplaceUnicodeToLaTex(skepForgetFunc, true);
         
         var altSenCol = new List<string>() {
-            "A",
+            formula,
             f,
         };
         
         var altSenCol2 = new List<string>() {
-            "A",
+            formula,
             sf,
         };
         
@@ -54,7 +54,7 @@ public class ForgetCompare {
     
     private string ForgetToLaTex((string[] col, string[][] rows) table, bool isSkepForget = false){
         var length = table.rows[0].Length-1;
-        var height = table.rows.Length-1;
+        var height = table.rows.Length-2;
         
         int forgetVarPos = IntForget.FindPosInSignature(forgetVar);
         int sentencePos = IntSkepForget.GetSignature().Count;

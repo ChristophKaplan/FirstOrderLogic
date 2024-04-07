@@ -12,6 +12,8 @@ public class InterpretationSet : ILanguageObject {
         return Interpretations.Count > 0 ? Interpretations[0].Assignment.Keys.ToList() : new List<AtomicSentence>();
     }
 
+    public bool IsEmptySet => Interpretations.Count == 0;
+    
     public int FindPosInSignature(string variable) {
         var signature = GetSignature();
         for (var i = 0; i < signature.Count; i++) {
@@ -27,12 +29,13 @@ public class InterpretationSet : ILanguageObject {
         Sentences = sentences.ToList();
     }
 
-    public string Analyze() {
-        string result = "";
-        foreach ((Sentence p, Sentence q, bool truth) r in  GetSemanticConsequences()) {
-            result += $"{r.p} \u22a8 {r.q} = {r.truth}\n";
+    public string AnalyzeLatex() {
+        string result = @"\begin{minipage}{\linewidth}\begin{itemize}";
+        foreach ((Sentence p, Sentence q, bool truth) r in  GetSemanticConsequences(true)) {
+            result += $"\\item {r.p} \u22a8 {r.q} = {r.truth}\n";
         }
-        return result;
+        result += @"\end{itemize}\end{minipage}";
+        return MRKUPGen.ReplaceUnicodeToLaTex(result,true);
     }
 
     public List <(Sentence p, Sentence q, bool truth)> GetSemanticConsequences(bool onlyTrue = false) {
@@ -108,6 +111,10 @@ public class InterpretationSet : ILanguageObject {
 
         var rows = new List<string[]>();
 
+        if (IsEmptySet) {
+            rows.Add(new []{@"$\emptyset$"});
+        }
+        
         foreach (var interpretation in interpretations) {
             var row = new List<string>();
             row.AddRange(interpretation.Assignment.Values.Select(value => value ? "1":"0").ToList());
@@ -115,6 +122,7 @@ public class InterpretationSet : ILanguageObject {
             rows.Add(row.ToArray());
         }
 
+        //rows.Add(new []{$"\\multicolumn{{{columns.Count}}}{{c}}{{{AnalyzeLatex()}}}"});
         return (columns.ToArray(), rows.ToArray());
     }
 

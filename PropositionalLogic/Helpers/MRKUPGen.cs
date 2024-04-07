@@ -95,17 +95,50 @@ public class MRKUPGen {
             return result;
         }
     }
+    
+    public static string SideBySideTables(params (string input, string caption)[] side) {
+        float w = (1f / side.Length) * 0.9f;
+        StringBuilder latexCode = new StringBuilder();
+        for (int i = 0; i < side.Length; i++) {
+            latexCode.AppendLine($"\\begin{{minipage}}{{{w.ToString(CultureInfo.InvariantCulture)}\\textwidth}}");
+            latexCode.AppendLine("\\centering"); // Add this line to center the content
+            latexCode.AppendLine(side[i].input);
+            latexCode.AppendLine("\\captionsetup{font=small,labelformat=empty}"); // Set caption format
+            latexCode.AppendLine($"\\captionof{{table}}{{{side[i].caption}}}"); // Use \captionof instead of \caption
+            latexCode.AppendLine("\\end{minipage}");
+            if (i < side.Length - 1) // Add horizontal space between tables
+                latexCode.AppendLine("\\hfill");
+        }
+        return latexCode.ToString();
+    }
 
+    private string GenerateLatexTable(string[][] table)
+    {
+        StringBuilder latexTable = new StringBuilder();
 
-    public static string ToLaTexTable((string[] col, string[][] rows) table, TkizMarkerManager tkizMarker, string tableLineColor = "black") {
-        var latexTable = new StringBuilder();
+        latexTable.AppendLine("\\begin{tabular}{|c|c|}");
+        latexTable.AppendLine("\\hline");
 
-        var defC = "|";
-        for (var i = 0; i < table.col.Length; i++) {
-            defC += " c |";
+        foreach (var row in table)
+        {
+            latexTable.AppendLine(string.Join(" & ", row) + " \\\\ \\hline");
         }
 
-        latexTable.Append($"\\arrayrulecolor{{{tableLineColor}}}\n"); // Set the color of the lines to white
+        latexTable.AppendLine("\\end{tabular}");
+
+        return latexTable.ToString();
+    }
+    
+    
+    public static string ToLaTexTable((string[] col, string[][] rows) table, TkizMarkerManager tkizMarker, bool lines = true, bool mathMode = true) {
+        var latexTable = new StringBuilder();
+        
+        var l = lines ? "|" : "";
+        var defC = l;
+        for (var i = 0; i < table.col.Length; i++) {
+            defC += $" c {l}";
+        }
+        
         latexTable.Append($"\\begin{{tabular}}{{{defC}}}\n");
 
         for (var i = 0; i < table.col.Length - 1; i++) {
@@ -114,7 +147,7 @@ public class MRKUPGen {
 
         latexTable.Append($"{table.col[^1]} \\\\\n");
 
-        latexTable.Append("\\hline\n");
+        if(lines) latexTable.Append("\\hline\n");
 
         for (var y = 0; y < table.rows.Length; y++) {
             var row = table.rows[y];
@@ -124,11 +157,11 @@ public class MRKUPGen {
 
             latexTable.Append($"{tkizMarker.GetMarker(row.Length - 1, y)}{row[^1]}\\\\\n");
         }
-
-        latexTable.Append("\\end{tabular}\\\n");
+        
+        latexTable.Append("\\end{tabular}\n");
         latexTable.Append(tkizMarker.GetMarkerDefs());
 
-        return ReplaceUnicodeToLaTex(latexTable.ToString(), true);
+        return ReplaceUnicodeToLaTex(latexTable.ToString(),mathMode);
     }
 
     public static string ReplaceUnicodeToLaTex(string input, bool mathMode = false) {
@@ -257,5 +290,34 @@ public class MRKUPGen {
         }
 
         return "$\\begin{array}{l l}\n" + equiv + "\\end{array}$";
+    }
+
+    public static string SemanticEquation(params (string func ,InterpretationSet resultSet)[] inputs) {
+
+        var result = "";
+        foreach (var input in inputs) {
+            var table = input.resultSet.IsEmptySet ? @"\emptyset": ToLaTexTable(input.resultSet.ToTable(), new MRKUPGen.TkizMarkerManager());
+            result += input.func + " &\\equiv " + table+" \\\\[15pt]\n";
+        }
+        
+        return "$\\begin{array}{l l}\n" +result+ "\\end{array}$";
+        
+        /*
+        StringBuilder latexCode = new StringBuilder();
+        latexCode.AppendLine($"\\begin{{minipage}}{{{w.ToString(CultureInfo.InvariantCulture)}\\textwidth}}");
+        latexCode.AppendLine("\\centering"); // Add this line to center the content
+        latexCode.AppendLine(side[i].input);
+        latexCode.AppendLine("\\end{minipage}");*/
+    }
+    
+    
+    public static string Itemizer(params string[] items) {
+        var result = "\\begin{itemize}\n";
+        foreach (var item in items) {
+            result += $"\\item {item}\n";
+        }
+
+        result += "\\end{itemize}\n";
+        return result;
     }
 }

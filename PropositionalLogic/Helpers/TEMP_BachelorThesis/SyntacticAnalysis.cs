@@ -163,7 +163,7 @@ public class SyntacticAnalysis : Section {
             array[row + 1][column] = MRKUPGen.ReplaceUnicodeToLaTex($"\\tiny {parsed} $\\equiv$ {simplified}", true);
         }
 
-        return MRKUPGen.ToLaTexTable((new string[columns], array), new MRKUPGen.TkizMarkerManager(), "white");
+        return MRKUPGen.ToLaTexTable((new string[columns], array), new MRKUPGen.TkizMarkerManager(), false);
     }
 
     string GetEquationsOfEquivalence(params string[] input) {
