@@ -94,7 +94,8 @@ public class BachelorThesis {
 
     public BachelorThesis() {
 
-        //logic.Interpret("Simplify(Forget(NOT(a AND b), a))");
+        //logic.Interpret("Simplify(NOT(a => b))");
+        //return;
         
         Sections.Add(new Motivation(logic));
         Sections.Add(new SyntacticAnalysis(logic));

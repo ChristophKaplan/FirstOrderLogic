@@ -113,6 +113,8 @@ public static class PropositionalLogicExtensions {
         }
         
         steps.Add(copy.GetCopy());
+        DissolveImplication(ref copy);
+        steps.Add(copy.GetCopy());
         PushNegation(ref copy);
         steps.Add(copy.GetCopy());
         DoubleNegation(ref copy);
@@ -198,6 +200,22 @@ public static class PropositionalLogicExtensions {
         StepDown(ref sentence);
     }
 
+    private static void DissolveImplication(ref Sentence sentence) {
+        if (sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.IMPLIES } implication) {
+            var lhs = implication.Children[0];
+            var rhs = implication.Children[1];
+            var notLhs = new ComplexSentence(LogicalConstant.LSymbol.NOT, lhs);
+            var or = new ComplexSentence(notLhs, LogicalConstant.LSymbol.OR, rhs);
+            or.Reparent(sentence);
+            sentence = or;
+        }
+        
+        for (var i = 0; i < sentence.Children.Count; i++) {
+            var c = sentence.Children[i];
+            DissolveImplication(ref c);
+        }
+    }
+    
     private static void PushNegation(ref Sentence sentence) {
         if (sentence is ComplexSentence { IsNegation: true } negatedSentence) {
             

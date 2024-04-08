@@ -30,58 +30,53 @@ public class SyntacticAnalysis : Section {
         var fe7 = ("F_{\\theta7}", "(a OR b) OR (c AND d)", "a");
         var fe8 = ("F_{\\theta8}", "(a OR b) OR (c OR d)", "a");
         
-        var text = $"To explore the properties of our ${BachelorThesis.SkepForgetName}$ operation, we need to identify the space or dimensions in which the function operates. " +
-                   "While introductory examples provided in the previous section shed light on the primary issue, " +
-                   $"it remains crucial to investigate the behavior of ${BachelorThesis.SkepForgetName}$ with more complex sentences. Do the outcomes predominantly correlate " +
-                   "with the top layer of connectives in the syntax tree? What influence do deeper nested expressions exert on the final result?\\\\" +
-                   "To draw valuable conclusions it is necessary to select examples that can proof generality while beeing specific enough to not loose any valuable properties and characteristics." +
-                   "How to identify such examples ? What criteria are essential for their selection?\\\\From the syntactical perspective we have sketched several dimensions for comparison: " +
-                   "We need to examine the behavior of the two forget operations in relation — are they dual in nature or not? " +
-                   "We need to consider complexity of sentences such as negation and multiple binary connectives with deeper nesting" +
-                   "Comparing the forgetting of variables at different depths, for instance, for a sentence such as (a or b or c) we have three options.\\\\" +
-                   "Lets start our investigation with the following sentences:\\\\";
-
-        
-        text += ForgetComparerLaTexWriter(fa1,fa2);
-        text += "In $F_{\\alpha1}$ and $F_{\\alpha2}$ we forget the whole sentence itself where $F_{\\alpha2}$ is negation of $F_{\\alpha1}$." + 
-                $"In both cases the result is $\\top$ for $Forget$ and $\\bot$ for ${BachelorThesis.SkepForgetName}$ as if it would characterize the function fundamentally."+
-                "Lets see what happens with more complex sentences.\\\\";
-        
-        text += ForgetComparerLaTexWriter(fb1,fb2,fb3,fb4);
-        text += @"Here we can see that $Forget(F_{\beta1},a) \equiv \neg(SkepForget(F_{\beta2},a$))\\";
-        text += @"With $F_{\beta1} \equiv \neg F_{\beta2}$ we get $Forget(F_{\beta1},a) \equiv \neg SkepForget(\neg F_{\beta1},a)$"+
-                @"$\neg F_{\beta1} \equiv F_{\beta2}$ and $Forget(\neg F_{\beta2},a) \equiv \neg SkepForget(F_{\beta2},a)$\\";
-        text += @"More generaly we can establish a relation that: $Forget(F,a) \equiv \neg SkepForget(\neg F,a)$ and $Forget(\neg F,a) \equiv \neg SkepForget(F,a)$\\"+
-                "Lets focus more on the logical connectives:\\\\";
-        
-        text += ForgetComparerLaTexWriter(fc1,fc2);
-        text += "In $F_{\\beta1}$ and $F_{\\beta2}$ we forget only one variable of a binary connective. Since logical connectives are commutative, forgetting the other variable would not give us new information." + 
-                $"We observe a dualistic behavior. Our forget operations deliver either truth values or the remaining variable $b$ of the original sentence." +
-                $"A necessary condition seems to be the connective itself. We can observe that Forget with $\\land$ gives us $\\bot$ where in combination with $\\lor$ we receive $b$. " +
-                $"For {BachelorThesis.SkepForgetName} its the other way arround, also the truth value is $\\top$ wich is the opposite"+
-                "Bottom line, with the 4 results, we loose exactly the variable, wich we expect to loose. And in the other two cases we loose more information thatn we expect" +
-                "Lets see if this holds true if we look are more complex/longer sentences:\\\\";
-        
-        text += ForgetComparerLaTexWriter( fd1, fd2, fd3, fd4);
-        text += "If we add more complexity via one additional connective." +
-                "It seems that, due to the inductive or recursive structure of propositional logic we still get the same dualistic result as in the previous example. " +
-                "As in the previous example, in half of the cases we loose exactly what we expect, and in the other half we loose more information." +
-                "Just to be on the safe side, lets see if it still holds when we add one more variable\\\\";
-        
-        text += ForgetComparerLaTexWriter( fe1, fe2, fe3, fe4, fe5, fe6, fe7, fe8);
-        text += "Surprisingly we dont get exactly the same behaviour as before. The dualistic overall picture remains." +
-                "But for $F_{\\theta5}$ and $F_{\\theta6}$ on the Forget side and $F_{\\theta3}$ and $F_{\\theta4}$ on the " +
-                "SkepForget side the result is structurally different from what we expected compared to the previous example." +
-                "Because, as in the previous example, in half of the cases we loose exactly what we want to loose but in the other half it is more differentiated. " +
-                "We loose some but we dont loos as much as in the previous. But we made a little mistake here:"+
-                "Imagine $a$ from the previous example is now replaced with with $(a \\circ b)$, we now forget only $a$ and not $(a \\circ b)$ wich we should in order to make the same move as before" +
-                "but we can see that within the half of the cases in wich we loose information again we can divide this in half and observe that we only lost half of that in drastic way, meaning reuslt is only truth values"+
-                "As we can only forget atomic variables, we cant make this comparison as we would need to forget $(a \\circ b)$." +
-                "We now would need to look at forgetting different variables in same sentences:" +
-                "note: also a is now deeper nested vs before it was top layer\\\\";
-
-
-        text += @"For a sentence $a \land (b \lor c)$ we have 3 options, but only 2 layers in depth, considering commutativity of logical connectives we can reduce this to 2 options.\\";
+        var text = $$"""
+                   To explore the properties of our ${{BachelorThesis.SkepForgetName}}$ operation, we need to identify the space or dimensions in which the function operates.
+                   While introductory examples provided in the previous section shed light on the primary issue, 
+                   it remains crucial to investigate the behavior of ${{BachelorThesis.SkepForgetName}}$ with more complex sentences. Do the outcomes predominantly correlate 
+                   with the top layer of connectives in the syntax tree? What influence do deeper nested expressions exert on the final result?\\
+                   To draw valuable conclusions it is necessary to select examples that can proof generality while beeing specific enough to not loose any valuable properties and characteristics.
+                   How to identify such examples ? What criteria are essential for their selection?\\From the syntactical perspective we have sketched several dimensions for comparison:
+                   We need to examine the behavior of the two forget operations in relation — are they dual in nature or not?
+                   We need to consider complexity of sentences such as negation and multiple binary connectives with deeper nesting
+                   Comparing the forgetting of variables at different depths, for instance, for a sentence such as (a or b or c) we have three options.\\
+                   Lets start our investigation with the following sentences:\\
+                   {{ForgetComparerLaTexWriter(fa1,fa2)}}
+                   In $F_{\alpha1}$ and $F_{\alpha2}$ we forget the whole sentence itself where $F_{\alpha2}$ is negation of $F_{\alpha1}$.
+                   In both cases the result is $\\top$ for $Forget$ and $\\bot$ for ${{BachelorThesis.SkepForgetName}}$ as if it would characterize the function fundamentally.
+                   Lets see what happens with more complex sentences.\\
+                   {{ForgetComparerLaTexWriter(fb1,fb2,fb3,fb4)}}
+                   Here we can see that $Forget(F_{\beta1},a) \equiv \neg(SkepForget(F_{\beta2},a$))\\
+                   With $F_{\beta1} \equiv \neg F_{\beta2}$ we get $Forget(F_{\beta1},a) \equiv \neg SkepForget(\neg F_{\beta1},a)$
+                   $\neg F_{\beta1} \equiv F_{\beta2}$ and $Forget(\neg F_{\beta2},a) \equiv \neg SkepForget(F_{\beta2},a)$\\
+                   More generally we can establish a relation that: $Forget(F,a) \equiv \neg SkepForget(\neg F,a)$ and $Forget(\neg F,a) \equiv \neg SkepForget(F,a)$\\
+                   Lets focus more on the logical connectives:\\
+                   {{ForgetComparerLaTexWriter(fc1,fc2)}}
+                   In $F_{\\beta1}$ and $F_{\\beta2}$ we forget only one variable of a binary connective. Since logical connectives are commutative, forgetting the other variable would not give us new information.
+                   We observe a dualistic behavior. Our forget operations deliver either truth values or the remaining variable $b$ of the original sentence.
+                   A necessary condition seems to be the connective itself. We can observe that Forget with $\land$ gives us $\bot$ where in combination with $\lor$ we receive $b$.
+                   For ${{BachelorThesis.SkepForgetName}}$ its the other way around, also the truth value is $\top$ which is the opposite
+                   Bottom line, with the 4 results, we loose exactly the variable, which we expect to loose. And in the other two cases we loose more information that we expect
+                   Lets see if this holds true if we look are more complex/longer sentences:\\
+                   {{ForgetComparerLaTexWriter( fd1, fd2, fd3, fd4)}}
+                   If we add more complexity via one additional connective.
+                   It seems that, due to the inductive or recursive structure of propositional logic we still get the same dualistic result as in the previous example.
+                   As in the previous example, in half of the cases we loose exactly what we expect, and in the other half we loose more information.
+                   Just to be on the safe side, lets see if it still holds when we add one more variable\\
+                   {{ForgetComparerLaTexWriter( fe1, fe2, fe3, fe4, fe5, fe6, fe7, fe8)}}
+                   Surprisingly we dont get exactly the same behaviour as before. The dualistic overall picture remains.
+                   But for $F_{\theta5}$ and $F_{\theta6}$ on the Forget side and $F_{\theta3}$ and $F_{\theta4}$ on the 
+                   SkepForget side the result is structurally different from what we expected compared to the previous example.
+                   Because, as in the previous example, in half of the cases we loose exactly what we want to loose but in the other half it is more differentiated. 
+                   We loose some but we dont loos as much as in the previous. But we made a little mistake here:
+                   Imagine $a$ from the previous example is now replaced with with $(a \circ b)$, we now forget only $a$ and not $(a \circ b)$ wich we should in order to make the same move as before
+                   but we can see that within the half of the cases in wich we loose information again we can divide this in half and observe that we only lost half of that in drastic way, 
+                   meaning reuslt is only truth values
+                   As we can only forget atomic variables, we cant make this comparison as we would need to forget $(a \circ b)$.
+                   We now would need to look at forgetting different variables in same sentences:
+                   note: also a is now deeper nested vs before it was top layer\\
+                   For a sentence $a \land (b \lor c)$ we have 3 options, but only 2 layers in depth, considering commutativity of logical connectives we can reduce this to 2 options.\\
+                   """;
         
         var f1a = ("F_{\\phi1}", "a AND (b AND c)", "a");
         var f2a = ("F_{\\phi2}", "a AND (b OR c)", "a");
