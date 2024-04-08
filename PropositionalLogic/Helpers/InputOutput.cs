@@ -3,7 +3,7 @@ using System.Diagnostics;
 namespace PropositionalLogic.Helpers;
 
 public static class InputOutput {
-    public const string ExportFolderPath = "../../../ExportFiles/";
+    public const string ExportFolderPath = "../../../../ExportFiles/";
 
     public static void WriteFile(string fileName, string text, string folderPath) {
         File.WriteAllText($"{ExportFolderPath}{folderPath}{fileName}", text);

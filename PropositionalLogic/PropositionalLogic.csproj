@@ -11,8 +11,4 @@
       <PackageReference Include="ConsoleTables" Version="2.6.1" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="ExportFiles\HTML\" />
-    </ItemGroup>
-
 </Project>
