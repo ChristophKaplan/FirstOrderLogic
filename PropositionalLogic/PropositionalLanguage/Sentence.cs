@@ -31,10 +31,6 @@ public class LogicalConstant : ILanguageObject {
     public override string ToString() {
         return Symbol.ToString();
     }
-
-    public string ToHTML() {
-        throw new NotImplementedException();
-    }
 }
 
 public class Function : ILanguageObject {
@@ -44,10 +40,6 @@ public class Function : ILanguageObject {
     public Function(string func, params ILanguageObject[] parameters) {
         Func = func;
         Parameters = parameters;
-    }
-
-    public string ToHTML() {
-        throw new NotImplementedException();
     }
 }
 
@@ -127,10 +119,6 @@ public abstract class Sentence : ILanguageObject {
             LogicalConstant.LSymbol.IMPLIES => "\u21d2",
             _ => throw new Exception($"Error: {this} not found.")
         };
-    }
-
-    public string ToHTML() {
-        throw new NotImplementedException();
     }
 }
 
