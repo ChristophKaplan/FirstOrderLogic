@@ -96,7 +96,6 @@ public class BachelorThesis {
 
         //logic.Interpret("Simplify(NOT(a => b))");
         //return;
-        
         Sections.Add(new Motivation(logic));
         Sections.Add(new SyntacticAnalysis(logic));
         Sections.Add(new SemanticInvestigation(logic));
