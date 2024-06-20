@@ -4,16 +4,6 @@ namespace PropositionalLogic;
 
 public static class PropositionalLogicExtensions {
     
-    public static InterpretationSet ForceAll(this PropositionalLogic logic, InterpretationSet set, AtomicSentence variable) {
-        var list = new List<Interpretation>();
-        foreach (var interpretation in set.Interpretations) {
-            var f = interpretation.Force(interpretation, variable);
-            if (f != null) list.Add(f);
-        }
-
-        return new InterpretationSet(list, set.Sentences.ToArray());
-    }
-    
     public static InterpretationSet SwitchAll(this PropositionalLogic logic, InterpretationSet set, AtomicSentence variable) {
         var list = new List<Interpretation>();
         foreach (var interpretation in set.Interpretations) {
@@ -22,7 +12,6 @@ public static class PropositionalLogicExtensions {
         }
         return new InterpretationSet(list, set.Sentences.ToArray());
     }
-
     
     public static List<Sentence> UnfoldEquivalence(this PropositionalLogic logic, Sentence sentence, bool completeSteps = false) {
         var simplified = logic.Simplify(sentence, out var steps);
@@ -77,28 +66,48 @@ public static class PropositionalLogicExtensions {
         return new InterpretationSet(i.Models(sentence), sentence);
     }
     
+    public static InterpretationSet SwMod(this PropositionalLogic logic,List<AtomicSentence> signature, Sentence sentence, AtomicSentence switchMe) {
+        var intSet = Int(logic, signature, sentence);
+        var switched = SwitchAll(logic, intSet, switchMe);
+        var list = new List<Interpretation>();
+        for (int i = 0; i < intSet.Interpretations.Count; i++) {
+            if (switched.Interpretations[i].IsModel(sentence)) {
+                list.Add(intSet.Interpretations[i]);
+            }
+        }
+        
+        return new InterpretationSet(list, sentence);
+    }
+    
     public static InterpretationSet Intersection(this PropositionalLogic logic,InterpretationSet a, InterpretationSet b) {
         return new InterpretationSet( a.Interpretations.Intersect(b.Interpretations).ToList(), a.Sentences.Intersect(b.Sentences).ToArray());
     }
     
     public static Sentence Forget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
-        var lhs = sentence.GetCopy();
-        var rhs = sentence.GetCopy();
-        lhs.FindReplaceAtom(forgetMe, LogicalConstant.LSymbol.TRUE.ToString());
-        rhs.FindReplaceAtom(forgetMe, LogicalConstant.LSymbol.FALSE.ToString());
+        
+        var lhs = Substitute(logic, sentence, forgetMe, new AtomicSentence(LogicalConstant.LSymbol.TRUE.ToString()));
+        var rhs = Substitute(logic, sentence, forgetMe, new AtomicSentence(LogicalConstant.LSymbol.FALSE.ToString()));
         var n = new ComplexSentence(lhs, LogicalConstant.LSymbol.OR, rhs);
         return n;
     }
-
+    
     public static Sentence SkepForget(this PropositionalLogic logic, Sentence sentence, AtomicSentence forgetMe) {
-        var lhs = sentence.GetCopy();
-        var rhs = sentence.GetCopy();
-        lhs.FindReplaceAtom(forgetMe, LogicalConstant.LSymbol.TRUE.ToString());
-        rhs.FindReplaceAtom(forgetMe, LogicalConstant.LSymbol.FALSE.ToString());
+        var lhs = Substitute(logic, sentence, forgetMe, new AtomicSentence(LogicalConstant.LSymbol.TRUE.ToString()));
+        var rhs = Substitute(logic, sentence, forgetMe, new AtomicSentence(LogicalConstant.LSymbol.FALSE.ToString()));
         var n = new ComplexSentence(lhs, LogicalConstant.LSymbol.AND, rhs);
         return n;
     }
-
+    
+    public static Sentence Substitute(this PropositionalLogic logic, Sentence sentence, AtomicSentence subMe, AtomicSentence subWith) {
+        if(sentence.Equals(subMe) && subMe.Parent == null) {
+            return subWith;
+        }
+        
+        var copy = sentence.GetCopy();
+        copy.SubstituteAtom(subMe, subWith);
+        return copy;
+    }
+    
     public static Sentence Simplify(this PropositionalLogic logic, Sentence sentence, out List<Sentence> steps) {
         var old = sentence;
         var copy = sentence.GetCopy();
@@ -131,7 +140,7 @@ public static class PropositionalLogicExtensions {
             if(changed) steps.Add(old);
             old = copy.GetCopy();
         }
-        
+        Console.WriteLine("done here");
         return copy;
     }
 
@@ -200,6 +209,49 @@ public static class PropositionalLogicExtensions {
         StepDown(ref sentence);
     }
 
+    private static void SimplifyTruthValues_BETTER(ref Sentence sentence) {
+        if (sentence is not ComplexSentence complexSentence) {
+            return;
+        }
+        
+        if (complexSentence.IsLiteral) {
+            if (complexSentence.Children[0] is AtomicSentence {IsTruthValue: true } truthValue) {
+                truthValue.FlipTruthValue();
+                truthValue.Reparent(sentence);
+                sentence = truthValue;
+            }
+            return;
+        }
+        
+        for (var i = 0; i < sentence.Children.Count; i++) {
+            var childSentence = sentence.Children[i];
+            SimplifyTruthValues(ref childSentence);
+        }
+        
+        foreach (var child in sentence.Children) {
+            if (child is not AtomicSentence { IsTruthValue: true } atomicSentence) {
+                continue;
+            }
+            
+            switch (complexSentence.Operator) {
+                case LogicalConstant.LSymbol.AND when atomicSentence.Verum:
+                case LogicalConstant.LSymbol.OR when atomicSentence.Falsum:
+                    var otherSide = complexSentence.GetOtherSide(atomicSentence);
+                    otherSide.Reparent(sentence);
+                    sentence = otherSide;
+                    break;
+                case LogicalConstant.LSymbol.AND when atomicSentence.Falsum:
+                case LogicalConstant.LSymbol.OR when atomicSentence.Verum:
+                    atomicSentence.Reparent(sentence);
+                    sentence = atomicSentence;
+                    break;
+                default:
+                    throw new Exception(complexSentence.ToString() +complexSentence.Operator);
+            }
+            break;
+        }
+    }
+    
     private static void DissolveImplication(ref Sentence sentence) {
         if (sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.IMPLIES } implication) {
             var lhs = implication.Children[0];
@@ -264,17 +316,17 @@ public static class PropositionalLogicExtensions {
         var lhs = sentence.Children[0];
         var rhs = sentence.Children[1];
 
-        if (rhs is ComplexSentence rhsComplex && IsOpposite(complex.Operator, rhsComplex.Operator) && rhsComplex.Children.Contains(lhs)) {
+        if (rhs is ComplexSentence rhsComplex && IsDualOperator(complex.Operator, rhsComplex.Operator) && rhsComplex.Children.Contains(lhs)) {
             lhs.Reparent(sentence);
             sentence = lhs;
         }
                
-       if (lhs is ComplexSentence lhsComplex && IsOpposite(complex.Operator, lhsComplex.Operator) && lhsComplex.Children.Contains(rhs)) { 
+       if (lhs is ComplexSentence lhsComplex && IsDualOperator(complex.Operator, lhsComplex.Operator) && lhsComplex.Children.Contains(rhs)) { 
            rhs.Reparent(sentence);
            sentence = rhs;
        }
 
-       bool IsOpposite(LogicalConstant.LSymbol o1, LogicalConstant.LSymbol o2) {
+       bool IsDualOperator(LogicalConstant.LSymbol o1, LogicalConstant.LSymbol o2) {
             switch (o1) {
                 case LogicalConstant.LSymbol.AND when o2 == LogicalConstant.LSymbol.OR:
                 case LogicalConstant.LSymbol.OR when o2 == LogicalConstant.LSymbol.AND:
@@ -286,7 +338,8 @@ public static class PropositionalLogicExtensions {
     }
     
     private static void Absorption_Ish(ref Sentence sentence) {
-
+//A AND A)
+//A OR A)
         //(A AND (B AND A)) = (B AND A)
         //(A OR (B OR A)) = (B OR A)
         
@@ -296,17 +349,17 @@ public static class PropositionalLogicExtensions {
         var lhs = sentence.Children[0];
         var rhs = sentence.Children[1];
 
-        if (rhs is ComplexSentence rhsComplex && IsSame(complex.Operator, rhsComplex.Operator) && rhsComplex.Children.Contains(lhs)) {
+        if (rhs is ComplexSentence rhsComplex && IsEquivOperator(complex.Operator, rhsComplex.Operator) && rhsComplex.Children.Contains(lhs)) {
             rhs.Reparent(sentence);
             sentence = rhs;
         }
                
-        if (lhs is ComplexSentence lhsComplex && IsSame(complex.Operator, lhsComplex.Operator) && lhsComplex.Children.Contains(rhs)) { 
+        if (lhs is ComplexSentence lhsComplex && IsEquivOperator(complex.Operator, lhsComplex.Operator) && lhsComplex.Children.Contains(rhs)) { 
             lhs.Reparent(sentence);
             sentence = lhs;
         }
 
-        bool IsSame(LogicalConstant.LSymbol o1, LogicalConstant.LSymbol o2) {
+        bool IsEquivOperator(LogicalConstant.LSymbol o1, LogicalConstant.LSymbol o2) {
             switch (o1) {
                 case LogicalConstant.LSymbol.AND when o2 == LogicalConstant.LSymbol.AND:
                 case LogicalConstant.LSymbol.OR when o2 == LogicalConstant.LSymbol.OR:

@@ -1,4 +1,3 @@
-using System.Numerics;
 using LRParser.Language;
 using ConsoleTables;
 using PropositionalLogic.Helpers;
@@ -8,11 +7,13 @@ namespace PropositionalLogic;
 public class InterpretationSet : ILanguageObject {
     public readonly List<Interpretation> Interpretations;
     public readonly List<Sentence> Sentences;
+    
     public List<AtomicSentence> GetSignature() {
         return Interpretations.Count > 0 ? Interpretations[0].Assignment.Keys.ToList() : new List<AtomicSentence>();
     }
 
     public bool IsEmptySet => Interpretations.Count == 0;
+    public bool IsOmega => Interpretations.Count == Math.Pow(2, GetSignature().Count);
     
     public int FindPosInSignature(string variable) {
         var signature = GetSignature();
@@ -29,16 +30,8 @@ public class InterpretationSet : ILanguageObject {
         Sentences = sentences.ToList();
     }
 
-    public string AnalyzeLatex() {
-        string result = @"\begin{minipage}{\linewidth}\begin{itemize}";
-        foreach ((Sentence p, Sentence q, bool truth) r in  GetSemanticConsequences(true)) {
-            result += $"\\item {r.p} \u22a8 {r.q} = {r.truth}\n";
-        }
-        result += @"\end{itemize}\end{minipage}";
-        return MRKUPGen.ReplaceUnicodeToLaTex(result,true);
-    }
-
     public List <(Sentence p, Sentence q, bool truth)> GetSemanticConsequences(bool onlyTrue = false) {
+        
         List<AtomicSentence> atomsFromInts = Interpretations.SelectMany(x => x.Assignment.Keys).Distinct().ToList();
         List<Sentence> merged = new(Sentences);
         merged.AddRange(atomsFromInts);
@@ -73,12 +66,9 @@ public class InterpretationSet : ILanguageObject {
 
     public List<Interpretation> Models(Sentence sentence) {
         var models = new List<Interpretation>();
-
         foreach (var interpretation in Interpretations) {
-            var mod = interpretation.Evaluate(sentence);
-            if (mod) { models.Add(interpretation); }
+            if (interpretation.IsModel(sentence)) { models.Add(interpretation); }
         }
-
         return models;
     }
     
@@ -90,11 +80,8 @@ public class InterpretationSet : ILanguageObject {
     private string ToConsoleTable((string[] col, string[][] rows) table) {
         var columns = table.col;
         var rows = table.rows;
-        
         var consoleTable = new ConsoleTable(columns);
-
         foreach (var row in rows) consoleTable.AddRow(row);
-        
         return consoleTable.ToMinimalString();
     }
     
@@ -125,18 +112,22 @@ public class InterpretationSet : ILanguageObject {
         //rows.Add(new []{$"\\multicolumn{{{columns.Count}}}{{c}}{{{AnalyzeLatex()}}}"});
         return (columns.ToArray(), rows.ToArray());
     }
+    
+    private string ToSetString() {
+        var result = "{";
+        if(IsEmptySet) return result + "empty set}";
+        if(IsOmega) return result + "Omega}";
+        
+        for (var i = 0; i < Interpretations.Count-1; i++) {
+            result += Interpretations[i].To01String() + ", ";
+        }
+        result += Interpretations[^1].To01String();
+        
+        return result + "}";
+    }
 
     public override string ToString() {
-        return ToConsoleTable(ToTable());
-    }
-
-    public string ToHTML() {
-        return MRKUPGen.ToHTMLTable(ToTable());
-    }
-    
-    public string ToLaTex(){
-        var table = ToTable();
-        var manager = new MRKUPGen.TkizMarkerManager();
-        return MRKUPGen.ToLaTexTable(table, manager);
+        bool table = false;
+        return table ? ToConsoleTable(ToTable()) : ToSetString();
     }
 }

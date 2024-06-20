@@ -8,6 +8,10 @@ public class Interpretation : ILanguageObject{
     
     public Interpretation() { }
 
+    public bool IsModel(Sentence sentence) {
+        return Evaluate(sentence);
+    }
+    
     public Interpretation(Interpretation other) {
         foreach (var kv in other.Assignment) {
             Assignment.Add(kv.Key, kv.Value);
@@ -84,6 +88,18 @@ public class Interpretation : ILanguageObject{
         return sb.ToString();
     }
 
+    public string To01String()
+    {
+        var sb = new StringBuilder();
+        foreach (var (key, value) in Assignment) {
+            var s = value ? "1" : "0";
+            sb.Append( $"{s}");
+        }
+
+        return sb.ToString();
+    }
+
+    
     public string ToHTML() {
         throw new NotImplementedException();
     }

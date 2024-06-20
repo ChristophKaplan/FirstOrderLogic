@@ -26,7 +26,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
 
     protected override TokenDefinition<Terminal>[] SetUpTokenDefinitions() {
         return new [] {
-            new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|SkepForget|MyForget|Int|Simplify|SwitchMany"),
+            new TokenDefinition<Terminal>(Terminal.Function, "Mod|Forget|SkepForget|MyForget|Int|Simplify|SwitchMany|Substitute"),
             new TokenDefinition<Terminal>(Terminal.Open, "\\("),
             new TokenDefinition<Terminal>(Terminal.Comma, ","),
             new TokenDefinition<Terminal>(Terminal.Close, "\\)"),
@@ -152,6 +152,10 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
                 var result = this.SwitchAll(s,(AtomicSentence)function.Parameters[1]);
                 return result;
             }
+            case "Substitute": {;
+                var result = this.Substitute((Sentence)function.Parameters[0], (AtomicSentence)function.Parameters[2], (AtomicSentence)function.Parameters[1]);
+                return result;
+            }
         }
 
         Console.WriteLine($"No return value for: {function.Func}");
@@ -165,7 +169,11 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         foreach (var truthValues in truthTable) {
             var interpretation = new Interpretation();
             var list = truthValues.ToArray();
+            
             for (var i = 0; i < signature.Count; i++) {
+                if(signature[i].IsTruthValue) {
+                    list[i] = signature[i].Verum;
+                }
                 interpretation.Add(signature[i], list[i]);
             }
 
@@ -190,10 +198,10 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             case 0:
                 return Enumerable.Empty<IEnumerable<bool>>();
             case 1:
-                return new List<List<bool>> { new() { true }, new() { false } };
+                return new List<List<bool>> { new() { false }, new() { true } };
             default: {
                 var subTables = GenerateTruthTable(n - 1);
-                return subTables.SelectMany(row => new[] { row.Append(true), row.Append(false) });
+                return subTables.SelectMany(row => new[] { row.Append(false), row.Append(true) });
             }
         }
     }

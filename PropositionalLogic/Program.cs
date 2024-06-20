@@ -1,2 +1,2 @@
-using PropositionalLogic.Helpers;
-var b = new BachelorThesis();
+var logic = new PropositionalLogic.PropositionalLogic();
+logic.Interpret("Simplify(((A AND B) OR C) IMPLIES D)");

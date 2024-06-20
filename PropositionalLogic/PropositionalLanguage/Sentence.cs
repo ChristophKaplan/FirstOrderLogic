@@ -44,11 +44,13 @@ public class Function : ILanguageObject {
 }
 
 public abstract class Sentence : ILanguageObject {
-
     public Sentence Parent { get; private set; }
     
     public readonly List<Sentence> Children = new();
 
+    public bool IsLiteral => this is AtomicSentence ||
+                             (this is ComplexSentence { IsNegation: true } complexSentence && complexSentence.Children[0] is AtomicSentence);
+    
     public void AddChild(Sentence sentence) {
         Children.Add(sentence);
         sentence.Parent = this;
@@ -148,7 +150,7 @@ public class ComplexSentence : Sentence {
     public LogicalConstant.LSymbol Operator;
     public string OperatorToString() => GetOperatorStringSymbol(Operator);
     
-    public bool IsNegation { get => Children.Count == 1; }
+    public bool IsNegation => Children.Count == 1; 
     
     public ComplexSentence(Sentence p, LogicalConstant.LSymbol @operator, Sentence q) {
         Operator = @operator;
@@ -171,5 +173,18 @@ public class ComplexSentence : Sentence {
             LogicalConstant.LSymbol.OR => LogicalConstant.LSymbol.AND,
             _ => throw new Exception($"Error: {this} not found.")
         };
+    }
+
+    public Sentence GetOtherSide(Sentence sentence) {
+        if(Children.Count != 2) {
+            throw new Exception("Error: ComplexSentence must have two children.");
+        }
+        if(Children[0].Equals(sentence)) {
+            return Children[1];
+        }
+        if(Children[1].Equals(sentence)) {
+            return Children[0];
+        }
+        throw new Exception("Error: Sentence not found in ComplexSentence.");
     }
 }

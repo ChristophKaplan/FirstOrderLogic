@@ -16,13 +16,14 @@ public static class SentenceExtensions {
         return reducedAtoms;
     }
     
-    public static void FindReplaceAtom(this Sentence sentence, AtomicSentence replaceMe, string replaceWith) {
-        foreach (var child in sentence.Children) {
-            child.FindReplaceAtom(replaceMe, replaceWith);
+    public static void SubstituteAtom(this Sentence sentence, AtomicSentence replaceMe, AtomicSentence replaceWith) {
+        for (var i = 0; i < sentence.Children.Count; i++) {
+            var child = sentence.Children[i];
+            child.SubstituteAtom(replaceMe, replaceWith);
         }
 
         if (sentence.Equals(replaceMe) && sentence is AtomicSentence atomicSentence) {
-            atomicSentence.Symbol = replaceWith;
+            replaceWith.Reparent(sentence);
         }
     }
 
