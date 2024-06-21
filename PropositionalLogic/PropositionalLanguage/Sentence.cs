@@ -97,8 +97,8 @@ public abstract class Sentence : ILanguageObject {
 
     public override string ToString() {
         if (this is AtomicSentence atomicSentence) {
-            if (atomicSentence.Falsum) return "\u22A5";
-            if (atomicSentence.Verum) return "\u22A4";
+            if (atomicSentence.Contradiction) return "\u22A5";
+            if (atomicSentence.Tautology) return "\u22A4";
             return atomicSentence.Symbol;
         }
 
@@ -126,9 +126,9 @@ public abstract class Sentence : ILanguageObject {
 
 public class AtomicSentence : Sentence {
     public string Symbol;
-    public bool IsTruthValue { get => Verum || Falsum; }
-    public bool Verum { get => Symbol.Equals(LogicalConstant.LSymbol.TRUE.ToString());}
-    public bool Falsum { get => Symbol.Equals(LogicalConstant.LSymbol.FALSE.ToString());}
+    public bool IsConstant { get => Tautology || Contradiction; }
+    public bool Tautology { get => Symbol.Equals(LogicalConstant.LSymbol.TRUE.ToString());}
+    public bool Contradiction { get => Symbol.Equals(LogicalConstant.LSymbol.FALSE.ToString());}
     
     public AtomicSentence(string symbol) {
         Symbol = symbol;
@@ -138,9 +138,9 @@ public class AtomicSentence : Sentence {
     }
     
     public void FlipTruthValue() {
-        if (Verum) {
+        if (Tautology) {
             Symbol = LogicalConstant.LSymbol.FALSE.ToString();
-        } else if (Falsum) {
+        } else if (Contradiction) {
             Symbol = LogicalConstant.LSymbol.TRUE.ToString();
         }
     }

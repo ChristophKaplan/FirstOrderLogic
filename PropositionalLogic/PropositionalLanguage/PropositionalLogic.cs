@@ -171,8 +171,8 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             var list = truthValues.ToArray();
             
             for (var i = 0; i < signature.Count; i++) {
-                if(signature[i].IsTruthValue) {
-                    list[i] = signature[i].Verum;
+                if(signature[i].IsConstant) {
+                    list[i] = signature[i].Tautology;
                 }
                 interpretation.Add(signature[i], list[i]);
             }

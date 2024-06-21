@@ -111,262 +111,30 @@ public static class PropositionalLogicExtensions {
     public static Sentence Simplify(this PropositionalLogic logic, Sentence sentence, out List<Sentence> steps) {
         var old = sentence;
         var copy = sentence.GetCopy();
+        
         var changed = true;
         steps = new List<Sentence>();
         
         while (changed) {
-            SimplifyTruthValues(ref copy);
+            Transformation.Transform(Transformation.EquivType.SimplifyConstants, ref copy);
             changed = !old.Equals(copy);
             if(changed) steps.Add(old);
             old = copy.GetCopy();
+            Console.WriteLine("step: " + old);
         }
         
         steps.Add(copy.GetCopy());
-        DissolveImplication(ref copy);
+        Transformation.Transform(Transformation.EquivType.DissolveImplication,ref copy);
         steps.Add(copy.GetCopy());
-        PushNegation(ref copy);
+        Transformation.Transform(Transformation.EquivType.PushNegation, ref copy);
         steps.Add(copy.GetCopy());
-        DoubleNegation(ref copy);
+        Transformation.Transform(Transformation.EquivType.DoubleNegation, ref copy);
         steps.Add(copy.GetCopy());
-        Absorption(ref copy);
+        Transformation.Transform(Transformation.EquivType.Absorption, ref copy);
         steps.Add(copy.GetCopy());
-        Absorption_Ish(ref copy);
-        
-        //temp
-        changed = true;
-        while (changed) {
-            SimplifyTruthValues(ref copy);
-            changed = !old.Equals(copy);
-            if(changed) steps.Add(old);
-            old = copy.GetCopy();
-        }
-        Console.WriteLine("done here");
+        Transformation.Transform(Transformation.EquivType.AssociationAndIdem, ref copy);
+
+        Console.WriteLine("simplify done");
         return copy;
-    }
-
-    private static void SimplifyTruthValues(ref Sentence sentence) {
-        if (sentence is AtomicSentence) return;
-        if (sentence is ComplexSentence { IsNegation: true } c) {
-            if (c.Children[0] is AtomicSentence {IsTruthValue: true } truthValue) {
-                truthValue.FlipTruthValue();
-                Replace(ref sentence, truthValue);
-            }
-            return;
-        }
-        
-        var lhs = sentence.Children[0];
-        var rhs = sentence.Children[1];
-
-        if (!(lhs is AtomicSentence { IsTruthValue: true } || rhs is AtomicSentence { IsTruthValue: true })) {
-            StepDown(ref sentence);
-            return;
-        }
-
-        (AtomicSentence, Sentence) MapLhsRhs() {
-            (AtomicSentence atomicTruthValue, Sentence other) result = (null, null);
-            if (lhs is AtomicSentence { IsTruthValue: true } atomicLhs) {
-                result = (atomicLhs, rhs);
-            }
-
-            if (rhs is AtomicSentence { IsTruthValue: true } atomicRhs) {
-                result = (atomicRhs, lhs);
-            }
-
-            return result;
-        }
-
-        (AtomicSentence truthValueSide, Sentence otherSide) mapping = MapLhsRhs();
-
-        switch (((ComplexSentence)sentence).Operator) {
-            case LogicalConstant.LSymbol.AND when mapping.truthValueSide.Verum:
-                Replace(ref sentence, mapping.otherSide);
-                break;
-            case LogicalConstant.LSymbol.AND when mapping.truthValueSide.Falsum:
-                Replace(ref sentence, mapping.truthValueSide);
-                break;
-            case LogicalConstant.LSymbol.OR when mapping.truthValueSide.Verum:
-                Replace(ref sentence, mapping.truthValueSide);
-                break;
-            case LogicalConstant.LSymbol.OR when mapping.truthValueSide.Falsum:
-                Replace(ref sentence, mapping.otherSide);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        void StepDown(ref Sentence sentence) {
-            for (var i = 0; i < sentence.Children.Count; i++) {
-                var childSentence = sentence.Children[i];
-                SimplifyTruthValues(ref childSentence);
-            }
-        }
-
-        void Replace(ref Sentence sentence, Sentence replaceWith) {
-            replaceWith.Reparent(sentence);
-            sentence = replaceWith;
-        }
-
-        StepDown(ref sentence);
-    }
-
-    private static void SimplifyTruthValues_BETTER(ref Sentence sentence) {
-        if (sentence is not ComplexSentence complexSentence) {
-            return;
-        }
-        
-        if (complexSentence.IsLiteral) {
-            if (complexSentence.Children[0] is AtomicSentence {IsTruthValue: true } truthValue) {
-                truthValue.FlipTruthValue();
-                truthValue.Reparent(sentence);
-                sentence = truthValue;
-            }
-            return;
-        }
-        
-        for (var i = 0; i < sentence.Children.Count; i++) {
-            var childSentence = sentence.Children[i];
-            SimplifyTruthValues(ref childSentence);
-        }
-        
-        foreach (var child in sentence.Children) {
-            if (child is not AtomicSentence { IsTruthValue: true } atomicSentence) {
-                continue;
-            }
-            
-            switch (complexSentence.Operator) {
-                case LogicalConstant.LSymbol.AND when atomicSentence.Verum:
-                case LogicalConstant.LSymbol.OR when atomicSentence.Falsum:
-                    var otherSide = complexSentence.GetOtherSide(atomicSentence);
-                    otherSide.Reparent(sentence);
-                    sentence = otherSide;
-                    break;
-                case LogicalConstant.LSymbol.AND when atomicSentence.Falsum:
-                case LogicalConstant.LSymbol.OR when atomicSentence.Verum:
-                    atomicSentence.Reparent(sentence);
-                    sentence = atomicSentence;
-                    break;
-                default:
-                    throw new Exception(complexSentence.ToString() +complexSentence.Operator);
-            }
-            break;
-        }
-    }
-    
-    private static void DissolveImplication(ref Sentence sentence) {
-        if (sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.IMPLIES } implication) {
-            var lhs = implication.Children[0];
-            var rhs = implication.Children[1];
-            var notLhs = new ComplexSentence(LogicalConstant.LSymbol.NOT, lhs);
-            var or = new ComplexSentence(notLhs, LogicalConstant.LSymbol.OR, rhs);
-            or.Reparent(sentence);
-            sentence = or;
-        }
-        
-        for (var i = 0; i < sentence.Children.Count; i++) {
-            var c = sentence.Children[i];
-            DissolveImplication(ref c);
-        }
-    }
-    
-    private static void PushNegation(ref Sentence sentence) {
-        if (sentence is ComplexSentence { IsNegation: true } negatedSentence) {
-            
-            if (negatedSentence.Children[0] is AtomicSentence {IsTruthValue: true } truthValue) {
-                truthValue.FlipTruthValue();
-                truthValue.Reparent(sentence);
-                sentence = truthValue;
-                return;
-            }
-            
-            if (negatedSentence.Children[0] is ComplexSentence { IsNegation: false } inner) {
-                inner.FlipOperator(); //deMorgan
-                var p = new ComplexSentence(LogicalConstant.LSymbol.NOT,inner.Children[0]);
-                var q = new ComplexSentence(LogicalConstant.LSymbol.NOT,inner.Children[1]);
-                var pq = new ComplexSentence(p, inner.Operator, q);
-                pq.Reparent(sentence);
-                sentence = pq;
-            }
-        }
-        
-        for (var i = 0; i < sentence.Children.Count; i++) {
-            var c = sentence.Children[i];
-            PushNegation(ref c);
-        }
-    }
-
-    private static void DoubleNegation(ref Sentence sentence) {
-        if (sentence is ComplexSentence { IsNegation: true } negation) {
-            if (negation.Children[0] is ComplexSentence { IsNegation: true } doubleNegation) {
-
-                int i = negation.Parent.Children.IndexOf(negation);
-                negation.Parent.Children[i] = doubleNegation.Children[0];
-            }
-        }
-        
-        for (var i = 0; i < sentence.Children.Count; i++) {
-            var c = sentence.Children[i];
-            DoubleNegation(ref c);
-        }
-    }
-
-    private static void Absorption(ref Sentence sentence) {
-        if(sentence is AtomicSentence || sentence is ComplexSentence { IsNegation: true }) return;
-        
-        var complex = sentence as ComplexSentence;
-        var lhs = sentence.Children[0];
-        var rhs = sentence.Children[1];
-
-        if (rhs is ComplexSentence rhsComplex && IsDualOperator(complex.Operator, rhsComplex.Operator) && rhsComplex.Children.Contains(lhs)) {
-            lhs.Reparent(sentence);
-            sentence = lhs;
-        }
-               
-       if (lhs is ComplexSentence lhsComplex && IsDualOperator(complex.Operator, lhsComplex.Operator) && lhsComplex.Children.Contains(rhs)) { 
-           rhs.Reparent(sentence);
-           sentence = rhs;
-       }
-
-       bool IsDualOperator(LogicalConstant.LSymbol o1, LogicalConstant.LSymbol o2) {
-            switch (o1) {
-                case LogicalConstant.LSymbol.AND when o2 == LogicalConstant.LSymbol.OR:
-                case LogicalConstant.LSymbol.OR when o2 == LogicalConstant.LSymbol.AND:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-    }
-    
-    private static void Absorption_Ish(ref Sentence sentence) {
-//A AND A)
-//A OR A)
-        //(A AND (B AND A)) = (B AND A)
-        //(A OR (B OR A)) = (B OR A)
-        
-        if(sentence is AtomicSentence || sentence is ComplexSentence { IsNegation: true }) return;
-        
-        var complex = sentence as ComplexSentence;
-        var lhs = sentence.Children[0];
-        var rhs = sentence.Children[1];
-
-        if (rhs is ComplexSentence rhsComplex && IsEquivOperator(complex.Operator, rhsComplex.Operator) && rhsComplex.Children.Contains(lhs)) {
-            rhs.Reparent(sentence);
-            sentence = rhs;
-        }
-               
-        if (lhs is ComplexSentence lhsComplex && IsEquivOperator(complex.Operator, lhsComplex.Operator) && lhsComplex.Children.Contains(rhs)) { 
-            lhs.Reparent(sentence);
-            sentence = lhs;
-        }
-
-        bool IsEquivOperator(LogicalConstant.LSymbol o1, LogicalConstant.LSymbol o2) {
-            switch (o1) {
-                case LogicalConstant.LSymbol.AND when o2 == LogicalConstant.LSymbol.AND:
-                case LogicalConstant.LSymbol.OR when o2 == LogicalConstant.LSymbol.OR:
-                    return true;
-                default:
-                    return false;
-            }
-        }
     }
 }

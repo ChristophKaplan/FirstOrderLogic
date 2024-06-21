@@ -7,7 +7,7 @@ public static class SentenceExtensions {
         var collectedAtoms = GetAtoms(sentence);
             
         foreach (var atom in collectedAtoms) {
-            if (atom.Verum || atom.Falsum) {
+            if (atom.Tautology || atom.Contradiction) {
                 continue;
             }
             if(!reducedAtoms.Contains(atom)) reducedAtoms.Add(atom);
