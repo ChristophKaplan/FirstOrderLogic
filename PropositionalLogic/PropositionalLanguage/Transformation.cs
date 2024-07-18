@@ -1,7 +1,7 @@
 namespace PropositionalLogic;
 
 public static class Transformation {
-    public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem }
+    public enum EquivType { SimplifyConstants, DissolveImplication, DeMorgan, DoubleNegation, Absorption, AssociationAndIdem }
 
     private delegate void TransformAction<Sentence>(ref Sentence sentence);
 
@@ -31,8 +31,8 @@ public static class Transformation {
             case EquivType.DissolveImplication:
                 BottomUpTransformation(ref sentence, DissolveImplication);
                 break;
-            case EquivType.PushNegation:
-                BottomUpTransformation(ref sentence, PushNegation);
+            case EquivType.DeMorgan:
+                BottomUpTransformation(ref sentence, DeMorgan);
                 break;
             case EquivType.DoubleNegation:
                 BottomUpTransformation(ref sentence, DoubleNegation);
@@ -46,7 +46,7 @@ public static class Transformation {
         }
     }
 
-    public static void SimplifyConstants(ref Sentence sentence) {
+    private static void SimplifyConstants(ref Sentence sentence) {
         //We take out Tautology and Contradiction
         if (sentence is not ComplexSentence complexSentence) {
             return;
@@ -54,7 +54,7 @@ public static class Transformation {
 
         if (complexSentence.IsLiteral) {
             if (complexSentence.Children[0] is AtomicSentence { IsConstant: true } constant) {
-                constant.FlipTruthValue();
+                constant.FlipTruthValue(); //push negation
                 constant.Reparent(sentence);
                 sentence = constant;
             }
@@ -85,7 +85,7 @@ public static class Transformation {
         }
     }
 
-    public static void DissolveImplication(ref Sentence sentence) {
+    private static void DissolveImplication(ref Sentence sentence) {
         if (sentence is ComplexSentence { Operator: LogicalConstant.LSymbol.IMPLIES } implication) {
             var lhs = implication.Children[0];
             var rhs = implication.Children[1];
@@ -96,15 +96,8 @@ public static class Transformation {
         }
     }
 
-    public static void PushNegation(ref Sentence sentence) {
+    private static void DeMorgan(ref Sentence sentence) {
         if (sentence is ComplexSentence { IsNegation: true } negatedSentence) {
-            if (negatedSentence.Children[0] is AtomicSentence { IsConstant: true } truthValue) {
-                truthValue.FlipTruthValue();
-                truthValue.Reparent(sentence);
-                sentence = truthValue;
-                return;
-            }
-
             if (negatedSentence.Children[0] is ComplexSentence { IsNegation: false } inner) {
                 inner.FlipOperator(); //deMorgan
                 var p = new ComplexSentence(LogicalConstant.LSymbol.NOT, inner.Children[0]);
@@ -125,7 +118,7 @@ public static class Transformation {
         }
     }
 
-    public static void Absorption(ref Sentence sentence) {
+    private static void Absorption(ref Sentence sentence) {
         if (sentence is AtomicSentence || sentence is ComplexSentence { IsNegation: true }) return;
 
         var complex = sentence as ComplexSentence;
@@ -153,7 +146,7 @@ public static class Transformation {
         }
     }
 
-    public static void AssociationAndIdem(ref Sentence sentence) {
+    private static void AssociationAndIdem(ref Sentence sentence) {
 //A AND A)
 //A OR A)
         //(A AND (B AND A)) = (B AND A)

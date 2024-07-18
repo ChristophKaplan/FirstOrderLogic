@@ -115,18 +115,18 @@ public static class PropositionalLogicExtensions {
         var changed = true;
         steps = new List<Sentence>();
         
-        while (changed) {
-            Transformation.Transform(Transformation.EquivType.SimplifyConstants, ref copy);
+        /*while (changed) {
             changed = !old.Equals(copy);
             if(changed) steps.Add(old);
             old = copy.GetCopy();
             Console.WriteLine("step: " + old);
-        }
+        }*/
         
+        Transformation.Transform(Transformation.EquivType.SimplifyConstants, ref copy);
         steps.Add(copy.GetCopy());
         Transformation.Transform(Transformation.EquivType.DissolveImplication,ref copy);
         steps.Add(copy.GetCopy());
-        Transformation.Transform(Transformation.EquivType.PushNegation, ref copy);
+        Transformation.Transform(Transformation.EquivType.DeMorgan, ref copy);
         steps.Add(copy.GetCopy());
         Transformation.Transform(Transformation.EquivType.DoubleNegation, ref copy);
         steps.Add(copy.GetCopy());
