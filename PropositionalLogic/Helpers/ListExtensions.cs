@@ -1,6 +1,5 @@
 namespace PropositionalLogic.Helpers;
 
-
 public static class ListExtensions
 {
     public static IEnumerable<IEnumerable<T>> DifferentCombinations<T>(this IEnumerable<T> elements, int k)

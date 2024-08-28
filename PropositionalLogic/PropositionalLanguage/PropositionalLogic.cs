@@ -40,22 +40,25 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
     }
 
     protected override void SetUpGrammar() {
-
         var rule01 = AddProductionRule(SpecialNonTerminal.Start, NonTerminal.LangObject);
         var rule02 = AddProductionRule(NonTerminal.LangObject, NonTerminal.Sentence);
+        
         var rule03 = AddProductionRule(NonTerminal.Sentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
         var rule04 = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
         var rule05 = AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
         var rule06 = AddProductionRule(NonTerminal.Sentence, NonTerminal.NegatedSentence);
         var rule07 = AddProductionRule(NonTerminal.Sentence, Terminal.TruthValue);
+        
         var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.TruthValue, NonTerminal.Connective, NonTerminal.Sentence);
         var rule09 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, NonTerminal.Connective, NonTerminal.Sentence);
         var rule10 = AddProductionRule(NonTerminal.ComplexSentence, NonTerminal.NegatedSentence, NonTerminal.Connective, NonTerminal.Sentence);
         var rule11 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, NonTerminal.Connective, NonTerminal.Sentence);
         var rule12 = AddProductionRule(NonTerminal.NegatedSentence, Terminal.Negation,Terminal.Open, NonTerminal.Sentence, Terminal.Close); //Negation musst be scoped (?) otherwise i get dangling else
+        
         var rule13 = AddProductionRule(NonTerminal.Connective, Terminal.Conjunction);
         var rule14 = AddProductionRule(NonTerminal.Connective, Terminal.Disjunction);
         var rule15 = AddProductionRule(NonTerminal.Connective, Terminal.Implication);
+        
         var rule16 = AddProductionRule(NonTerminal.LangObject, Terminal.Function, Terminal.Open, NonTerminal.LangObject, NonTerminal.Ext);
         var rule17 = AddProductionRule(NonTerminal.Ext, Terminal.Comma, NonTerminal.LangObject, NonTerminal.Ext);
         var rule18 = AddProductionRule(NonTerminal.Ext, Terminal.Close);
