@@ -12,6 +12,7 @@ public class Connective : ILanguageObject {
         FALSE,
         EXISTENTIAL,
         UNIVERSAL,
+        BICONDITIONAL
     }
 
     public LogicSymbol Symbol;
@@ -23,8 +24,10 @@ public class Connective : ILanguageObject {
     public static implicit operator LogicSymbol(Connective constant) => constant.Symbol; 
     public static implicit operator Connective(LogicSymbol symbol) => new (symbol); 
 
-    public override string ToString() {
-        return Symbol switch {
+    public override string ToString() => SymbolToString(Symbol);
+    
+    public static string SymbolToString(LogicSymbol symbol) {
+        return symbol switch {
             LogicSymbol.CONJUNCTION => "\u2227",
             LogicSymbol.DISJUNCTION => "\u2228",
             LogicSymbol.NEGATION => "\u00ac",
@@ -33,7 +36,8 @@ public class Connective : ILanguageObject {
             LogicSymbol.UNIVERSAL => "\u2200",
             LogicSymbol.TRUE => "\u22A4",
             LogicSymbol.FALSE => "\u22A5",
-            _ => throw new Exception($"Error: {this} not found.")
+            LogicSymbol.BICONDITIONAL => "\u21d4",
+            _ => throw new Exception($"Error: {symbol} not found.")
         };
     }
 }

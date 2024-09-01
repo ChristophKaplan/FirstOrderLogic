@@ -15,6 +15,9 @@ public static class FirstOrderLogicExtensions
             case "NOT":
             case "!":
                 return Connective.LogicSymbol.NEGATION;
+            case "IFF":
+            case "<=>":
+                return Connective.LogicSymbol.BICONDITIONAL;
             case "IMPLIES":
             case "=>":
                 return Connective.LogicSymbol.IMPLICATION;
@@ -31,24 +34,33 @@ public static class FirstOrderLogicExtensions
                 throw new Exception($"Unknown Logic Symbol: {lexValue}");
         }
     }
-    
+
+    private delegate void TransformationDelegate(ref Sentence sentence);
     public static Sentence Simplify(this FirstOrderLogic logic, Sentence sentence, out List<Sentence> steps) {
-        var clone = sentence.Clone();
         steps = new List<Sentence>();
+        var clone = sentence.Clone();
         
-        
-        TransformationFOL.Transform(TransformationFOL.EquivType.SimplifyConstants, ref clone);
-        steps.Add(clone.Clone());
-        TransformationFOL.Transform(TransformationFOL.EquivType.DissolveImplication,ref clone);
-        steps.Add(clone.Clone());
-        TransformationFOL.Transform(TransformationFOL.EquivType.PushNegation, ref clone);
-        steps.Add(clone.Clone());
-        TransformationFOL.Transform(TransformationFOL.EquivType.DoubleNegation, ref clone);
-        steps.Add(clone.Clone());
-        TransformationFOL.Transform(TransformationFOL.EquivType.Absorption, ref clone);
-        steps.Add(clone.Clone());
-        TransformationFOL.Transform(TransformationFOL.EquivType.AssociationAndIdem, ref clone);
-        
+        var transformations = new List<TransformationDelegate> {
+            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.SimplifyConstants, ref s),
+            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DissolveBiconditional, ref s),
+            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DissolveImplication, ref s),
+            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.PushNegation, ref s),
+            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DoubleNegation, ref s),
+            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.Absorption, ref s),
+            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.AssociationAndIdem, ref s)
+        };
+
+        while (true) {
+            var start = clone.Clone();
+            foreach (var transform in transformations) {
+                transform(ref clone);
+                steps.Add(clone.Clone());
+            }
+            if (start.Equals(clone)) {
+                break;
+            }
+        }
+
         Console.WriteLine("simplification done.");
         return clone;
     }

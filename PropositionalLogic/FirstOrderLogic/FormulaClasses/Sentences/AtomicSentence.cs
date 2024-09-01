@@ -4,8 +4,8 @@ public abstract class AtomicSentence : Sentence {
     public string Symbol;
 
     public bool IsConstant => Tautology || Contradiction;
-    public bool Tautology => Symbol.Equals(Connective.LogicSymbol.TRUE.ToString());
-    public bool Contradiction => Symbol.Equals(Connective.LogicSymbol.FALSE.ToString());
+    public bool Tautology => Symbol.Equals(Connective.SymbolToString(Connective.LogicSymbol.TRUE));
+    public bool Contradiction => Symbol.Equals(Connective.SymbolToString(Connective.LogicSymbol.FALSE));
 
     public AtomicSentence(string symbol) {
         Symbol = symbol;
@@ -18,9 +18,9 @@ public abstract class AtomicSentence : Sentence {
     
     public void NegateNullary() {
         if (Tautology) {
-            Symbol = Connective.LogicSymbol.FALSE.ToString();
+            Symbol = Connective.SymbolToString(Connective.LogicSymbol.FALSE);
         } else if (Contradiction) {
-            Symbol = Connective.LogicSymbol.TRUE.ToString();
+            Symbol = Connective.SymbolToString(Connective.LogicSymbol.TRUE);
         }
     }
     

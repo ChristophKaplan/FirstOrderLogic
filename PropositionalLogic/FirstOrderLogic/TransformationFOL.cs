@@ -1,7 +1,7 @@
 using FirstOrderLogic;
 
 public static class TransformationFOL {
-    public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem }
+    public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem, DissolveBiconditional }
 
     private delegate void TransformAction<Sentence>(ref Sentence sentence);
 
@@ -28,6 +28,9 @@ public static class TransformationFOL {
             case EquivType.SimplifyConstants:
                 BottomUpTransformation(ref sentence, SimplifyConstants);
                 break;
+            case EquivType.DissolveBiconditional:
+                BottomUpTransformation(ref sentence, DissolveBiconditional);
+                break;
             case EquivType.DissolveImplication:
                 BottomUpTransformation(ref sentence, DissolveImplication);
                 break;
@@ -47,11 +50,12 @@ public static class TransformationFOL {
     }
 
     private static void SimplifyConstants(ref Sentence sentence) {
+        //add these to the other transformations
         //We take out Tautology and Contradiction
         if (sentence is not ComplexSentence complexSentence) {
             return;
         }
-
+        
         if (complexSentence.IsLiteral) {
             if (complexSentence.Children[0] is AtomicSentence { IsConstant: true } constant) {
                 constant.NegateNullary(); //push negation
@@ -62,6 +66,11 @@ public static class TransformationFOL {
             return;
         }
 
+        if (complexSentence._operator.Symbol != Connective.LogicSymbol.CONJUNCTION || 
+            complexSentence._operator.Symbol != Connective.LogicSymbol.DISJUNCTION) {
+            return;
+        }
+        
         foreach (var child in sentence.Children) {
             if (child is not AtomicSentence { IsConstant: true } atomicSentence) {
                 continue;
@@ -80,11 +89,23 @@ public static class TransformationFOL {
                     sentence = atomicSentence;
                     break;
                 default:
-                    throw new Exception(complexSentence.ToString() + complexSentence._operator);
+                    throw new Exception($"{complexSentence}, {complexSentence._operator}");
             }
         }
     }
 
+    private static void DissolveBiconditional(ref Sentence sentence) {
+        if (sentence is ComplexSentence { _operator.Symbol: Connective.LogicSymbol.BICONDITIONAL } implication) {
+            var lhs = implication.Children[0];
+            var rhs = implication.Children[1];
+            var lhsImplication = new ComplexSentence(lhs, Connective.LogicSymbol.IMPLICATION, rhs);
+            var rhsImplication = new ComplexSentence(rhs, Connective.LogicSymbol.IMPLICATION, lhs);
+            var and = new ComplexSentence(lhsImplication, Connective.LogicSymbol.CONJUNCTION, rhsImplication);
+            and.SetParentToParentOf(sentence);
+            sentence = and;
+        }
+    }
+    
     private static void DissolveImplication(ref Sentence sentence) {
         if (sentence is ComplexSentence { _operator.Symbol: Connective.LogicSymbol.IMPLICATION } implication) {
             var lhs = implication.Children[0];

@@ -15,7 +15,8 @@ public enum Terminal
     Implication,
     Negation,
     Boolean,
-    Quantifier
+    Quantifier,
+    Biconditional
 }
 
 public enum NonTerminal
@@ -45,6 +46,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             new TokenDefinition<Terminal>(Terminal.Conjunction, "AND|&&"),
             new TokenDefinition<Terminal>(Terminal.Disjunction, "OR|\\|\\|"),
             new TokenDefinition<Terminal>(Terminal.Implication, "IMPLIES|=>"),
+            new TokenDefinition<Terminal>(Terminal.Biconditional, "IFF|<=>"),
             new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!|-"),
             new TokenDefinition<Terminal>(Terminal.Boolean, "TRUE|FALSE"),
             new TokenDefinition<Terminal>(Terminal.Quantifier, "FORALL|EXISTS"),
@@ -83,6 +85,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
         var ruleCon = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Conjunction);
         var ruleDis = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Disjunction);
         var ruleImp = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Implication);
+        var ruleIFF = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Biconditional);
         var ruleNeg = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Negation);
 
         ruleStart.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
@@ -231,6 +234,10 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
         });
         ruleImp.SetSemanticAction((lhs, rhs) =>
+        {
+            lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+        });
+        ruleIFF.SetSemanticAction((lhs, rhs) =>
         {
             lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
         });

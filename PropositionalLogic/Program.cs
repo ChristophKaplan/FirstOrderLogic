@@ -7,7 +7,7 @@ propositionalLogic.Interpret("A OR B");
 
 
 var firstOrderLogic = new FirstOrderLogic.FirstOrderLogic();
-var get = firstOrderLogic.TryParse("!FORALL x Hum(x,Func(y)) && TRUE");
+var get = firstOrderLogic.TryParse("!FORALL x Hum(x,Func(y)) <=> TRUE");
 Console.WriteLine(firstOrderLogic.Simplify((Sentence)get, out var steps));
     
 /*var debugLang = new DebugLang.DebugLang();
