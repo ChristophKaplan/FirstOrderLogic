@@ -23,9 +23,9 @@ public static class FirstOrderLogicExtensions
             case "FALSE":
                 return LogicalConstant.LSymbol.FALSE;
             case "FORALL":
-                return LogicalConstant.LSymbol.FORALL;
+                return LogicalConstant.LSymbol.UniversalQuantifier;
             case "EXISTS":    
-                return LogicalConstant.LSymbol.EXISTS;
+                return LogicalConstant.LSymbol.ExistentialQuantifier;
                 
             default:
                 throw new Exception($"Unknown Logic Symbol: {lexValue}");

@@ -60,8 +60,8 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
         var ruleSentence = AddProductionRule(NonTerminal.Sentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
         var ruleSentenceComp = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
         var ruleSentenceAtom = AddProductionRule(NonTerminal.Sentence, NonTerminal.AtomicSentence);
-        var ruleSentenceQuantifier = AddProductionRule(NonTerminal.Sentence, Terminal.Quantifier, Terminal.Identifier, NonTerminal.Sentence);
-
+        
+        var ruleSentenceQuantifier = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Quantifier, Terminal.Identifier, NonTerminal.Sentence);
         var ruleComplexSentenceAtomic = AddProductionRule(NonTerminal.ComplexSentence, NonTerminal.AtomicSentence, NonTerminal.ComplexSentenceUnary);
         var ruleComplexSentenceBraces = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, NonTerminal.ComplexSentenceUnary);
         var ruleComplexSentenceNegation = AddProductionRule(NonTerminal.ComplexSentence, NonTerminal.ComplexSentenceUnary);
@@ -92,10 +92,10 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
 
         ruleSentenceQuantifier.SetSemanticAction((lhs, rhs) =>
         {
-            var quantifier = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
-            var variable = ((LexValue)rhs[1].SyntheticAttribute).Value;
+            var quantifierSymbol = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+            var variableString = ((LexValue)rhs[1].SyntheticAttribute).Value;
             var sentence = (Sentence)rhs[2].SyntheticAttribute;
-            //lhs.SyntheticAttribute = new (quantifier, variable, sentence);
+            lhs.SyntheticAttribute = new ComplexSentence(new Quantifier(quantifierSymbol, new Variable(variableString)), sentence);
         });
 
         ruleComplexSentenceAtomic.SetSemanticAction((lhs, rhs) =>
