@@ -14,7 +14,7 @@ public enum Terminal {
     Implication,
     Disjunction,
     Conjunction,
-    TruthValue,
+    Boolean,
 }
 
 public enum NonTerminal {
@@ -34,7 +34,7 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
             new TokenDefinition<Terminal>(Terminal.Disjunction, "OR|\\|\\|"),
             new TokenDefinition<Terminal>(Terminal.Implication, "IMPLIES|=>"),
             new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!|-"),
-            new TokenDefinition<Terminal>(Terminal.TruthValue, "TRUE|FALSE"),
+            new TokenDefinition<Terminal>(Terminal.Boolean, "TRUE|FALSE"),
             new TokenDefinition<Terminal>(Terminal.AtomicSentence, "[A-Z][a-z]*|[a-z]*") 
         };
     }
@@ -47,9 +47,9 @@ public class PropositionalLogic : Language<Terminal, NonTerminal> {
         var rule04 = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
         var rule05 = AddProductionRule(NonTerminal.Sentence, Terminal.AtomicSentence);
         var rule06 = AddProductionRule(NonTerminal.Sentence, NonTerminal.NegatedSentence);
-        var rule07 = AddProductionRule(NonTerminal.Sentence, Terminal.TruthValue);
+        var rule07 = AddProductionRule(NonTerminal.Sentence, Terminal.Boolean);
         
-        var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.TruthValue, NonTerminal.Connective, NonTerminal.Sentence);
+        var rule08 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Boolean, NonTerminal.Connective, NonTerminal.Sentence);
         var rule09 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.AtomicSentence, NonTerminal.Connective, NonTerminal.Sentence);
         var rule10 = AddProductionRule(NonTerminal.ComplexSentence, NonTerminal.NegatedSentence, NonTerminal.Connective, NonTerminal.Sentence);
         var rule11 = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, NonTerminal.Connective, NonTerminal.Sentence);

@@ -14,7 +14,7 @@ public enum Terminal
     Disjunction,
     Implication,
     Negation,
-    Constant,
+    Boolean,
     Quantifier
 }
 
@@ -46,7 +46,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             new TokenDefinition<Terminal>(Terminal.Disjunction, "OR|\\|\\|"),
             new TokenDefinition<Terminal>(Terminal.Implication, "IMPLIES|=>"),
             new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!|-"),
-            new TokenDefinition<Terminal>(Terminal.Constant, "TRUE|FALSE"),
+            new TokenDefinition<Terminal>(Terminal.Boolean, "TRUE|FALSE"),
             new TokenDefinition<Terminal>(Terminal.Quantifier, "FORALL|EXISTS"),
             new TokenDefinition<Terminal>(Terminal.Identifier, "[a-zA-Z]+"),
         };
@@ -60,6 +60,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
         var ruleSentence = AddProductionRule(NonTerminal.Sentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
         var ruleSentenceComp = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
         var ruleSentenceAtom = AddProductionRule(NonTerminal.Sentence, NonTerminal.AtomicSentence);
+        var ruleSentenceBoolean = AddProductionRule(NonTerminal.Sentence, Terminal.Boolean);
         
         var ruleSentenceQuantifier = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Quantifier, Terminal.Identifier, NonTerminal.Sentence);
         var ruleComplexSentenceAtomic = AddProductionRule(NonTerminal.ComplexSentence, NonTerminal.AtomicSentence, NonTerminal.ComplexSentenceUnary);
@@ -89,7 +90,12 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
         ruleSentence.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
         ruleSentenceComp.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         ruleSentenceAtom.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-
+        ruleSentenceBoolean.SetSemanticAction((lhs, rhs) =>
+        {
+            var boolean = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+            lhs.SyntheticAttribute = new Proposition(boolean.ToString());
+        });
+            
         ruleSentenceQuantifier.SetSemanticAction((lhs, rhs) =>
         {
             var quantifierSymbol = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
@@ -102,7 +108,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
         {
             var atomic = (Sentence)rhs[0].SyntheticAttribute;
             var extArray = (ArrayValue)rhs[1].SyntheticAttribute;
-            var connective = (LogicalConstant)extArray.Value[0];
+            var connective = (Connective)extArray.Value[0];
             var sentence = (Sentence)extArray.Value[1];
             lhs.SyntheticAttribute = new ComplexSentence(atomic, connective, sentence);
         });
@@ -111,14 +117,14 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
         {
             var atomic = (Sentence)rhs[1].SyntheticAttribute;
             var extArray = (ArrayValue)rhs[3].SyntheticAttribute;
-            var connective = (LogicalConstant)extArray.Value[0];
+            var connective = (Connective)extArray.Value[0];
             var sentence = (Sentence)extArray.Value[1];
             lhs.SyntheticAttribute = new ComplexSentence(atomic, connective, sentence);
         });
 
         ruleComplexSentenceExt.SetSemanticAction((lhs, rhs) =>
         {
-            var connective = (LogicalConstant)rhs[0].SyntheticAttribute;
+            var connective = (Connective)rhs[0].SyntheticAttribute;
             var sentences = (Sentence)rhs[1].SyntheticAttribute;
             lhs.SyntheticAttribute = new ArrayValue(connective, sentences);
         });
@@ -126,7 +132,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
         ruleComplexSentenceNegation.SetSemanticAction((lhs, rhs) =>
         {
             var extArray = (ArrayValue)rhs[0].SyntheticAttribute;
-            var negation = (LogicalConstant)extArray.Value[0];
+            var negation = (Connective)extArray.Value[0];
             var sentence = (Sentence)extArray.Value[1];
             lhs.SyntheticAttribute = new ComplexSentence(negation, sentence);
         });
