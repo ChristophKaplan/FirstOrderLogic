@@ -1,13 +1,13 @@
 namespace FirstOrderLogic;
 
 public class Quantifier : Connective {
-    private readonly Variable _variable;
+    public readonly Variable Variable;
 
     public Quantifier(LogicSymbol symbol, Variable variable) : base(symbol) {
-        _variable = variable;
+        Variable = variable;
     }
 
     public override string ToString() {
-        return $"{base.ToString()} {_variable}";
+        return $"{base.ToString()} {Variable}";
     }
 }

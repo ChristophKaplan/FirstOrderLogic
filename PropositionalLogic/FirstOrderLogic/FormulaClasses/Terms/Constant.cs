@@ -1,6 +1,6 @@
 namespace FirstOrderLogic;
 
-public class Constant : Term {
+public class Constant : Function {
     public Constant(string termSymbol) : base(termSymbol) {
     }
 }

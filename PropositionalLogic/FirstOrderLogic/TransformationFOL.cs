@@ -66,8 +66,8 @@ public static class TransformationFOL {
             return;
         }
 
-        if (complexSentence._operator.Symbol != Connective.LogicSymbol.CONJUNCTION || 
-            complexSentence._operator.Symbol != Connective.LogicSymbol.DISJUNCTION) {
+        if (complexSentence.Connective.Symbol != Connective.LogicSymbol.CONJUNCTION || 
+            complexSentence.Connective.Symbol != Connective.LogicSymbol.DISJUNCTION) {
             return;
         }
         
@@ -76,7 +76,7 @@ public static class TransformationFOL {
                 continue;
             }
 
-            switch (complexSentence._operator.Symbol) {
+            switch (complexSentence.Connective.Symbol) {
                 case Connective.LogicSymbol.CONJUNCTION when atomicSentence.Tautology:
                 case Connective.LogicSymbol.DISJUNCTION when atomicSentence.Contradiction:
                     var otherSide = complexSentence.GetOtherSide(atomicSentence);
@@ -89,13 +89,13 @@ public static class TransformationFOL {
                     sentence = atomicSentence;
                     break;
                 default:
-                    throw new Exception($"{complexSentence}, {complexSentence._operator}");
+                    throw new Exception($"{complexSentence}, {complexSentence.Connective}");
             }
         }
     }
 
     private static void DissolveBiconditional(ref Sentence sentence) {
-        if (sentence is ComplexSentence { _operator.Symbol: Connective.LogicSymbol.BICONDITIONAL } implication) {
+        if (sentence is ComplexSentence { Connective.Symbol: Connective.LogicSymbol.BICONDITIONAL } implication) {
             var lhs = implication.Children[0];
             var rhs = implication.Children[1];
             var lhsImplication = new ComplexSentence(lhs, Connective.LogicSymbol.IMPLICATION, rhs);
@@ -107,7 +107,7 @@ public static class TransformationFOL {
     }
     
     private static void DissolveImplication(ref Sentence sentence) {
-        if (sentence is ComplexSentence { _operator.Symbol: Connective.LogicSymbol.IMPLICATION } implication) {
+        if (sentence is ComplexSentence { Connective.Symbol: Connective.LogicSymbol.IMPLICATION } implication) {
             var lhs = implication.Children[0];
             var rhs = implication.Children[1];
             var notLhs = new ComplexSentence(Connective.LogicSymbol.NEGATION, lhs);
@@ -156,12 +156,12 @@ public static class TransformationFOL {
         var lhs = sentence.Children[0];
         var rhs = sentence.Children[1];
 
-        if (rhs is ComplexSentence rhsComplex && IsDualOperator(complex._operator, rhsComplex._operator) && rhsComplex.Children.Contains(lhs)) {
+        if (rhs is ComplexSentence rhsComplex && IsDualOperator(complex.Connective, rhsComplex.Connective) && rhsComplex.Children.Contains(lhs)) {
             lhs.SetParentToParentOf(sentence);
             sentence = lhs;
         }
 
-        if (lhs is ComplexSentence lhsComplex && IsDualOperator(complex._operator, lhsComplex._operator) && lhsComplex.Children.Contains(rhs)) {
+        if (lhs is ComplexSentence lhsComplex && IsDualOperator(complex.Connective, lhsComplex.Connective) && lhsComplex.Children.Contains(rhs)) {
             rhs.SetParentToParentOf(sentence);
             sentence = rhs;
         }
@@ -189,12 +189,12 @@ public static class TransformationFOL {
         var lhs = sentence.Children[0];
         var rhs = sentence.Children[1];
 
-        if (rhs is ComplexSentence rhsComplex && IsEquivOperator(complex._operator, rhsComplex._operator) && rhsComplex.Children.Contains(lhs)) {
+        if (rhs is ComplexSentence rhsComplex && IsEquivOperator(complex.Connective, rhsComplex.Connective) && rhsComplex.Children.Contains(lhs)) {
             rhs.SetParentToParentOf(sentence);
             sentence = rhs;
         }
 
-        if (lhs is ComplexSentence lhsComplex && IsEquivOperator(complex._operator, lhsComplex._operator) && lhsComplex.Children.Contains(rhs)) {
+        if (lhs is ComplexSentence lhsComplex && IsEquivOperator(complex.Connective, lhsComplex.Connective) && lhsComplex.Children.Contains(rhs)) {
             lhs.SetParentToParentOf(sentence);
             sentence = lhs;
         }

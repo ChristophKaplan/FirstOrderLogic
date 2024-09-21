@@ -44,6 +44,8 @@ public abstract class Sentence : ILanguageObject {
         parent.InsertChild(index, this);
     }
     
+    public abstract void SubstituteTerm(Term term, Term replacement);
+    
     public Sentence Clone() {
         switch (this) {
             case Proposition proposition:

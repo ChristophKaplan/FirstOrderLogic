@@ -1,24 +1,24 @@
 namespace FirstOrderLogic;
 
 public class ComplexSentence : Sentence {
-    public readonly Connective _operator;
-    public bool IsNegation => _operator == Connective.LogicSymbol.NEGATION;
+    public readonly Connective Connective;
+    public bool IsNegation => Connective == Connective.LogicSymbol.NEGATION;
     public bool IsQuantifier =>
-        _operator == Connective.LogicSymbol.EXISTENTIAL || _operator == Connective.LogicSymbol.UNIVERSAL;
+        Connective == Connective.LogicSymbol.EXISTENTIAL || Connective == Connective.LogicSymbol.UNIVERSAL;
 
-    public ComplexSentence(Sentence p, Connective @operator, Sentence q) {
-        _operator = @operator;
+    public ComplexSentence(Sentence p, Connective connective, Sentence q) {
+        Connective = connective;
         AddChild(p);
         AddChild(q);
     }
 
-    public ComplexSentence(Connective @operator, Sentence p) {
-        _operator = @operator;
+    public ComplexSentence(Connective connective, Sentence p) {
+        Connective = connective;
         AddChild(p);
     }
     
     public ComplexSentence(ComplexSentence other) {
-        _operator = other._operator;
+        Connective = other.Connective;
         Parent = other.Parent;
         foreach (var child in other.Children) {
             AddChild(child.Clone());
@@ -26,13 +26,13 @@ public class ComplexSentence : Sentence {
     }
 
     public void FlipOperator() {
-        _operator.Symbol = _operator.Symbol switch {
+        Connective.Symbol = Connective.Symbol switch {
             Connective.LogicSymbol.CONJUNCTION => Connective.LogicSymbol.DISJUNCTION,
             Connective.LogicSymbol.DISJUNCTION => Connective.LogicSymbol.CONJUNCTION,
             Connective.LogicSymbol.EXISTENTIAL => Connective.LogicSymbol.UNIVERSAL,
             Connective.LogicSymbol.UNIVERSAL => Connective.LogicSymbol.EXISTENTIAL,
 
-            _ => throw new Exception($"Error: {this._operator.Symbol} not found.")
+            _ => throw new Exception($"Error: {this.Connective.Symbol} not found.")
         };
     }
 
@@ -48,12 +48,18 @@ public class ComplexSentence : Sentence {
         }
         throw new Exception("Error: Sentence not found in ComplexSentence.");
     }
-    
+
+    public override void SubstituteTerm(Term term, Term replacement) {
+        foreach (var child in Children) {
+            child.SubstituteTerm(term, replacement);
+        }
+    }
+
     public override string ToString() {
         if (IsNegation || IsQuantifier) {
-            return $"{_operator} {Children[0]}";
+            return $"{Connective} {Children[0]}";
         }
 
-        return $"({Children[0]} {_operator} {Children[1]})";
+        return $"({Children[0]} {Connective} {Children[1]})";
     }
 }
