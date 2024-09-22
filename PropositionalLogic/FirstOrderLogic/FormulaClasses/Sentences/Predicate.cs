@@ -33,4 +33,17 @@ public class Predicate : AtomicSentence {
         }
         return variables.ToArray();
     }
+
+    public bool HasBoundVariables() {
+        Sentence current = this;
+        while (current.Parent != null) {
+            current = current.Parent;
+            
+            if(current is ComplexSentence { IsQuantifier: true }) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }

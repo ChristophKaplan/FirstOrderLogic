@@ -7,10 +7,12 @@ public class Function : Term {
         Terms = terms;
     }
 
-    protected Function(string termSymbol) : base(termSymbol) { }
+    protected Function(string termSymbol) : base(termSymbol) {
+        Terms = Array.Empty<Term>();
+    }
     
     public override string ToString() {
-        return $"{base.ToString()}({string.Join<Term>(",", Terms)})";
+        return IsConstant ? base.ToString() : $"{base.ToString()}({string.Join<Term>(",", Terms)})";
     }
 
     public void SubstituteTerm(Term term, Term replacement) {

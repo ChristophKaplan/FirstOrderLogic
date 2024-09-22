@@ -3,10 +3,10 @@ using LRParser.Language;
 namespace FirstOrderLogic;
 
 public abstract class Term : ILanguageObject {
-    private readonly string _termSymbol;
+    public readonly string TermSymbol;
 
     public Term(string termSymbol) {
-        _termSymbol = termSymbol;
+        TermSymbol = termSymbol;
     }
 
     public override bool Equals(object? obj) {
@@ -14,15 +14,15 @@ public abstract class Term : ILanguageObject {
             return false;
         }
 
-        return _termSymbol.Equals(((Term)obj)._termSymbol);
+        return TermSymbol.Equals(((Term)obj).TermSymbol);
     }
     
     public override int GetHashCode() {
-        return _termSymbol.GetHashCode();
+        return TermSymbol.GetHashCode();
     }
 
     public override string ToString() {
-        return _termSymbol;
+        return TermSymbol;
     }
     
     public Variable[] GetVariables() {

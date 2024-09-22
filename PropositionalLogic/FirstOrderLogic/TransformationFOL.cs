@@ -10,6 +10,8 @@ public static class TransformationFOL {
             var childSentence = sentence.Children[i];
             BottomUpTransformation(ref childSentence, transformAction);
         }
+        
+        //how is this bottomup when there is no parent call?
 
         transformAction(ref sentence);
     }

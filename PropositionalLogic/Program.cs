@@ -1,16 +1,18 @@
 using FirstOrderLogic;
 
-var propositionalLogic = new PropositionalLogic.PropositionalLogic();
+//var propositionalLogic = new PropositionalLogic.PropositionalLogic();
 //logic.Interpret("Forget((A AND (A AND B)) OR C, A)");
 //logic.Interpret("Simplify(Forget((A AND (A AND B)) OR C, A))");
-propositionalLogic.Interpret("A OR B");
+//propositionalLogic.Interpret("A OR B");
 
 
 var firstOrderLogic = new FirstOrderLogic.FirstOrderLogic();
-var get = (Sentence)firstOrderLogic.TryParse("!FORALL x Hum(x,Func(y)) <=> TRUE");
+var get = (Sentence)firstOrderLogic.TryParse("FORALL x Human(x) => Mortal(x)");
 Console.WriteLine(firstOrderLogic.Simplify(get, out var steps));
 var interpretation = new Interpretation(null);
-interpretation.Evaluate(get);
+var eval = interpretation.Evaluate(get);
+Console.WriteLine(eval);
+
 
 /*var debugLang = new DebugLang.DebugLang();
 var get2 = debugLang.TryParse("A"); 

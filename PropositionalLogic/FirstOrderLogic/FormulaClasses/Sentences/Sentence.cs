@@ -24,6 +24,7 @@ public abstract class Sentence : ILanguageObject {
 
     public void SetParentToParentOf(Sentence parentOfThis) {
         if (parentOfThis.Parent == null) {
+            this.Parent = null; //??
             return;
         }
 
@@ -62,10 +63,27 @@ public abstract class Sentence : ILanguageObject {
     }
 
     public void Negate() {
-        var negated = new ComplexSentence(Connective.LogicSymbol.NEGATION, this.Clone());
+        //TODO: what if its negation already
+        var negated = new ComplexSentence(Connective.LogicSymbol.NEGATION, Clone());
         negated.SetParentToParentOf(this);
     }
-    
+
+    public bool HasScopeConflict(List<Variable> boundVariables = default) {
+        boundVariables ??= new List<Variable>();
+        
+        if(this is ComplexSentence { IsQuantifier: true } complexSentence) {
+            var boundVariable = ((Quantifier) complexSentence.Connective).Variable;
+            if (boundVariables.Contains(boundVariable)) {
+                return true;
+            }
+            
+            boundVariables.Add(boundVariable);
+        }
+
+        return Children.Any(child => child.HasScopeConflict());
+    }
+
+
     public override bool Equals(object? obj) {
         if (obj == null || GetType() != obj.GetType()) {
             return false;

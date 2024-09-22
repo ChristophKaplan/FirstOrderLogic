@@ -40,4 +40,16 @@ public class Connective : ILanguageObject {
             _ => throw new Exception($"Error: {symbol} not found.")
         };
     }
+
+    public override bool Equals(object? obj) {
+        if (obj == null || GetType() != obj.GetType()) {
+            return false;
+        }
+
+        return Symbol == ((Connective)obj).Symbol;
+    }
+    
+    public override int GetHashCode() {
+        return Symbol.GetHashCode();
+    }
 }
