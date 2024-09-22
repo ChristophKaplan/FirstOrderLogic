@@ -2,6 +2,15 @@ namespace FirstOrderLogic;
 
 public class ScopeTable {
     private readonly List<Quantifier> _quantifiers = new();
+
+    public ScopeTable Clone() {
+        var clone = new ScopeTable();
+        foreach (var quantifier in _quantifiers) {
+            clone._quantifiers.Add(quantifier);
+        }
+        return clone;
+    }
+
     public void SetScope(Quantifier other) {
         _quantifiers.RemoveAll(q => q.Variable.Equals(other.Variable)); 
         _quantifiers.Add(other);
@@ -11,7 +20,7 @@ public class ScopeTable {
         return _quantifiers.Find(quantifier => quantifier.Variable.Equals(variable));
     }
 
-    private bool IsScoped(Variable variable) {
+    public bool IsScoped(Variable variable) {
         return _quantifiers.Exists(quantifier => quantifier.Variable.Equals(variable));
     }
     

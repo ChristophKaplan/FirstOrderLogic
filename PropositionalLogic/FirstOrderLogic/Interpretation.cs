@@ -31,7 +31,7 @@ public class Interpretation : ILanguageObject{
         }
     }
     
-    public bool Evaluate(Sentence sentence, ScopeTable table = null) {
+    public bool Evaluate(Sentence sentence, ScopeTable table = default) {
         return sentence switch {
             AtomicSentence atomicSentence => Evaluate(atomicSentence, table),
             ComplexSentence complexSentence => Evaluate(complexSentence, table),
@@ -56,27 +56,22 @@ public class Interpretation : ILanguageObject{
     }
     
     private bool Evaluate(Predicate predicate, ScopeTable table) {
-        
         if(!_relations.TryGetValue(predicate, out var relation)) {
             throw new Exception($"Error: {predicate} not found in interpretation.");
         }
         
-        var terms = predicate.Terms; // need to evaluate terms
-        
-        if (!table.HasBoundVariables(predicate)) {
-            return relation(Array.ConvertAll(terms, term => Evaluate(term)));
+        if (table.HasBoundVariables(predicate)) {
+          throw new Exception($"Error: {predicate} has bound variables.");
         }
         
-        //how to evaluate bound variables? Ex Ay,z P(x,y,z)
-        //probably send in the quantifier evaluate for every variable.
-        throw new Exception("Error: bound variables not implemented.");
+        return relation(Array.ConvertAll(predicate.Terms, Evaluate));
     }
     
     private IElementOfDiscourse Evaluate(Term term) {
         return term switch {
-            Variable variable => _variableAssigment.TryGetValue(variable, out var domain) ? domain : throw new Exception("Error: variable not found in interpretation."),
             Constant constant => _functions.TryGetValue(constant, out var nullAryFunc) ? nullAryFunc(Array.Empty<Term>()) : throw new Exception("Error: constant not found in interpretation."),
             Function function =>  _functions.TryGetValue(function, out var func) ? func(function.Terms) : throw new Exception("Error: function not found in interpretation."),
+            Variable variable => _variableAssigment.TryGetValue(variable, out var domain) ? domain : throw new Exception("Error: variable not found in interpretation."),
             _ => throw new Exception($"Error: {term} not found in interpretation.")
         };
     }
@@ -99,12 +94,26 @@ public class Interpretation : ILanguageObject{
     private bool Evaluate(Quantifier quantifier, Sentence sentence, ScopeTable table) {
         table ??= new ScopeTable();
         table.SetScope(quantifier);
+
+        if(table.IsScoped(quantifier.Variable)) {
+            throw new Exception($"Error: {quantifier.Variable} is already quantified.");
+        }
         
-        //one way, to generate constants for all variables and send them through the evaluate route.
-        //so for exmaple, if we have ForAll y,z P(x,y,z) we substitue y and z make a lot of new sentence.
-        //then we evaluate them all and return true if all are true. but could this be a efficiency problem?
+        foreach (var element in Domain.Elements) {
+            var constantToElement = new Constant($"element_{element.Id}");
+            var clone = sentence.Clone(); 
+            clone.SubstituteTerm(quantifier.Variable, constantToElement);
+            var isTrue = Evaluate(clone, table);
+            
+            switch (quantifier.Symbol) {
+                case Connective.LogicSymbol.UNIVERSAL when !isTrue:
+                    return false;
+                case Connective.LogicSymbol.EXISTENTIAL when isTrue:
+                    return true;
+            }
+        }
         
-        return Evaluate(sentence, table);
+        return quantifier.Symbol == Connective.LogicSymbol.UNIVERSAL;
     }
     
     public override bool Equals(object? obj) {
