@@ -3,9 +3,9 @@ using FirstOrderLogic;
 public static class TransformationFOL {
     public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem, DissolveBiconditional }
 
-    private delegate void TransformAction<Sentence>(ref Sentence sentence);
+    private delegate void TransformAction<T>(ref T sentence);
 
-    private static void BottomUpTransformation(ref Sentence sentence, TransformAction<Sentence> transformAction) {
+    private static void BottomUpTransformation(ref ISentence sentence, TransformAction<ISentence> transformAction) {
         for (var i = 0; i < sentence.Children.Count; i++) {
             var childSentence = sentence.Children[i];
             BottomUpTransformation(ref childSentence, transformAction);
@@ -16,7 +16,7 @@ public static class TransformationFOL {
         transformAction(ref sentence);
     }
 
-    private static void TopDownTransformation(ref Sentence sentence, TransformAction<Sentence> transformAction) {
+    private static void TopDownTransformation(ref ISentence sentence, TransformAction<ISentence> transformAction) {
         transformAction(ref sentence);
 
         for (var i = 0; i < sentence.Children.Count; i++) {
@@ -25,7 +25,7 @@ public static class TransformationFOL {
         }
     }
 
-    public static void Transform(EquivType equivType, ref Sentence sentence) {
+    public static void Transform(EquivType equivType, ref ISentence sentence) {
         switch (equivType) {
             case EquivType.SimplifyConstants:
                 BottomUpTransformation(ref sentence, SimplifyConstants);
@@ -51,16 +51,16 @@ public static class TransformationFOL {
         }
     }
 
-    private static void SimplifyConstants(ref Sentence sentence) {
+    private static void SimplifyConstants(ref ISentence sentence) {
         //add these to the other transformations
         //We take out Tautology and Contradiction
-        if (sentence is not ComplexSentence complexSentence) {
+        if (sentence is not IComplexSentence complexSentence) {
             return;
         }
         
         if (complexSentence.IsLiteral) {
-            if (complexSentence.Children[0] is AtomicSentence { IsConstant: true } constant) {
-                constant.NegateNullary(); //push negation
+            if (complexSentence.Children[0] is IAtomicSentence { IsNullaryConstant: true } constant) {
+                constant.Negate(); //push negation
                 constant.SetParentToParentOf(sentence);
                 sentence = constant;
             }
@@ -74,7 +74,7 @@ public static class TransformationFOL {
         }
         
         foreach (var child in sentence.Children) {
-            if (child is not AtomicSentence { IsConstant: true } atomicSentence) {
+            if (child is not IAtomicSentence { IsNullaryConstant: true } atomicSentence) {
                 continue;
             }
 
@@ -96,8 +96,8 @@ public static class TransformationFOL {
         }
     }
 
-    private static void DissolveBiconditional(ref Sentence sentence) {
-        if (sentence is ComplexSentence { Connective.Symbol: Connective.LogicSymbol.BICONDITIONAL } implication) {
+    private static void DissolveBiconditional(ref ISentence sentence) {
+        if (sentence is IComplexSentence { Connective.Symbol: Connective.LogicSymbol.BICONDITIONAL } implication) {
             var lhs = implication.Children[0];
             var rhs = implication.Children[1];
             var lhsImplication = new ComplexSentence(lhs, Connective.LogicSymbol.IMPLICATION, rhs);
@@ -108,8 +108,8 @@ public static class TransformationFOL {
         }
     }
     
-    private static void DissolveImplication(ref Sentence sentence) {
-        if (sentence is ComplexSentence { Connective.Symbol: Connective.LogicSymbol.IMPLICATION } implication) {
+    private static void DissolveImplication(ref ISentence sentence) {
+        if (sentence is IComplexSentence { Connective.Symbol: Connective.LogicSymbol.IMPLICATION } implication) {
             var lhs = implication.Children[0];
             var rhs = implication.Children[1];
             var notLhs = new ComplexSentence(Connective.LogicSymbol.NEGATION, lhs);
@@ -119,13 +119,13 @@ public static class TransformationFOL {
         }
     }
 
-    private static void PushNegation(ref Sentence sentence) {
-        if (sentence is not ComplexSentence { IsNegation: true } negatedSentence) {
+    private static void PushNegation(ref ISentence sentence) {
+        if (sentence is not IComplexSentence { IsNegation: true } negatedSentence) {
             return;
         }
 
         //negate quantifier
-        if (negatedSentence.Children[0] is ComplexSentence { IsNegation: false, IsQuantifier: true } quantified) {
+        if (negatedSentence.Children[0] is IComplexSentence { IsNegation: false, IsQuantifier: true } quantified) {
             quantified.FlipOperator();
             quantified.Children[0].Negate();
             quantified.SetParentToParentOf(sentence);
@@ -133,7 +133,7 @@ public static class TransformationFOL {
         }
 
         //deMorgan
-        else if (negatedSentence.Children[0] is ComplexSentence { IsNegation: false, IsBinary: true } inner) {
+        else if (negatedSentence.Children[0] is IComplexSentence { IsNegation: false, IsBinary: true } inner) {
             inner.FlipOperator();
             inner.Children[0].Negate();
             inner.Children[1].Negate();
@@ -142,28 +142,28 @@ public static class TransformationFOL {
         }
     }
 
-    public static void DoubleNegation(ref Sentence sentence) {
-        if (sentence is ComplexSentence { IsNegation: true } negation) {
-            if (negation.Children[0] is ComplexSentence { IsNegation: true } doubleNegation) {
+    public static void DoubleNegation(ref ISentence sentence) {
+        if (sentence is IComplexSentence { IsNegation: true } negation) {
+            if (negation.Children[0] is IComplexSentence { IsNegation: true } doubleNegation) {
                 var i = negation.Parent.Children.IndexOf(negation);
                 negation.Parent.Children[i] = doubleNegation.Children[0];
             }
         }
     }
 
-    private static void Absorption(ref Sentence sentence) {
+    private static void Absorption(ref ISentence sentence) {
         if (!sentence.IsBinary) return;
 
-        var complex = sentence as ComplexSentence;
+        var complex = sentence as IComplexSentence;
         var lhs = sentence.Children[0];
         var rhs = sentence.Children[1];
 
-        if (rhs is ComplexSentence rhsComplex && IsDualOperator(complex.Connective, rhsComplex.Connective) && rhsComplex.Children.Contains(lhs)) {
+        if (rhs is IComplexSentence rhsComplex && IsDualOperator(complex.Connective, rhsComplex.Connective) && rhsComplex.Children.Contains(lhs)) {
             lhs.SetParentToParentOf(sentence);
             sentence = lhs;
         }
 
-        if (lhs is ComplexSentence lhsComplex && IsDualOperator(complex.Connective, lhsComplex.Connective) && lhsComplex.Children.Contains(rhs)) {
+        if (lhs is IComplexSentence lhsComplex && IsDualOperator(complex.Connective, lhsComplex.Connective) && lhsComplex.Children.Contains(rhs)) {
             rhs.SetParentToParentOf(sentence);
             sentence = rhs;
         }
@@ -179,7 +179,7 @@ public static class TransformationFOL {
         }
     }
 
-    private static void AssociationAndIdem(ref Sentence sentence) {
+    private static void AssociationAndIdem(ref ISentence sentence) {
 //A AND A)
 //A OR A)
         //(A AND (B AND A)) = (B AND A)
@@ -187,16 +187,16 @@ public static class TransformationFOL {
 
         if (!sentence.IsBinary) return;
 
-        var complex = sentence as ComplexSentence;
+        var complex = sentence as IComplexSentence;
         var lhs = sentence.Children[0];
         var rhs = sentence.Children[1];
 
-        if (rhs is ComplexSentence rhsComplex && IsEquivOperator(complex.Connective, rhsComplex.Connective) && rhsComplex.Children.Contains(lhs)) {
+        if (rhs is IComplexSentence rhsComplex && IsEquivOperator(complex.Connective, rhsComplex.Connective) && rhsComplex.Children.Contains(lhs)) {
             rhs.SetParentToParentOf(sentence);
             sentence = rhs;
         }
 
-        if (lhs is ComplexSentence lhsComplex && IsEquivOperator(complex.Connective, lhsComplex.Connective) && lhsComplex.Children.Contains(rhs)) {
+        if (lhs is IComplexSentence lhsComplex && IsEquivOperator(complex.Connective, lhsComplex.Connective) && lhsComplex.Children.Contains(rhs)) {
             lhs.SetParentToParentOf(sentence);
             sentence = lhs;
         }

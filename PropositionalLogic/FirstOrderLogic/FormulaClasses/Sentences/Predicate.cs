@@ -1,13 +1,19 @@
 namespace FirstOrderLogic;
 
-public class Predicate : AtomicSentence {
-    public readonly Term[] Terms;
+public interface IPredicate : IAtomicSentence {
+    public Term[] Terms { get; }
+    public Variable[] GetVariables();
+    public bool HasBoundVariables();
+}
+
+public class Predicate : AtomicSentence, IPredicate {
+    public Term[] Terms { get; set; }
 
     public Predicate(string predicateSymbol, Term[] terms) : base(predicateSymbol) {
         Terms = terms;
     }
 
-    public Predicate(Predicate other) : base(other) {
+    public Predicate(IPredicate other) : base(other) {
         Terms = other.Terms;
     }
 
@@ -35,11 +41,11 @@ public class Predicate : AtomicSentence {
     }
 
     public bool HasBoundVariables() {
-        Sentence current = this;
+        ISentence current = this;
         while (current.Parent != null) {
             current = current.Parent;
             
-            if(current is ComplexSentence { IsQuantifier: true }) {
+            if(current is IComplexSentence { IsQuantifier: true }) {
                 return true;
             }
         }

@@ -3,33 +3,9 @@ using LRParser.Language;
 
 namespace FirstOrderLogic;
 
-public interface IElementOfDiscourse {
-    public int Id{ get; }
-}
-
-public interface IDomainOfDiscourse {
-    public List<IElementOfDiscourse> Elements { get; }
-}
-
-public class Domain : IDomainOfDiscourse {
-    public List<IElementOfDiscourse> Elements { get; } = new();
-    
-    public Domain(params IElementOfDiscourse[] elements) {
-        Elements.AddRange(elements);
-    }
-}
-
-public class Element : IElementOfDiscourse {
-    public int Id { get; }
-    
-    public Element(int id) {
-        Id = id;
-    }
-}
-
 public class Interpretation : ILanguageObject{
     private IDomainOfDiscourse Domain { get; set; }
-    private readonly Dictionary<AtomicSentence, bool> _propositionAssignment = new();
+    private readonly Dictionary<IAtomicSentence, bool> _propositionAssignment = new();
     private readonly Dictionary<string, IElementOfDiscourse> _variableAssigment = new();
     private readonly Dictionary<string, Func<IElementOfDiscourse[], bool>> _relations = new();
     private readonly Dictionary<string, Func<Term[], IElementOfDiscourse>> _functions = new();
@@ -62,7 +38,7 @@ public class Interpretation : ILanguageObject{
         }
     }
     
-    public bool Evaluate(Sentence sentence) {
+    public bool Evaluate(ISentence sentence) {
         if(sentence.HasScopeConflict()) {
             throw new Exception("Error: Sentence has scope conflict.");
         }
@@ -74,7 +50,7 @@ public class Interpretation : ILanguageObject{
         };
     }
     
-    private bool Evaluate(AtomicSentence atomicSentence) {
+    private bool Evaluate(IAtomicSentence atomicSentence) {
         return atomicSentence switch {
             Proposition proposition => Evaluate(proposition),
             Predicate predicate => Evaluate(predicate),
@@ -82,7 +58,7 @@ public class Interpretation : ILanguageObject{
         };
     }
     
-    private bool Evaluate(Proposition proposition) {
+    private bool Evaluate(IProposition proposition) {
         if (_propositionAssignment.TryGetValue(proposition, out var value)) {
             return value;
         }
@@ -90,7 +66,7 @@ public class Interpretation : ILanguageObject{
         throw new Exception($"Error: {proposition} not found in interpretation.");
     }
     
-    private bool Evaluate(Predicate predicate) {
+    private bool Evaluate(IPredicate predicate) {
         if(!_relations.TryGetValue(predicate.Symbol, out var relation)) {
             throw new Exception($"Error: {predicate} not found in interpretation.");
         }
@@ -111,7 +87,7 @@ public class Interpretation : ILanguageObject{
         };
     }
     
-    private bool Evaluate(ComplexSentence complexSentence) {
+    private bool Evaluate(IComplexSentence complexSentence) {
         return complexSentence.Connective.Symbol switch {
             Connective.LogicSymbol.TRUE => true,
             Connective.LogicSymbol.FALSE => false,
@@ -126,7 +102,10 @@ public class Interpretation : ILanguageObject{
         };
     }
 
-    private Sentence InstantiateVariable(Variable variable, Sentence sentence, IElementOfDiscourse element) {
+    private ISentence InstantiateVariable(Variable variable, ISentence sentence, IElementOfDiscourse element) {
+        //TODO: pass the constants as additional param, or ass variable assigment? how is it donw usually?
+        //TODO: check how skolemiztion works, and unification
+        
         var constantToElement = new Constant($"element_{element.Id}");
         _functions.Add(constantToElement.TermSymbol, _ => element);
         var clone = sentence.Clone(); 

@@ -35,19 +35,19 @@ public static class FirstOrderLogicExtensions
         }
     }
 
-    private delegate void TransformationDelegate(ref Sentence sentence);
-    public static Sentence Simplify(this FirstOrderLogic logic, Sentence sentence, out List<Sentence> steps) {
-        steps = new List<Sentence>();
+    private delegate void TransformationDelegate(ref ISentence sentence);
+    public static ISentence Simplify(this FirstOrderLogic logic, ISentence sentence, out List<ISentence> steps) {
+        steps = new List<ISentence>();
         var clone = sentence.Clone();
         
         var transformations = new List<TransformationDelegate> {
-            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.SimplifyConstants, ref s),
-            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DissolveBiconditional, ref s),
-            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DissolveImplication, ref s),
-            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.PushNegation, ref s),
-            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DoubleNegation, ref s),
-            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.Absorption, ref s),
-            (ref Sentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.AssociationAndIdem, ref s)
+            (ref ISentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.SimplifyConstants, ref s),
+            (ref ISentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DissolveBiconditional, ref s),
+            (ref ISentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DissolveImplication, ref s),
+            (ref ISentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.PushNegation, ref s),
+            (ref ISentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DoubleNegation, ref s),
+            (ref ISentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.Absorption, ref s),
+            (ref ISentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.AssociationAndIdem, ref s)
         };
 
         while (true) {

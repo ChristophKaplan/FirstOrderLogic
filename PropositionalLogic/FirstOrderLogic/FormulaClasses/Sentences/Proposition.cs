@@ -1,10 +1,12 @@
 namespace FirstOrderLogic;
 
-public class Proposition : AtomicSentence {
+public interface IProposition : IAtomicSentence { }
+
+public class Proposition : AtomicSentence, IProposition {
     public Proposition(string propositionSymbol) : base(propositionSymbol) {
     }
 
-    public Proposition(Proposition other) : base(other) {
+    public Proposition(IProposition other) : base(other) {
     }
 
     public override void SubstituteTerm(Term term, Term replacement) {

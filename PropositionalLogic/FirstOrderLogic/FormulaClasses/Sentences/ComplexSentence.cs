@@ -1,22 +1,30 @@
 namespace FirstOrderLogic;
 
-public class ComplexSentence : Sentence {
-    public readonly Connective Connective;
+public interface IComplexSentence : ISentence{
+    Connective Connective { get; }
+    bool IsNegation { get; }
+    bool IsQuantifier { get; }
+    void FlipOperator();
+    ISentence GetOtherSide(ISentence sentence);
+}
+
+public class ComplexSentence : Sentence, IComplexSentence {
+    public Connective Connective { get; set; }
     public bool IsNegation => Connective == Connective.LogicSymbol.NEGATION;
     public bool IsQuantifier => Connective == Connective.LogicSymbol.EXISTENTIAL || Connective == Connective.LogicSymbol.UNIVERSAL;
-
-    public ComplexSentence(Sentence p, Connective connective, Sentence q) {
+    
+    public ComplexSentence(ISentence p, Connective connective, ISentence q) {
         Connective = connective;
         AddChild(p);
         AddChild(q);
     }
 
-    public ComplexSentence(Connective connective, Sentence p) {
+    public ComplexSentence(Connective connective, ISentence p) {
         Connective = connective;
         AddChild(p);
     }
 
-    public ComplexSentence(ComplexSentence other) {
+    public ComplexSentence(IComplexSentence other) {
         Connective = other.Connective;
         Parent = other.Parent;
         foreach (var child in other.Children) {
@@ -34,7 +42,7 @@ public class ComplexSentence : Sentence {
         };
     }
 
-    public Sentence GetOtherSide(Sentence sentence) {
+    public ISentence GetOtherSide(ISentence sentence) {
         if (Children.Count != 2) {
             throw new Exception("Error: ComplexSentence must have two children.");
         }
@@ -56,11 +64,12 @@ public class ComplexSentence : Sentence {
         }
     }
 
-    public override string ToString() {
-        if (IsNegation || IsQuantifier) {
-            return $"{Connective} {Children[0]}";
-        }
+    public override void Negate() {
+        var negated = IsNegation ? Children[0] : new ComplexSentence(Connective.LogicSymbol.NEGATION, Clone());
+        negated.SetParentToParentOf(this);
+    }
 
-        return $"({Children[0]} {Connective} {Children[1]})";
+    public override string ToString() {
+        return Children.Count == 1 ? $"{Connective} {Children[0]}" : $"({Children[0]} {Connective} {Children[1]})";
     }
 }

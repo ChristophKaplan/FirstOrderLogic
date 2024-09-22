@@ -40,4 +40,8 @@ public abstract class Term : ILanguageObject {
                 return Array.Empty<Variable>();
         }
     }
+    
+    public bool Contains(Variable variable) {
+        return GetVariables().Contains(variable);
+    }
 }
