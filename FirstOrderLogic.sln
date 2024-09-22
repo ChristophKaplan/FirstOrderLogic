@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropositionalLogic", "PropositionalLogic\PropositionalLogic.csproj", "{C563103B-3418-4E10-B78B-7126FC6B669F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirstOrderLogic", "FirstOrderLogic\FirstOrderLogic.csproj", "{C563103B-3418-4E10-B78B-7126FC6B669F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
