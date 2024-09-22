@@ -5,7 +5,7 @@ public interface IComplexSentence : ISentence{
     bool IsNegation { get; }
     bool IsQuantifier { get; }
     void FlipOperator();
-    ISentence GetOtherSide(ISentence sentence);
+    ISentence GetSiblingOf(ISentence sentence);
 }
 
 public class ComplexSentence : Sentence, IComplexSentence {
@@ -42,7 +42,7 @@ public class ComplexSentence : Sentence, IComplexSentence {
         };
     }
 
-    public ISentence GetOtherSide(ISentence sentence) {
+    public ISentence GetSiblingOf(ISentence sentence) {
         if (Children.Count != 2) {
             throw new Exception("Error: ComplexSentence must have two children.");
         }

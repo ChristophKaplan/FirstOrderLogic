@@ -35,7 +35,7 @@ public class Literal : Sentence, ILiteral {
     public void FlipOperator() {
         throw new NotImplementedException();
     }
-    public ISentence GetOtherSide(ISentence sentence) {
+    public ISentence GetSiblingOf(ISentence sentence) {
         throw new NotImplementedException();
     }
 }

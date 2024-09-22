@@ -1,7 +1,7 @@
 using FirstOrderLogic;
 
 public static class TransformationFOL {
-    public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem, DissolveBiconditional }
+    public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem, DissolveBiconditional, PullQuantifier, RemoveDuplicateQuantifier }
 
     private delegate void TransformAction<T>(ref T sentence);
 
@@ -48,7 +48,49 @@ public static class TransformationFOL {
             case EquivType.AssociationAndIdem:
                 BottomUpTransformation(ref sentence, AssociationAndIdem);
                 break;
+            case EquivType.PullQuantifier:
+                BottomUpTransformation(ref sentence, PullQuantifier);
+                break;
+            case EquivType.RemoveDuplicateQuantifier:
+                TopDownTransformation(ref sentence, RemoveDuplicateQuantifier);
+                break;
         }
+    }
+
+
+    
+    private static void PullQuantifier(ref ISentence sentence) {
+        if (sentence is not IComplexSentence { IsQuantifier: true } quantifiedSentence) {
+            return;
+        }
+
+        if(quantifiedSentence.Parent is not IComplexSentence { IsBinary: true } connectiveParent) {
+            return;
+        }
+
+        var sibling = connectiveParent.GetSiblingOf(quantifiedSentence);
+        
+        var quantifierRemoved = new ComplexSentence(quantifiedSentence.Children[0], connectiveParent.Connective, sibling);
+        var result = new ComplexSentence(quantifiedSentence.Connective, quantifierRemoved);
+        result.SetParentToParentOf(connectiveParent);
+        sentence = result;
+    }
+    
+    private static void RemoveDuplicateQuantifier(ref ISentence sentence) {
+        if (sentence is not IComplexSentence { IsQuantifier: true } quantifiedSentence) {
+            return;
+        }
+        
+        if(quantifiedSentence.Children[0] is not IComplexSentence {IsQuantifier:true} childQuantified) {
+            return;
+        }
+
+        if (!Equals(quantifiedSentence.Connective, childQuantified.Connective)) {
+            return;
+        }
+
+        childQuantified.SetParentToParentOf(sentence);
+        sentence = childQuantified;
     }
 
     private static void SimplifyConstants(ref ISentence sentence) {
@@ -81,7 +123,7 @@ public static class TransformationFOL {
             switch (complexSentence.Connective.Symbol) {
                 case Connective.LogicSymbol.CONJUNCTION when atomicSentence.Tautology:
                 case Connective.LogicSymbol.DISJUNCTION when atomicSentence.Contradiction:
-                    var otherSide = complexSentence.GetOtherSide(atomicSentence);
+                    var otherSide = complexSentence.GetSiblingOf(atomicSentence);
                     otherSide.SetParentToParentOf(sentence);
                     sentence = otherSide;
                     break;

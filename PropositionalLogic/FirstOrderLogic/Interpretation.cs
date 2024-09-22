@@ -106,8 +106,12 @@ public class Interpretation : ILanguageObject{
         //TODO: pass the constants as additional param, or ass variable assigment? how is it donw usually?
         //TODO: check how skolemiztion works, and unification
         
-        var constantToElement = new Constant($"element_{element.Id}");
-        _functions.Add(constantToElement.TermSymbol, _ => element);
+        var constantToElement = new Constant($"{variable}_element_{element.Id}");
+
+        if (!_functions.TryAdd(constantToElement.TermSymbol, _ => element)) {
+            Console.WriteLine("");
+        }
+        
         var clone = sentence.Clone(); 
         clone.SubstituteTerm(variable, constantToElement);
         clone.SetParentToParentOf(sentence.Parent); //remove quantifier
