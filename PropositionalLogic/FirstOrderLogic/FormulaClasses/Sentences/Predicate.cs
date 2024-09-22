@@ -1,9 +1,9 @@
 namespace FirstOrderLogic;
 
 public interface IPredicate : IAtomicSentence {
-    public Term[] Terms { get; }
-    public Variable[] GetVariables();
-    public bool HasBoundVariables();
+    Term[] Terms { get; }
+    Variable[] GetVariables();
+    bool HasBoundVariables();
 }
 
 public class Predicate : AtomicSentence, IPredicate {

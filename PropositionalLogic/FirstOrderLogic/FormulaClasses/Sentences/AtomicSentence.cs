@@ -1,10 +1,10 @@
 namespace FirstOrderLogic;
 
 public interface IAtomicSentence : ISentence {
-    public string Symbol { get; set; }
-    public bool IsNullaryConstant { get; }
-    public bool Tautology { get; }
-    public bool Contradiction { get; }
+    string Symbol { get; set; }
+    bool IsNullaryConstant { get; }
+    bool Tautology { get; }
+    bool Contradiction { get; }
 }
 
 public abstract class AtomicSentence : Sentence, IAtomicSentence {
