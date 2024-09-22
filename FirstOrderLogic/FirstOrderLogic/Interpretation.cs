@@ -5,37 +5,23 @@ namespace FirstOrderLogic;
 
 public class Interpretation : ILanguageObject{
     private IDomainOfDiscourse Domain { get; set; }
+    
     private readonly Dictionary<IAtomicSentence, bool> _propositionAssignment = new();
-    private readonly Dictionary<string, IElementOfDiscourse> _variableAssigment = new();
     private readonly Dictionary<string, Func<IElementOfDiscourse[], bool>> _relations = new();
     private readonly Dictionary<string, Func<Term[], IElementOfDiscourse>> _functions = new();
-
-    private void TestSetUp() {
-        Domain = new Domain(new Element(1), new Element(2), new Element(3), new Element(4));
-        
-        _relations.Add("Human", terms => terms[0] switch {
-            Element element => element.Id == 1 || element.Id == 2,
-            _ => throw new Exception("Error: Human predicate not found.")
-        });
-        
-        _relations.Add("Mortal", terms => terms[0] switch {
-            Element element => element.Id == 1 || element.Id == 2,
-            _ => throw new Exception("Error: Mortal predicate not found.")
-        });
-    }
+    private readonly Dictionary<string, IElementOfDiscourse> _variableAssigment = new();
     
-    public Interpretation(IDomainOfDiscourse domain) {
-        Domain = domain;
-
-        TestSetUp();
-    }
-    
-    public Interpretation(Interpretation other, IDomainOfDiscourse domain) {
-        Domain = domain;
+    public Interpretation(IDomainOfDiscourse domain, 
+        Dictionary<string, Func<IElementOfDiscourse[], bool>> relations, 
+        Dictionary<string, Func<Term[], IElementOfDiscourse>> functions, 
+        Dictionary<string, IElementOfDiscourse> variableAssigment, 
+        Dictionary<IAtomicSentence, bool> propositionAssignment) {
         
-        foreach (var kv in other._propositionAssignment) {
-            _propositionAssignment.Add(kv.Key, kv.Value);
-        }
+        Domain = domain;
+        _relations = relations;
+        _functions = functions;
+        _variableAssigment = variableAssigment;
+        _propositionAssignment = propositionAssignment;
     }
     
     public bool Evaluate(ISentence sentence) {
