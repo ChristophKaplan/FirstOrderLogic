@@ -1,6 +1,6 @@
 namespace FirstOrderLogic;
 
-public interface IComplexSentence : ISentence{
+public interface IComplexSentence : ISentence, ILiteral{
     Connective Connective { get; }
     bool IsNegation { get; }
     bool IsQuantifier { get; }
@@ -8,7 +8,7 @@ public interface IComplexSentence : ISentence{
     ISentence GetSiblingOf(ISentence sentence);
 }
 
-public class ComplexSentence : Sentence, IComplexSentence {
+public class ComplexSentence : Sentence, IComplexSentence, ILiteral {
     public Connective Connective { get; set; }
     public bool IsNegation => Connective == Connective.LogicSymbol.NEGATION;
     public bool IsQuantifier => Connective == Connective.LogicSymbol.EXISTENTIAL || Connective == Connective.LogicSymbol.UNIVERSAL;
@@ -72,4 +72,7 @@ public class ComplexSentence : Sentence, IComplexSentence {
     public override string ToString() {
         return Children.Count == 1 ? $"{Connective} {Children[0]}" : $"({Children[0]} {Connective} {Children[1]})";
     }
+
+    public IPredicate Pred => Children[0] as IPredicate;
+    public Term[] Terms => Pred.Terms;
 }

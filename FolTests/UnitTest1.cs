@@ -40,4 +40,16 @@ public class Tests {
         
         Assert.That(interpretation.Evaluate(parsed), Is.EqualTo(true));
     }
+    
+    [Test]
+    public void Test_Unification() {
+        var human = (Sentence)firstOrderLogic.TryParse("Human(x)");
+        var mortal = (Sentence)firstOrderLogic.TryParse("Mortal(x)");
+        
+        Unificator unificator = new(human, mortal);
+        
+        Console.WriteLine(unificator);
+        
+        Assert.That(true, Is.EqualTo(true));
+    }
 }

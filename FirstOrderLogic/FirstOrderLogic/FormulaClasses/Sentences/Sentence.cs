@@ -1,7 +1,8 @@
 using LRParser.Language;
+
 namespace FirstOrderLogic;
 
-public interface ISentence : ILanguageObject{
+public interface ISentence : ILanguageObject {
     ISentence Parent { get; set; }
     List<ISentence> Children { get; }
     bool IsBinary { get; }
@@ -19,20 +20,20 @@ public interface ISentence : ILanguageObject{
 }
 
 public abstract class Sentence : ISentence {
-    public ISentence Parent { get; set; } 
+    public ISentence Parent { get; set; }
     public List<ISentence> Children { get; } = new();
 
     public bool IsBinary => Children.Count == 2;
     public bool IsUnary => Children.Count == 1;
     public bool IsNullary => Children.Count == 0;
     public int Arity => Children.Count;
-    
+
     public bool IsLiteral =>
         this is IAtomicSentence || (this is IComplexSentence { IsNegation: true } complexSentence && complexSentence.Children[0] is IAtomicSentence);
-    
+
     public abstract void SubstituteTerm(Term term, Term replacement);
     public abstract void Negate();
-    
+
     public void AddChild(ISentence sentence) {
         Children.Add(sentence);
         sentence.Parent = this;
@@ -67,7 +68,7 @@ public abstract class Sentence : ISentence {
         parent.Children.RemoveAt(index);
         parent.InsertChild(index, this);
     }
-    
+
     public ISentence Clone() {
         switch (this) {
             case Proposition proposition:
@@ -85,13 +86,13 @@ public abstract class Sentence : ISentence {
 
     public bool HasScopeConflict(List<Variable> boundVariables = default) {
         boundVariables ??= new List<Variable>();
-        
-        if(this is IComplexSentence { IsQuantifier: true } complexSentence) {
-            var boundVariable = ((Quantifier) complexSentence.Connective).Variable;
+
+        if (this is IComplexSentence { IsQuantifier: true } complexSentence) {
+            var boundVariable = ((Quantifier)complexSentence.Connective).Variable;
             if (boundVariables.Contains(boundVariable)) {
                 return true;
             }
-            
+
             boundVariables.Add(boundVariable);
         }
 

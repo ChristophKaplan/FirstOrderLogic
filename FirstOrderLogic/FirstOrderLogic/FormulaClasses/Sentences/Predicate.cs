@@ -1,12 +1,13 @@
 namespace FirstOrderLogic;
 
-public interface IPredicate : IAtomicSentence {
+public interface IPredicate : IAtomicSentence, ILiteral {
     Term[] Terms { get; }
     Variable[] GetVariables();
     bool HasBoundVariables();
 }
 
-public class Predicate : AtomicSentence, IPredicate {
+public class Predicate : AtomicSentence, IPredicate, ILiteral {
+    public IPredicate Pred => this;
     public Term[] Terms { get; set; }
 
     public Predicate(string predicateSymbol, Term[] terms) : base(predicateSymbol) {
