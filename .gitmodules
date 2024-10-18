@@ -1,6 +1,6 @@
 [submodule "LRParser"]
 	path = FirstOrderLogic/
-	url = https://github.com/ChristophKaplan/LRParser.git
+	url = git@github.com:ChristophKaplan/LRParser.git
 [submodule "FirstOrderLogic/LRParser"]
 	path = FirstOrderLogic/LRParser
-	url = https://github.com/ChristophKaplan/LRParser.git
+	url = git@github.com:ChristophKaplan/LRParser.git
