@@ -26,7 +26,7 @@ public abstract class Sentence : ISentence {
     public bool IsBinary => Children.Count == 2;
     public bool IsUnary => Children.Count == 1;
     public bool IsNullary => Children.Count == 0;
-    public int Arity => Children.Count;
+    public virtual int Arity => Children.Count;
 
     public bool IsLiteral =>
         this is IAtomicSentence || (this is IComplexSentence { IsNegation: true } complexSentence && complexSentence.Children[0] is IAtomicSentence);

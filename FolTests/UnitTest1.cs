@@ -43,13 +43,25 @@ public class Tests {
     
     [Test]
     public void Test_Unification() {
-        var human = (Sentence)firstOrderLogic.TryParse("Human(x)");
-        var mortal = (Sentence)firstOrderLogic.TryParse("Mortal(x)");
+        var p1 = (ISentence)firstOrderLogic.TryParse("P(x,y,y)");
+        var p2 = (ISentence)firstOrderLogic.TryParse("P(y,z,a)");
+        var unificator1 = new Unificator(p1, p2);
+        Console.WriteLine(unificator1);
         
-        Unificator unificator = new(human, mortal);
+        var p3 = (ISentence)firstOrderLogic.TryParse("P(x,y,y)");
+        var p4 = (ISentence)firstOrderLogic.TryParse("P(f(y),y,x)");
+        var unificator2 = new Unificator(p3, p4);
+        Console.WriteLine(unificator2);
         
-        Console.WriteLine(unificator);
+        var p5 = (ISentence)firstOrderLogic.TryParse("P(f(x),a,x)");
+        var l = (ILiteral)p5;
+        l.Terms[1] = new Constant("a");
+        var p6 = (ISentence)firstOrderLogic.TryParse("P(f(g(y)),z,z)");
+        var unificator3 = new Unificator(p5, p6);
+        Console.WriteLine(unificator3);
         
-        Assert.That(true, Is.EqualTo(true));
+        Assert.That(unificator1.IsUnifiable, Is.EqualTo(true));
+        Assert.That(unificator2.IsUnifiable, Is.EqualTo(false));
+        Assert.That(unificator3.IsUnifiable, Is.EqualTo(false));
     }
 }

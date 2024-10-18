@@ -41,7 +41,7 @@ public abstract class Term : ILanguageObject {
         }
     }
     
-    public bool Contains(Variable variable) {
+    public bool Occurs(Variable variable) {
         return GetVariables().Contains(variable);
     }
 }

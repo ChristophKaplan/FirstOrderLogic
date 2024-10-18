@@ -4,12 +4,15 @@ public interface IPredicate : IAtomicSentence, ILiteral {
     Term[] Terms { get; }
     Variable[] GetVariables();
     bool HasBoundVariables();
+    bool EqualSignature(IPredicate other);
 }
 
 public class Predicate : AtomicSentence, IPredicate, ILiteral {
     public IPredicate Pred => this;
     public Term[] Terms { get; set; }
 
+    public override int Arity => Terms.Length;
+    
     public Predicate(string predicateSymbol, Term[] terms) : base(predicateSymbol) {
         Terms = terms;
     }
@@ -27,10 +30,6 @@ public class Predicate : AtomicSentence, IPredicate, ILiteral {
                 function.SubstituteTerm(term, replacement);
             }
         }
-    }
-
-    public override string ToString() {
-        return $"{Symbol}({string.Join<Term>(",", Terms)})";
     }
     
     public Variable[] GetVariables() {
@@ -52,5 +51,11 @@ public class Predicate : AtomicSentence, IPredicate, ILiteral {
         }
         
         return false;
+    }
+    
+    public bool EqualSignature(IPredicate other) => Symbol == other.Symbol && Arity == other.Arity;
+    
+    public override string ToString() {
+        return $"{Symbol}({string.Join<Term>(",", Terms)})";
     }
 }
