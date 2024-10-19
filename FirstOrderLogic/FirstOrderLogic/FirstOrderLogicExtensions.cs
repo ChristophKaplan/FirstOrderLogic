@@ -4,7 +4,7 @@ namespace FirstOrderLogic;
 
 public static class FirstOrderLogicExtensions
 {
-    public static Connective ToLogicalConstant(this LexValue lexValue) {
+    public static Connective.LogicSymbol ToLogicalConstant(this LexValue lexValue) {
         switch (lexValue.Value) {
             case "OR":
             case "||":
@@ -64,6 +64,35 @@ public static class FirstOrderLogicExtensions
         }
 
         Console.WriteLine("simplification done.");
+        return clone;
+    }
+    
+    public static ISentence SkolemForm(this FirstOrderLogic logic, ISentence sentence) {
+        var clone = (IComplexSentence)sentence.Clone();
+
+        //1. is PNF ?
+        
+        var  universalQantifiers = clone.GetQuantifiers(Connective.LogicSymbol.UNIVERSAL);
+        var  existentialQuantifiers = clone.GetQuantifiers(Connective.LogicSymbol.EXISTENTIAL);
+       
+        Dictionary<Variable, Function> substitution = new();
+
+        foreach (var exist in existentialQuantifiers) {
+            var args = new List<Term>();
+            foreach (var universal in universalQantifiers) {
+                args.Add(universal.Variable);
+            }
+            
+            substitution.Add(exist.Variable, new Function("sk",args.ToArray()));
+        }
+        
+        //remove quantifiers
+        
+        
+        foreach (var var in substitution.Keys) {
+            clone.SubstituteTerm(var, substitution[var]);
+        }
+        
         return clone;
     }
 }

@@ -105,12 +105,8 @@ namespace FirstOrderLogic {
                 throw new Exception("unifactor is not usable!");
             }
             
-            if (sentence is not ILiteral literal) {
-                throw new Exception("Only literals can be substituted");
-            }
-
             foreach (var var in _substitutions.Keys) {
-                literal.Pred.SubstituteTerm(var, _substitutions[var]);
+                sentence.SubstituteTerm(var, _substitutions[var]);
             }
         }
     }

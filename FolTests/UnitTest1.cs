@@ -34,7 +34,7 @@ public class Tests {
     }
     
     [Test]
-    public void Test1() {
+    public void Evaluation() {
         var parsed = (Sentence)firstOrderLogic.TryParse("FORALL x (Human(x) => (Mortal(x)))");
         var simplified = firstOrderLogic.Simplify(parsed, out var steps);
         
@@ -42,7 +42,7 @@ public class Tests {
     }
     
     [Test]
-    public void Test_Unification() {
+    public void Unification() {
         var p1 = (ISentence)firstOrderLogic.TryParse("P(x,y,y)");
         var p2 = (ISentence)firstOrderLogic.TryParse("P(y,z,a)");
         var unificator1 = new Unificator(p1, p2);
@@ -63,5 +63,18 @@ public class Tests {
         Assert.That(unificator1.IsUnifiable, Is.EqualTo(true));
         Assert.That(unificator2.IsUnifiable, Is.EqualTo(false));
         Assert.That(unificator3.IsUnifiable, Is.EqualTo(false));
+    }
+    
+    
+    [Test]
+    public void CNF() {
+        var p = (ISentence)firstOrderLogic.TryParse("NOT(P(x) => P(y))");
+        var p2 = firstOrderLogic.Simplify(p, out var steps);
+
+        Console.WriteLine(p);
+        Console.WriteLine(p2);
+        
+        Assert.That(p.IsCNF(), Is.EqualTo(false));
+        Assert.That(p2.IsCNF(), Is.EqualTo(true));
     }
 }

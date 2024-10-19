@@ -18,7 +18,7 @@ public abstract class AtomicSentence : Sentence, IAtomicSentence {
     }
 
     public AtomicSentence(IAtomicSentence other) {
-        Parent = other.Parent;
+        Parent = null; //other.Parent;
         Symbol = other.Symbol;
     }
     

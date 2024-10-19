@@ -1,3 +1,4 @@
+using System.Reflection;
 using LRParser.Language;
 
 namespace FirstOrderLogic;
@@ -7,6 +8,14 @@ public abstract class Term : ILanguageObject {
 
     public Term(string termSymbol) {
         TermSymbol = termSymbol;
+    }
+    
+    public Term Clone() {
+        return this switch {
+            Variable variable => new Variable(variable),
+            Function function => new Function(function),
+            _ => throw new Exception($"Unknown Term Type: {this}")
+        };
     }
 
     public override bool Equals(object? obj) {

@@ -1,6 +1,6 @@
 namespace FirstOrderLogic;
 
-public interface IPredicate : IAtomicSentence, ILiteral {
+public interface IPredicate : IAtomicSentence {
     Term[] Terms { get; }
     Variable[] GetVariables();
     bool HasBoundVariables();
@@ -18,7 +18,10 @@ public class Predicate : AtomicSentence, IPredicate, ILiteral {
     }
 
     public Predicate(IPredicate other) : base(other) {
-        Terms = other.Terms;
+        Terms = new Term[other.Terms.Length];
+        for (int i = 0; i < other.Terms.Length; i++) {
+            Terms[i] = other.Terms[i].Clone();
+        }
     }
 
     public override void SubstituteTerm(Term term, Term replacement) {

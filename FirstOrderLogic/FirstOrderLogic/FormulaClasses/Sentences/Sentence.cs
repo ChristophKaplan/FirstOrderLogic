@@ -17,6 +17,9 @@ public interface ISentence : ILanguageObject {
     ISentence Clone();
     void Negate();
     bool HasScopeConflict(List<Variable> boundVariables = default);
+
+    bool IsCNF();
+    bool IsDisjunctionOfLiterals();
 }
 
 public abstract class Sentence : ISentence {
@@ -99,6 +102,26 @@ public abstract class Sentence : ISentence {
         return Children.Any(child => child.HasScopeConflict());
     }
 
+    public bool IsCNF() {
+        if (this is ILiteral || this is AtomicSentence) return true;
+
+        var complexSentence = this as IComplexSentence;
+
+        if (complexSentence.IsNegation || 
+            complexSentence.IsQuantifier ||
+            complexSentence.Connective == Connective.LogicSymbol.IMPLICATION || 
+            complexSentence.Connective == Connective.LogicSymbol.BICONDITIONAL) {
+            return false;
+        }
+
+        return complexSentence.Connective == Connective.LogicSymbol.DISJUNCTION ? complexSentence.Children.All(child => child.IsDisjunctionOfLiterals()) : Children.All(child => child.IsCNF());
+    }
+
+    public bool IsDisjunctionOfLiterals() {
+        if (this is ILiteral) return true;
+        return this is IComplexSentence { Connective.Symbol: Connective.LogicSymbol.DISJUNCTION } &&
+               Children.All(child => child.IsDisjunctionOfLiterals());
+    }
 
     public override bool Equals(object? obj) {
         if (obj == null || GetType() != obj.GetType()) {

@@ -22,7 +22,6 @@ public class Connective : ILanguageObject {
     }
 
     public static implicit operator LogicSymbol(Connective constant) => constant.Symbol; 
-    public static implicit operator Connective(LogicSymbol symbol) => new (symbol); 
 
     public override string ToString() => SymbolToString(Symbol);
     

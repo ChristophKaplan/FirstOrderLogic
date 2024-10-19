@@ -1,32 +1,46 @@
 namespace FirstOrderLogic;
 
-public interface IComplexSentence : ISentence, ILiteral{
+public interface IComplexSentence : ISentence{
     Connective Connective { get; }
     bool IsNegation { get; }
     bool IsQuantifier { get; }
     void FlipOperator();
     ISentence GetSiblingOf(ISentence sentence);
+    Quantifier[] GetQuantifiers(Connective.LogicSymbol quantifier);
 }
 
-public class ComplexSentence : Sentence, IComplexSentence, ILiteral {
+public class ComplexSentence : Sentence, IComplexSentence{
     public Connective Connective { get; set; }
     public bool IsNegation => Connective == Connective.LogicSymbol.NEGATION;
     public bool IsQuantifier => Connective == Connective.LogicSymbol.EXISTENTIAL || Connective == Connective.LogicSymbol.UNIVERSAL;
     
-    public ComplexSentence(ISentence p, Connective connective, ISentence q) {
-        Connective = connective;
+    public ComplexSentence(ISentence p, Connective.LogicSymbol logicSymbol, ISentence q) {
+        Connective = new Connective(logicSymbol);
         AddChild(p);
         AddChild(q);
     }
 
+    public ComplexSentence(Connective.LogicSymbol logicSymbol, ISentence p) {
+        Connective = new Connective(logicSymbol);
+        AddChild(p);
+    }
+    
     public ComplexSentence(Connective connective, ISentence p) {
         Connective = connective;
         AddChild(p);
     }
 
     public ComplexSentence(IComplexSentence other) {
-        Connective = other.Connective;
-        Parent = other.Parent;
+        
+        if(other.Connective is Quantifier quantifier) {
+            Connective = new Quantifier(quantifier.Symbol, quantifier.Variable);
+        }
+        else {
+            Connective = new Connective(other.Connective);
+        }
+        
+        Parent = null; //other.Parent; //TODO: def not only assign the parent, maybe clone it and all the other siblings ?
+        
         foreach (var child in other.Children) {
             AddChild(child.Clone());
         }
@@ -56,6 +70,22 @@ public class ComplexSentence : Sentence, IComplexSentence, ILiteral {
         }
 
         throw new Exception("Error: Sentence not found in ComplexSentence.");
+    }
+
+    public Quantifier[] GetQuantifiers(Connective.LogicSymbol quantifier) {
+        
+        var quantifiers = new List<Quantifier>();
+        if (Connective.Symbol == quantifier) {
+            quantifiers.Add((Quantifier)Connective);
+        }
+        
+        foreach (var child in Children) {
+            if (child is IComplexSentence complex) { 
+                quantifiers.AddRange(complex.GetQuantifiers(quantifier));
+            }
+        }
+
+        return quantifiers.ToArray();
     }
 
     public override void SubstituteTerm(Term term, Term replacement) {

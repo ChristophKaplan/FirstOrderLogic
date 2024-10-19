@@ -227,23 +227,23 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
 
         ruleCon.SetSemanticAction((lhs, rhs) =>
         {
-            lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+            lhs.SyntheticAttribute = new Connective( ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
         });
         ruleDis.SetSemanticAction((lhs, rhs) =>
         {
-            lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+            lhs.SyntheticAttribute = new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
         });
         ruleImp.SetSemanticAction((lhs, rhs) =>
         {
-            lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+            lhs.SyntheticAttribute = new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
         });
         ruleIFF.SetSemanticAction((lhs, rhs) =>
         {
-            lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+            lhs.SyntheticAttribute = new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
         });
         ruleNeg.SetSemanticAction((lhs, rhs) =>
         {
-            lhs.SyntheticAttribute = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
+            lhs.SyntheticAttribute = new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
         });
     }
 
