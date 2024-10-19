@@ -7,12 +7,13 @@ public interface IPredicate : IAtomicSentence {
     bool EqualSignature(IPredicate other);
 }
 
-public class Predicate : AtomicSentence, IPredicate, ILiteral {
+public class Predicate : AtomicSentence, IPredicate {
     public IPredicate Pred => this;
     public Term[] Terms { get; set; }
-
     public override int Arity => Terms.Length;
-    
+    public override ISentence Clone() => new Predicate(this);
+    public bool EqualSignature(IPredicate other) => Symbol == other.Symbol && Arity == other.Arity;
+
     public Predicate(string predicateSymbol, Term[] terms) : base(predicateSymbol) {
         Terms = terms;
     }
@@ -55,8 +56,6 @@ public class Predicate : AtomicSentence, IPredicate, ILiteral {
         
         return false;
     }
-    
-    public bool EqualSignature(IPredicate other) => Symbol == other.Symbol && Arity == other.Arity;
     
     public override string ToString() {
         return $"{Symbol}({string.Join<Term>(",", Terms)})";

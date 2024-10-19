@@ -8,6 +8,9 @@ public class Proposition : AtomicSentence, IProposition {
 
     public Proposition(IProposition other) : base(other) {
     }
+    
+    public override ISentence Clone() => new Proposition(this);
+
 
     public override void SubstituteTerm(Term term, Term replacement) {
         //no terms

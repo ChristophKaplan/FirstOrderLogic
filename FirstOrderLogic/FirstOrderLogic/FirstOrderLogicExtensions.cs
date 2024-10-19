@@ -68,12 +68,12 @@ public static class FirstOrderLogicExtensions
     }
     
     public static ISentence SkolemForm(this FirstOrderLogic logic, ISentence sentence) {
-        var clone = (IComplexSentence)sentence.Clone();
-
-        //1. is PNF ?
+        var clone = sentence.Clone();
         
-        var  universalQantifiers = clone.GetQuantifiers(Connective.LogicSymbol.UNIVERSAL);
-        var  existentialQuantifiers = clone.GetQuantifiers(Connective.LogicSymbol.EXISTENTIAL);
+        //1. is PNF ?
+        var complexSentence = (IComplexSentence) clone;
+        var  universalQantifiers = complexSentence.GetQuantifiers(Connective.LogicSymbol.UNIVERSAL);
+        var  existentialQuantifiers = complexSentence.GetQuantifiers(Connective.LogicSymbol.EXISTENTIAL);
        
         Dictionary<Variable, Function> substitution = new();
 
@@ -82,17 +82,43 @@ public static class FirstOrderLogicExtensions
             foreach (var universal in universalQantifiers) {
                 args.Add(universal.Variable);
             }
-            
-            substitution.Add(exist.Variable, new Function("sk",args.ToArray()));
+
+            //TODO: semantics of skolem function ??
+            var skolemFunction = new Function("sk", args.ToArray());
+            substitution.Add(exist.Variable, skolemFunction);
         }
-        
-        //remove quantifiers
-        
         
         foreach (var var in substitution.Keys) {
             clone.SubstituteTerm(var, substitution[var]);
         }
         
+        //remove quantifiers
+        TransformationFOL.Transform(TransformationFOL.EquivType.RemoveQuantifier, ref clone);
+        
         return clone;
+    }
+    
+    public static List<List<ISentence>> GetClauseSet(this ISentence sentence, List<List<ISentence>> clauseSet = null) {
+        if (!sentence.IsCNF())
+        {
+            throw new Exception("Sentence is not in CNF");
+        }
+        
+        clauseSet ??= new List<List<ISentence>>();
+        var clone = sentence.Clone(); 
+        
+        if(clone.IsDisjunctionOfLiterals())
+        {
+            var clause = clone.GetLiterals();
+            clauseSet.Add(clause);
+            return clauseSet;
+        }
+        
+        foreach (var child in sentence.Children)
+        {
+            child.GetClauseSet(clauseSet);
+        }
+        
+        return clauseSet;
     }
 }

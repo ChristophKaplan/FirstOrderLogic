@@ -1,7 +1,9 @@
 using FirstOrderLogic;
 
 public static class TransformationFOL {
-    public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem, DissolveBiconditional, PullQuantifier, RemoveDuplicateQuantifier }
+    public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem, DissolveBiconditional, PullQuantifier, RemoveDuplicateQuantifier,
+        RemoveQuantifier
+    }
 
     private delegate void TransformAction<T>(ref T sentence);
 
@@ -11,8 +13,6 @@ public static class TransformationFOL {
             BottomUpTransformation(ref childSentence, transformAction);
         }
         
-        //how is this bottomup when there is no parent call?
-
         transformAction(ref sentence);
     }
 
@@ -53,6 +53,9 @@ public static class TransformationFOL {
                 break;
             case EquivType.RemoveDuplicateQuantifier:
                 TopDownTransformation(ref sentence, RemoveDuplicateQuantifier);
+                break;
+            case EquivType.RemoveQuantifier:
+                BottomUpTransformation(ref sentence, RemoveQuantifier);
                 break;
         }
     }
@@ -252,5 +255,16 @@ public static class TransformationFOL {
                     return false;
             }
         }
+    }
+
+    private static void RemoveQuantifier(ref ISentence sentence)
+    {
+        if (sentence is not IComplexSentence { IsQuantifier: true } quantifiedSentence) {
+            return;
+        }
+        
+        var child = quantifiedSentence.Children[0];
+        child.SetParentToParentOf(quantifiedSentence);
+        sentence = child;
     }
 }

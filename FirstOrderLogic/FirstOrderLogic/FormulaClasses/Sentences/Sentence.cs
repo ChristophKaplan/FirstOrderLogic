@@ -17,9 +17,10 @@ public interface ISentence : ILanguageObject {
     ISentence Clone();
     void Negate();
     bool HasScopeConflict(List<Variable> boundVariables = default);
-
     bool IsCNF();
     bool IsDisjunctionOfLiterals();
+    List<ISentence> GetLiterals();
+    IPredicate GetPredicate();
 }
 
 public abstract class Sentence : ISentence {
@@ -36,7 +37,8 @@ public abstract class Sentence : ISentence {
 
     public abstract void SubstituteTerm(Term term, Term replacement);
     public abstract void Negate();
-
+    public abstract ISentence Clone();
+    
     public void AddChild(ISentence sentence) {
         Children.Add(sentence);
         sentence.Parent = this;
@@ -72,21 +74,6 @@ public abstract class Sentence : ISentence {
         parent.InsertChild(index, this);
     }
 
-    public ISentence Clone() {
-        switch (this) {
-            case Proposition proposition:
-                return new Proposition(proposition);
-            case Predicate predicate:
-                return new Predicate(predicate);
-            case ComplexSentence complexSentence: {
-                var result = new ComplexSentence(complexSentence);
-                return result;
-            }
-            default:
-                throw new Exception($"Clone: Sentence type {GetType()} not found!");
-        }
-    }
-
     public bool HasScopeConflict(List<Variable> boundVariables = default) {
         boundVariables ??= new List<Variable>();
 
@@ -103,7 +90,7 @@ public abstract class Sentence : ISentence {
     }
 
     public bool IsCNF() {
-        if (this is ILiteral || this is AtomicSentence) return true;
+        if (IsLiteral) return true;
 
         var complexSentence = this as IComplexSentence;
 
@@ -118,11 +105,39 @@ public abstract class Sentence : ISentence {
     }
 
     public bool IsDisjunctionOfLiterals() {
-        if (this is ILiteral) return true;
+        if (IsLiteral) return true;
         return this is IComplexSentence { Connective.Symbol: Connective.LogicSymbol.DISJUNCTION } &&
                Children.All(child => child.IsDisjunctionOfLiterals());
     }
 
+    public List<ISentence> GetLiterals() {
+        var literals = new List<ISentence>();
+        
+        if (IsLiteral)
+        {
+            literals.Add(this);
+            return literals;
+        }
+        
+        foreach (var child in Children)
+        {
+            literals.AddRange(child.GetLiterals());    
+        }
+        
+        return literals;
+    }
+
+    public IPredicate GetPredicate()
+    {
+        if(!IsLiteral) throw new Exception("Sentence is not a literal");
+        
+        return this switch
+        {
+            IPredicate predicate => predicate,
+            IComplexSentence => Children[0] as IPredicate,
+        };
+    }
+    
     public override bool Equals(object? obj) {
         if (obj == null || GetType() != obj.GetType()) {
             return false;

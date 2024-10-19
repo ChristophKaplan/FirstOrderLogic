@@ -8,7 +8,6 @@ public interface IComplexSentence : ISentence{
     ISentence GetSiblingOf(ISentence sentence);
     Quantifier[] GetQuantifiers(Connective.LogicSymbol quantifier);
 }
-
 public class ComplexSentence : Sentence, IComplexSentence{
     public Connective Connective { get; set; }
     public bool IsNegation => Connective == Connective.LogicSymbol.NEGATION;
@@ -31,20 +30,15 @@ public class ComplexSentence : Sentence, IComplexSentence{
     }
 
     public ComplexSentence(IComplexSentence other) {
-        
-        if(other.Connective is Quantifier quantifier) {
-            Connective = new Quantifier(quantifier.Symbol, quantifier.Variable);
-        }
-        else {
-            Connective = new Connective(other.Connective);
-        }
-        
+        Connective = other.Connective.Clone();
         Parent = null; //other.Parent; //TODO: def not only assign the parent, maybe clone it and all the other siblings ?
         
         foreach (var child in other.Children) {
             AddChild(child.Clone());
         }
     }
+
+    public override ISentence Clone() => new ComplexSentence(this);
 
     public void FlipOperator() {
         Connective.Symbol = Connective.Symbol switch {
@@ -73,7 +67,6 @@ public class ComplexSentence : Sentence, IComplexSentence{
     }
 
     public Quantifier[] GetQuantifiers(Connective.LogicSymbol quantifier) {
-        
         var quantifiers = new List<Quantifier>();
         if (Connective.Symbol == quantifier) {
             quantifiers.Add((Quantifier)Connective);
@@ -93,7 +86,7 @@ public class ComplexSentence : Sentence, IComplexSentence{
             child.SubstituteTerm(term, replacement);
         }
     }
-
+    
     public override void Negate() {
         var negated = IsNegation ? Children[0] : new ComplexSentence(Connective.LogicSymbol.NEGATION, Clone());
         negated.SetParentToParentOf(this);

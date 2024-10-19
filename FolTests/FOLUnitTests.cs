@@ -54,7 +54,7 @@ public class Tests {
         Console.WriteLine(unificator2);
         
         var p5 = (ISentence)firstOrderLogic.TryParse("P(f(x),a,x)");
-        var l = (ILiteral)p5;
+        var l = p5.GetPredicate();
         l.Terms[1] = new Constant("a");
         var p6 = (ISentence)firstOrderLogic.TryParse("P(f(g(y)),z,z)");
         var unificator3 = new Unificator(p5, p6);
@@ -76,5 +76,15 @@ public class Tests {
         
         Assert.That(p.IsCNF(), Is.EqualTo(false));
         Assert.That(p2.IsCNF(), Is.EqualTo(true));
+    }
+    
+    [Test]
+    public void ClauseSet() {
+        var p = (ISentence)firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
+        var p2 = firstOrderLogic.Simplify(p, out var steps);
+        Console.WriteLine(p2 +" cnf:"+ p2.IsCNF());
+        var set = p2.GetClauseSet();
+        Console.WriteLine(set.Aggregate("", (s, list) => s + list.Aggregate("", (s, l) => s + l + " ") + ", "));
+        Assert.That(set.Count, Is.EqualTo(2));
     }
 }

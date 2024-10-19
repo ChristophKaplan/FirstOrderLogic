@@ -7,6 +7,12 @@ public class Quantifier : Connective {
         Variable = variable;
     }
     
+    public Quantifier(Quantifier quantifier) : base(quantifier.Symbol) {
+        Variable = new Variable(quantifier.Variable);
+    }
+    
+    public override Connective Clone() => new Quantifier(this);
+
     public override string ToString() {
         return $"{base.ToString()} {Variable}";
     }

@@ -20,7 +20,12 @@ public class Connective : ILanguageObject {
     public Connective(LogicSymbol symbol) {
         Symbol = symbol;
     }
-
+    public Connective(Connective connective) {
+        Symbol = connective.Symbol;
+    }
+    
+    public virtual Connective Clone() => new Connective(this);
+    
     public static implicit operator LogicSymbol(Connective constant) => constant.Symbol; 
 
     public override string ToString() => SymbolToString(Symbol);

@@ -7,22 +7,21 @@ namespace FirstOrderLogic {
         public readonly bool IsUnifiable;
  
         public Unificator(ISentence s1, ISentence s2) {
-            if (s1 is not ILiteral l1 || s2 is not ILiteral l2) {
+            if (!s1.IsLiteral || !s2.IsLiteral) {
                 throw new Exception("Both sentences must be literals");
             }
             
-          IsUnifiable = UnifyLiteral(l1, l2);
+          IsUnifiable = UnifyLiteral(s1, s2);
         }
 
-        private bool UnifyLiteral(ILiteral lit1, ILiteral lit2) {
-            if(!lit1.Pred.EqualSignature(lit2.Pred)) {
-                //throw new Exception("predicates not unifyable");
-                return false;
-            }
-            
+        private bool UnifyLiteral(ISentence lit1, ISentence lit2)
+        {
+            var pred1 = lit1.GetPredicate();
+            var pred2 = lit2.GetPredicate();
             var len = lit1.Arity;
+            
             for (var i = len-1; i >= 0 ; i--) { //terms sind falschrum?
-                if (!UnifyTerm(lit1.Terms[i], lit2.Terms[i])) {
+                if (!UnifyTerm(pred1.Terms[i], pred2.Terms[i])) {
                     return false;
                 }
             }
