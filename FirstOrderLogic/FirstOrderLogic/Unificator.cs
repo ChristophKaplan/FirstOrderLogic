@@ -11,27 +11,7 @@ namespace FirstOrderLogic
         {
             IsUnifiable = UnifyLiteral(s1, s2);
         }
-
-        public Unificator(Clause clause1, Clause clause2)
-        {
-            IsUnifiable = UnifyClause(clause1.Literals, clause2.Literals);
-        }
         
-        private bool UnifyClause(List<ISentence> c1, List<ISentence> c2)
-        {
-            if (c1.Count != c2.Count)
-            {
-                return false;
-            }
-
-            var first1 = c1.First();
-            var rest1 = c1.GetRange(1, c1.Count - 1);
-            var first2 = c2.First();
-            var rest2 = c2.GetRange(1, c2.Count - 1);
-
-            return UnifyLiteral(first1, first2) && UnifyClause(rest1, rest2);
-        }
-
         private bool UnifyLiteral(ISentence lit1, ISentence lit2)
         {
             if (!lit1.IsLiteral || !lit2.IsLiteral)

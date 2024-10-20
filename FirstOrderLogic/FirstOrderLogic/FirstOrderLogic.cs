@@ -211,15 +211,9 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             }
             else
             {
-                var isVariable = true;
-                if (isVariable)
-                {
-                    term = new Variable(symbol);
-                }
-                else
-                {
-                    term = new Constant(symbol);
-                }
+                var variableList = new[] { "x", "y", "z", "w" };
+                var isVariable = variableList.Contains(symbol);
+                term = isVariable ? new Variable(symbol) : new Constant(symbol);
             }
 
             lhs.SyntheticAttribute = term;

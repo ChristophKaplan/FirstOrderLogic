@@ -22,6 +22,11 @@ public class Clause
         
         Literals.Add(l);
     }
+    
+    public override string ToString()
+    {
+        return Literals.Aggregate("{", (current, l) => current + l + ", ")+ "}";
+    }
 }
 
 public class Resolvent : Clause {
@@ -37,21 +42,13 @@ public class Resolvent : Clause {
     
     public string ResolventAsString() {
         var s = "";
-        s += "k1: " + _parentClause1 + "\n";
-        s += "k2: " + _parentClause2 + "\n";
-        s += "-----------------------" + "\n";
-        s += "res: " + ToString() + "\n";
+        s += $"k1: {_parentClause1}\n";
+        s += $"k2: {_parentClause2}\n";
+        s += "-----------------------\n";
+        s += $"res: {ToString()}\n";
         return s;
     }
     
-    public bool IsCircular(Clause k1, Clause k2) {
-        if (_parentClause1.Equals(k1))
-            if (_parentClause2.Equals(k2))
-                return true;
-        if (_parentClause1 is Resolvent) return ((Resolvent)_parentClause1).IsCircular(_parentClause1, k2);
-        return false;
-    }
-
     public string TraceResolution() {
         var s = "";
 
