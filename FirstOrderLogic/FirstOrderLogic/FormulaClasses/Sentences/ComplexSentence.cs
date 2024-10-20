@@ -87,9 +87,10 @@ public class ComplexSentence : Sentence, IComplexSentence{
         }
     }
     
-    public override void Negate() {
+    public override ISentence Negate() {
         var negated = IsNegation ? Children[0] : new ComplexSentence(Connective.LogicSymbol.NEGATION, Clone());
         negated.SetParentToParentOf(this);
+        return negated;
     }
 
     public override string ToString() {

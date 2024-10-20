@@ -10,12 +10,13 @@ public interface ISentence : ILanguageObject {
     bool IsNullary { get; }
     int Arity { get; }
     bool IsLiteral { get; }
+    bool IsNegation { get; }
     void AddChild(ISentence sentence);
     void InsertChild(int index, ISentence sentence);
     void SetParentToParentOf(ISentence parentOfThis);
     void SubstituteTerm(Term term, Term replacement);
     ISentence Clone();
-    void Negate();
+    ISentence Negate();
     bool HasScopeConflict(List<Variable> boundVariables = default);
     bool IsCNF();
     bool IsDisjunctionOfLiterals();
@@ -31,12 +32,12 @@ public abstract class Sentence : ISentence {
     public bool IsUnary => Children.Count == 1;
     public bool IsNullary => Children.Count == 0;
     public virtual int Arity => Children.Count;
-
-    public bool IsLiteral =>
-        this is IAtomicSentence || (this is IComplexSentence { IsNegation: true } complexSentence && complexSentence.Children[0] is IAtomicSentence);
-
+    public bool IsLiteral => this is IAtomicSentence || 
+                             (this is IComplexSentence { IsNegation: true } complex && complex.Children[0] is IAtomicSentence);
+    public bool IsNegation => this is not IAtomicSentence || this is IComplexSentence { IsNegation: true };
+    
     public abstract void SubstituteTerm(Term term, Term replacement);
-    public abstract void Negate();
+    public abstract ISentence Negate();
     public abstract ISentence Clone();
     
     public void AddChild(ISentence sentence) {

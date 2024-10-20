@@ -98,19 +98,16 @@ public static class FirstOrderLogicExtensions
         return clone;
     }
     
-    public static List<List<ISentence>> GetClauseSet(this ISentence sentence, List<List<ISentence>> clauseSet = null) {
-        if (!sentence.IsCNF())
-        {
-            throw new Exception("Sentence is not in CNF");
-        }
+    public static List<Clause> GetClauseSet(this ISentence sentence, List<Clause> clauseSet = null) {
+        if (!sentence.IsCNF()) { throw new Exception("Sentence is not in CNF"); }
         
-        clauseSet ??= new List<List<ISentence>>();
+        clauseSet ??= new List<Clause>();
         var clone = sentence.Clone(); 
         
         if(clone.IsDisjunctionOfLiterals())
         {
-            var clause = clone.GetLiterals();
-            clauseSet.Add(clause);
+            var clauseList = clone.GetLiterals();
+            clauseSet.Add(new Clause(clauseList.ToArray()));
             return clauseSet;
         }
         

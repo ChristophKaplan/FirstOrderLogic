@@ -84,7 +84,7 @@ public class Tests {
         var p2 = firstOrderLogic.Simplify(p, out var steps);
         Console.WriteLine(p2 +" cnf:"+ p2.IsCNF());
         var set = p2.GetClauseSet();
-        Console.WriteLine(set.Aggregate("", (s, list) => s + list.Aggregate("", (s, l) => s + l + " ") + ", "));
+        Console.WriteLine(set.Aggregate("", (current, clause) => current + clause + "\n"));
         Assert.That(set.Count, Is.EqualTo(2));
     }
 }

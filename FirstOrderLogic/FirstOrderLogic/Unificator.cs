@@ -1,27 +1,53 @@
 using System.Text;
 
-namespace FirstOrderLogic {
-
-    public class Unificator {
+namespace FirstOrderLogic
+{
+    public class Unificator
+    {
         private readonly Dictionary<Variable, Term> _substitutions = new();
         public readonly bool IsUnifiable;
- 
-        public Unificator(ISentence s1, ISentence s2) {
-            if (!s1.IsLiteral || !s2.IsLiteral) {
-                throw new Exception("Both sentences must be literals");
+
+        public Unificator(ISentence s1, ISentence s2)
+        {
+            IsUnifiable = UnifyLiteral(s1, s2);
+        }
+
+        public Unificator(Clause clause1, Clause clause2)
+        {
+            IsUnifiable = UnifyClause(clause1.Literals, clause2.Literals);
+        }
+        
+        private bool UnifyClause(List<ISentence> c1, List<ISentence> c2)
+        {
+            if (c1.Count != c2.Count)
+            {
+                return false;
             }
-            
-          IsUnifiable = UnifyLiteral(s1, s2);
+
+            var first1 = c1.First();
+            var rest1 = c1.GetRange(1, c1.Count - 1);
+            var first2 = c2.First();
+            var rest2 = c2.GetRange(1, c2.Count - 1);
+
+            return UnifyLiteral(first1, first2) && UnifyClause(rest1, rest2);
         }
 
         private bool UnifyLiteral(ISentence lit1, ISentence lit2)
         {
+            if (!lit1.IsLiteral || !lit2.IsLiteral)
+            {
+                throw new Exception("Both sentences must be literals");
+            }
+
             var pred1 = lit1.GetPredicate();
             var pred2 = lit2.GetPredicate();
             var len = lit1.Arity;
-            
-            for (var i = len-1; i >= 0 ; i--) { //terms sind falschrum?
-                if (!UnifyTerm(pred1.Terms[i], pred2.Terms[i])) {
+
+            for (var i = len - 1; i >= 0; i--)
+            {
+                //terms sind falschrum?
+                if (!UnifyTerm(pred1.Terms[i], pred2.Terms[i]))
+                {
                     return false;
                 }
             }
@@ -29,34 +55,43 @@ namespace FirstOrderLogic {
             return true;
         }
 
-        private bool UnifyTerm(Term term1, Term term2) {
-            if (term1.Equals(term2)) {
+        private bool UnifyTerm(Term term1, Term term2)
+        {
+            if (term1.Equals(term2))
+            {
                 return true;
             }
-            
-            if (term1 is Variable var1) {
+
+            if (term1 is Variable var1)
+            {
                 return UnifyVar(var1, term2);
             }
-            
-            if (term2 is Variable var2) {
+
+            if (term2 is Variable var2)
+            {
                 return UnifyVar(var2, term1);
             }
-            
-            if (term1 is Function func1 && term2 is Function func2) {
+
+            if (term1 is Function func1 && term2 is Function func2)
+            {
                 return UnifyFunction(func1, func2);
             }
-            
+
             //throw new Exception($"Unification failed for {term1} and {term2}");
             return false;
         }
 
-        private bool UnifyFunction(Function func1, Function func2) {
-            if (!func1.EqualSignature(func2)) {
+        private bool UnifyFunction(Function func1, Function func2)
+        {
+            if (!func1.EqualSignature(func2))
+            {
                 return false;
             }
 
-            for (var i = 0; i < func1.Terms.Length; i++) {
-                if (!UnifyTerm(func1.Terms[i], func2.Terms[i])) {
+            for (var i = 0; i < func1.Terms.Length; i++)
+            {
+                if (!UnifyTerm(func1.Terms[i], func2.Terms[i]))
+                {
                     return false;
                 }
             }
@@ -64,16 +99,20 @@ namespace FirstOrderLogic {
             return true;
         }
 
-        private bool UnifyVar(Variable var, Term term) {
-            if(_substitutions.TryGetValue(var, out var subVar)) {
+        private bool UnifyVar(Variable var, Term term)
+        {
+            if (_substitutions.TryGetValue(var, out var subVar))
+            {
                 return UnifyTerm(subVar, term);
             }
-            
-            if(term is Variable termVar && _substitutions.TryGetValue(termVar, out var subTerm)) {
+
+            if (term is Variable termVar && _substitutions.TryGetValue(termVar, out var subTerm))
+            {
                 return UnifyTerm(var, subTerm);
             }
 
-            if (term.Occurs(var)) {
+            if (term.Occurs(var))
+            {
                 //throw new Exception($"Occurs check failed for {var} and {term}");
                 return false;
             }
@@ -81,30 +120,42 @@ namespace FirstOrderLogic {
             _substitutions.Add(var, term);
             return true;
         }
-        
-        public override string ToString() {
-            if(_substitutions.Count == 0) {
+
+        public override string ToString()
+        {
+            if (_substitutions.Count == 0)
+            {
                 return $"No substitutions ,IsUnifiable: {IsUnifiable}";
             }
-            
+
             var sb = new StringBuilder();
-            foreach (var (variable, term) in _substitutions) {
+            foreach (var (variable, term) in _substitutions)
+            {
                 sb.Append($"[{variable}/{term}], ");
             }
 
-            if (sb.Length > 0) {
+            if (sb.Length > 0)
+            {
                 sb.Length -= 2;
             }
 
             return sb.ToString();
         }
+
+        public void Substitute(Clause clause)
+        {
+            clause.Literals.ForEach(lit => Substitute(ref lit));
+        }
         
-        public void Substitute(ref ISentence sentence) {
-            if (!IsUnifiable) {
+        public void Substitute(ref ISentence sentence)
+        {
+            if (!IsUnifiable)
+            {
                 throw new Exception("unifactor is not usable!");
             }
-            
-            foreach (var var in _substitutions.Keys) {
+
+            foreach (var var in _substitutions.Keys)
+            {
                 sentence.SubstituteTerm(var, _substitutions[var]);
             }
         }

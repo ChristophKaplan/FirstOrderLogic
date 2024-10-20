@@ -2,7 +2,8 @@ using FirstOrderLogic;
 
 public static class TransformationFOL {
     public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem, DissolveBiconditional, PullQuantifier, RemoveDuplicateQuantifier,
-        RemoveQuantifier
+        RemoveQuantifier,
+        StandardizeVariables
     }
 
     private delegate void TransformAction<T>(ref T sentence);
@@ -57,11 +58,19 @@ public static class TransformationFOL {
             case EquivType.RemoveQuantifier:
                 BottomUpTransformation(ref sentence, RemoveQuantifier);
                 break;
+            case EquivType.StandardizeVariables:
+                BottomUpTransformation(ref sentence, StandardizeVariables);
+                break;
         }
     }
 
+    private static void StandardizeVariables(ref ISentence sentence)
+    {
+        //check for quantifiers using same variable names and rename
+        throw new NotImplementedException();
+    }
 
-    
+
     private static void PullQuantifier(ref ISentence sentence) {
         if (sentence is not IComplexSentence { IsQuantifier: true } quantifiedSentence) {
             return;
@@ -225,8 +234,8 @@ public static class TransformationFOL {
     }
 
     private static void AssociationAndIdem(ref ISentence sentence) {
-//A AND A)
-//A OR A)
+        //A AND A)
+        //A OR A)
         //(A AND (B AND A)) = (B AND A)
         //(A OR (B OR A)) = (B OR A)
 

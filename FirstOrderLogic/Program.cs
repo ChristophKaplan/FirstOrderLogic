@@ -4,8 +4,8 @@ Console.OutputEncoding = Encoding.UTF8;
 
 var firstOrderLogic = new FirstOrderLogic.FirstOrderLogic();
 
-var p = (ISentence)firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
-var p2 = firstOrderLogic.Simplify(p, out var steps);
-Console.WriteLine(p2 +" cnf:"+ p2.IsCNF());
-var set = p2.GetClauseSet();
-Console.WriteLine(set.Aggregate("", (s, list) => s + list.Aggregate("", (s, l) => s + l + " ") + ", "));
+var PpImpliesQ = (ISentence)firstOrderLogic.TryParse("(P(x) AND (P(x) => Q(y)))");
+var PpImpliesQ2 = firstOrderLogic.Simplify(PpImpliesQ, out var steps);
+var q = (ISentence)firstOrderLogic.TryParse("Q(y)");
+var resolution = new Resolution();
+var b = resolution.PLResolution(PpImpliesQ2, q);
