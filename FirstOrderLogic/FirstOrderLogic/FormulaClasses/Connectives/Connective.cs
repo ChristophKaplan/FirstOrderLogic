@@ -27,8 +27,6 @@ public class Connective : ILanguageObject {
     public virtual Connective Clone() => new Connective(this);
     
     public static implicit operator LogicSymbol(Connective constant) => constant.Symbol; 
-
-    public override string ToString() => SymbolToString(Symbol);
     
     public static string SymbolToString(LogicSymbol symbol) {
         return symbol switch {
@@ -56,4 +54,6 @@ public class Connective : ILanguageObject {
     public override int GetHashCode() {
         return Symbol.GetHashCode();
     }
+    
+    public override string ToString() => SymbolToString(Symbol);
 }

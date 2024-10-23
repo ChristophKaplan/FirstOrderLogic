@@ -1,5 +1,6 @@
 using System.Text;
 using LRParser.Language;
+using Helpers;
 
 namespace FirstOrderLogic;
 
@@ -95,7 +96,7 @@ public class Interpretation : ILanguageObject{
         var constantToElement = new Constant($"{variable}_element_{element.Id}");
 
         if (!_functions.TryAdd(constantToElement.TermSymbol, _ => element)) {
-            Console.WriteLine("");
+            Logger.Log("");
         }
         
         var clone = sentence.Clone(); 

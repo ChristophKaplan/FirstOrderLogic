@@ -2,15 +2,14 @@ namespace FirstOrderLogic;
 
 public interface IComplexSentence : ISentence{
     Connective Connective { get; }
-    bool IsNegation { get; }
     bool IsQuantifier { get; }
     void FlipOperator();
     ISentence GetSiblingOf(ISentence sentence);
     Quantifier[] GetQuantifiers(Connective.LogicSymbol quantifier);
 }
+
 public class ComplexSentence : Sentence, IComplexSentence{
-    public Connective Connective { get; set; }
-    public bool IsNegation => Connective == Connective.LogicSymbol.NEGATION;
+    public Connective Connective { get; }
     public bool IsQuantifier => Connective == Connective.LogicSymbol.EXISTENTIAL || Connective == Connective.LogicSymbol.UNIVERSAL;
     
     public ComplexSentence(ISentence p, Connective.LogicSymbol logicSymbol, ISentence q) {
@@ -29,7 +28,7 @@ public class ComplexSentence : Sentence, IComplexSentence{
         AddChild(p);
     }
 
-    public ComplexSentence(IComplexSentence other) {
+    private ComplexSentence(IComplexSentence other) {
         Connective = other.Connective.Clone();
         Parent = null; //other.Parent; //TODO: def not only assign the parent, maybe clone it and all the other siblings ?
         
@@ -93,10 +92,20 @@ public class ComplexSentence : Sentence, IComplexSentence{
         return negated;
     }
 
+    public override int GetHashCode() {
+        return HashCode.Combine(Connective.GetHashCode(), base.GetHashCode());
+    }
+    
+    public override bool Equals(object? obj) {
+        if (obj == null || GetType() != obj.GetType()) {
+            return false;
+        }
+
+        var other = (ComplexSentence)obj;
+        return Connective.Equals(other.Connective) && base.Equals(other);
+    }
+
     public override string ToString() {
         return Children.Count == 1 ? $"{Connective} {Children[0]}" : $"({Children[0]} {Connective} {Children[1]})";
     }
-
-    public IPredicate Pred => Children[0] as IPredicate;
-    public Term[] Terms => Pred.Terms;
 }

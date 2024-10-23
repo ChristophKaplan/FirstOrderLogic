@@ -34,7 +34,7 @@ public abstract class Sentence : ISentence {
     public virtual int Arity => Children.Count;
     public bool IsLiteral => this is IAtomicSentence || 
                              (this is IComplexSentence { IsNegation: true } complex && complex.Children[0] is IAtomicSentence);
-    public bool IsNegation => this is not IAtomicSentence || this is IComplexSentence { IsNegation: true };
+    public bool IsNegation => this is IComplexSentence complex && complex.Connective == Connective.LogicSymbol.NEGATION;
     
     public abstract void SubstituteTerm(Term term, Term replacement);
     public abstract ISentence Negate();
@@ -143,12 +143,12 @@ public abstract class Sentence : ISentence {
         if (obj == null || GetType() != obj.GetType()) {
             return false;
         }
-
-        return ToString().Equals(obj.ToString());
+        
+        return Children.SequenceEqual(((Sentence)obj).Children);
     }
 
     public override int GetHashCode() {
-        return ToString().GetHashCode();
+        return Children.Aggregate(0, (current, child) => HashCode.Combine(current, child.GetHashCode()));
     }
 
     public override string ToString() {

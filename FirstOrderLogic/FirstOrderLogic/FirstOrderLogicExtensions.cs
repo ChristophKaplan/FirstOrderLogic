@@ -1,4 +1,5 @@
 using LRParser.Language;
+using Helpers;
 
 namespace FirstOrderLogic;
 
@@ -63,7 +64,7 @@ public static class FirstOrderLogicExtensions
             }
         }
 
-        Console.WriteLine("simplification done.");
+        Logger.Log("simplification done.");
         return clone;
     }
     

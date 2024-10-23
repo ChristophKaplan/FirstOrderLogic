@@ -47,5 +47,17 @@ public abstract class AtomicSentence : Sentence, IAtomicSentence
         return negated;
     }
 
+    public override bool Equals(object? obj) {
+        if (obj == null || GetType() != obj.GetType()) {
+            return false;
+        }
+
+        return Symbol.Equals(((AtomicSentence)obj).Symbol);
+    }
+    
+    public override int GetHashCode() {
+        return Symbol.GetHashCode();
+    }
+
     public override string ToString() => Symbol;
 }

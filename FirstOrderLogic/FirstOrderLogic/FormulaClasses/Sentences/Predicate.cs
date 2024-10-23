@@ -8,8 +8,7 @@ public interface IPredicate : IAtomicSentence {
 }
 
 public class Predicate : AtomicSentence, IPredicate {
-    public IPredicate Pred => this;
-    public Term[] Terms { get; set; }
+    public Term[] Terms { get; }
     public override int Arity => Terms.Length;
     public override ISentence Clone() => new Predicate(this);
     public bool EqualSignature(IPredicate other) => Symbol == other.Symbol && Arity == other.Arity;
@@ -56,7 +55,16 @@ public class Predicate : AtomicSentence, IPredicate {
         
         return false;
     }
+
+    public override bool Equals(object? obj) {
+        return base.Equals(obj) && Terms.SequenceEqual(((Predicate)obj).Terms);
+    }
     
+    public override int GetHashCode() {
+        var hash = base.GetHashCode();
+        return Terms.Aggregate(hash, (current, term) => HashCode.Combine(current, term.GetHashCode()));
+    }
+
     public override string ToString() {
         return $"{Symbol}({string.Join<Term>(",", Terms)})";
     }

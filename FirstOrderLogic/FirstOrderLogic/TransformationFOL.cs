@@ -196,7 +196,7 @@ public static class TransformationFOL {
         }
     }
 
-    public static void DoubleNegation(ref ISentence sentence) {
+    private static void DoubleNegation(ref ISentence sentence) {
         if (sentence is IComplexSentence { IsNegation: true } negation) {
             if (negation.Children[0] is IComplexSentence { IsNegation: true } doubleNegation) {
                 var i = negation.Parent.Children.IndexOf(negation);
