@@ -22,7 +22,7 @@ public class Tests
         var relations = new Dictionary<string, Func<IElementOfDiscourse[], bool>>();
         var functions = new Dictionary<string, Func<Term[], IElementOfDiscourse>>();
         var variableAssignments = new Dictionary<string, IElementOfDiscourse>();
-        var propositionalAssignments = new Dictionary<IAtomicSentence, bool>();
+        var propositionalAssignments = new Dictionary<IProposition, bool>();
 
         relations.Add("Human", terms => terms[0] switch
         {
@@ -136,12 +136,22 @@ public class Tests
     [Test] 
     public void Resolution()
     {
-        var PpImpliesQ = (ISentence)_firstOrderLogic.TryParse("(Human(Sokrates) AND (Human(x) => Mortal(x)))");
+        //TODO: remove quantifiers (check if we shoud run always skolemform)
+        var PpImpliesQ = (ISentence)_firstOrderLogic.TryParse("(Human(Sokrates) AND (FORALL x (Human(x) => Mortal(x))))");
         var PpImpliesQ2 = _firstOrderLogic.Simplify(PpImpliesQ, out var steps);
         var q = (ISentence)_firstOrderLogic.TryParse("Mortal(Sokrates)");
         var resolution = new Resolution();
         var b = resolution.Resolve(PpImpliesQ2, q);
         
         Assert.That(b, Is.EqualTo(true));
+    }
+    
+    [Test] 
+    public void IsPropositional()
+    {
+        var fol = (ISentence)_firstOrderLogic.TryParse("(Human(Sokrates) AND (FORALL x (Human(x) => Mortal(x))))");
+        var prop = (ISentence)_firstOrderLogic.TryParse("A OR B AND C");
+        Assert.That(fol.IsPropositional(), Is.EqualTo(false));
+        Assert.That(prop.IsPropositional(), Is.EqualTo(true));
     }
 }

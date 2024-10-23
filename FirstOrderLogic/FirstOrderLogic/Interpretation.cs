@@ -4,10 +4,71 @@ using Helpers;
 
 namespace FirstOrderLogic;
 
-public class Interpretation : ILanguageObject{
-    private IDomainOfDiscourse Domain { get; set; }
+public class PossibleWorld : ILanguageObject{
+    private readonly Dictionary<IProposition, bool> _propositionalAssignment = new();
+    public PossibleWorld(Dictionary<IProposition, bool> propositionalAssignment) {
+        _propositionalAssignment = propositionalAssignment;
+    }
     
-    private readonly Dictionary<IAtomicSentence, bool> _propositionAssignment = new();
+    public virtual bool Evaluate(ISentence sentence) {
+        return sentence switch {
+            AtomicSentence atomicSentence => Evaluate(atomicSentence),
+            ComplexSentence complexSentence => Evaluate(complexSentence),
+            _ => throw new Exception($"Error: subtype of {this} not found.")
+        };
+    }
+    
+    protected virtual bool Evaluate(IComplexSentence complexSentence) {
+        return complexSentence.Connective.Symbol switch {
+            Connective.LogicSymbol.TRUE => true,
+            Connective.LogicSymbol.FALSE => false,
+            Connective.LogicSymbol.NEGATION => !Evaluate(complexSentence.Children[0]),
+            Connective.LogicSymbol.CONJUNCTION => Evaluate(complexSentence.Children[0]) && Evaluate(complexSentence.Children[1]),
+            Connective.LogicSymbol.DISJUNCTION => Evaluate(complexSentence.Children[0]) || Evaluate(complexSentence.Children[1]),
+            Connective.LogicSymbol.IMPLICATION => !Evaluate(complexSentence.Children[0]) || Evaluate(complexSentence.Children[1]),
+            Connective.LogicSymbol.BICONDITIONAL => Evaluate(complexSentence.Children[0]) == Evaluate(complexSentence.Children[1]),
+            _ => throw new Exception($"Error: subtype of {complexSentence.Connective.Symbol} not found.")
+        };
+    }
+    
+    protected virtual bool Evaluate(IAtomicSentence atomicSentence) {
+        return atomicSentence switch {
+            Proposition proposition => Evaluate(proposition),
+            _ => throw new Exception($"Error: {atomicSentence} not found in interpretation.")
+        };
+    }
+    
+    private bool Evaluate(IProposition proposition) {
+        if (_propositionalAssignment.TryGetValue(proposition, out var value)) {
+            return value;
+        }
+        
+        throw new Exception($"Error: {proposition} not found in interpretation.");
+    }
+    
+    public override int GetHashCode() {
+        var hash = 17;
+        foreach (var kv in _propositionalAssignment) {
+            var (key, value) = kv;
+            hash = HashCode.Combine(hash ,key, value);
+        }
+
+        return hash;
+    }
+    
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        foreach (var (key, value) in _propositionalAssignment) {
+            sb.Append($"{key}={value}, ");
+        }
+
+        return sb.ToString();
+    }
+}
+
+public class Interpretation : PossibleWorld {
+    private IDomainOfDiscourse Domain { get; }
     private readonly Dictionary<string, Func<IElementOfDiscourse[], bool>> _relations = new();
     private readonly Dictionary<string, Func<Term[], IElementOfDiscourse>> _functions = new();
     private readonly Dictionary<string, IElementOfDiscourse> _variableAssigment = new();
@@ -16,41 +77,35 @@ public class Interpretation : ILanguageObject{
         Dictionary<string, Func<IElementOfDiscourse[], bool>> relations, 
         Dictionary<string, Func<Term[], IElementOfDiscourse>> functions, 
         Dictionary<string, IElementOfDiscourse> variableAssigment, 
-        Dictionary<IAtomicSentence, bool> propositionAssignment) {
+        Dictionary<IProposition, bool> propositionalAssignment) : base(propositionalAssignment) {
         
         Domain = domain;
         _relations = relations;
         _functions = functions;
         _variableAssigment = variableAssigment;
-        _propositionAssignment = propositionAssignment;
     }
     
-    public bool Evaluate(ISentence sentence) {
+    public override bool Evaluate(ISentence sentence) {
         if(sentence.HasScopeConflict()) {
             throw new Exception("Error: Sentence has scope conflict.");
         }
         
-        return sentence switch {
-            AtomicSentence atomicSentence => Evaluate(atomicSentence),
-            ComplexSentence complexSentence => Evaluate(complexSentence),
-            _ => throw new Exception($"Error: subtype of {this} not found.")
+        return base.Evaluate(sentence);
+    }
+    
+    protected override bool Evaluate(IComplexSentence complexSentence) {
+        return complexSentence.Connective.Symbol switch {
+            Connective.LogicSymbol.UNIVERSAL => Domain.Elements.All(element => Evaluate(InstantiateVariable(((Quantifier)complexSentence.Connective).Variable, complexSentence.Children[0], element))),
+            Connective.LogicSymbol.EXISTENTIAL => Domain.Elements.Any(element => Evaluate(InstantiateVariable(((Quantifier)complexSentence.Connective).Variable, complexSentence.Children[0], element))),
+            _ => base.Evaluate(complexSentence)
         };
     }
     
-    private bool Evaluate(IAtomicSentence atomicSentence) {
+    protected override bool Evaluate(IAtomicSentence atomicSentence) {
         return atomicSentence switch {
-            Proposition proposition => Evaluate(proposition),
             Predicate predicate => Evaluate(predicate),
-            _ => throw new Exception($"Error: {atomicSentence} not found in interpretation.")
+            _ => base.Evaluate(atomicSentence)
         };
-    }
-    
-    private bool Evaluate(IProposition proposition) {
-        if (_propositionAssignment.TryGetValue(proposition, out var value)) {
-            return value;
-        }
-        
-        throw new Exception($"Error: {proposition} not found in interpretation.");
     }
     
     private bool Evaluate(IPredicate predicate) {
@@ -73,25 +128,9 @@ public class Interpretation : ILanguageObject{
             _ => throw new Exception($"Error: {term} not found in interpretation.")
         };
     }
-    
-    private bool Evaluate(IComplexSentence complexSentence) {
-        return complexSentence.Connective.Symbol switch {
-            Connective.LogicSymbol.TRUE => true,
-            Connective.LogicSymbol.FALSE => false,
-            Connective.LogicSymbol.NEGATION => !Evaluate(complexSentence.Children[0]),
-            Connective.LogicSymbol.CONJUNCTION => Evaluate(complexSentence.Children[0]) && Evaluate(complexSentence.Children[1]),
-            Connective.LogicSymbol.DISJUNCTION => Evaluate(complexSentence.Children[0]) || Evaluate(complexSentence.Children[1]),
-            Connective.LogicSymbol.IMPLICATION => !Evaluate(complexSentence.Children[0]) || Evaluate(complexSentence.Children[1]),
-            Connective.LogicSymbol.BICONDITIONAL => Evaluate(complexSentence.Children[0]) == Evaluate(complexSentence.Children[1]),
-            Connective.LogicSymbol.UNIVERSAL => Domain.Elements.All(element => Evaluate(InstantiateVariable(((Quantifier)complexSentence.Connective).Variable, complexSentence.Children[0], element))),
-            Connective.LogicSymbol.EXISTENTIAL => Domain.Elements.Any(element => Evaluate(InstantiateVariable(((Quantifier)complexSentence.Connective).Variable, complexSentence.Children[0], element))),
-            _ => throw new Exception($"Error: subtype of {complexSentence.Connective.Symbol} not found.")
-        };
-    }
 
     private ISentence InstantiateVariable(Variable variable, ISentence sentence, IElementOfDiscourse element) {
-        //TODO: pass the constants as additional param, or ass variable assigment? how is it donw usually?
-        //TODO: check how skolemiztion works, and unification
+        //TODO: pass the constants as additional param, or as variable assigment? how is it done usually?
         
         var constantToElement = new Constant($"{variable}_element_{element.Id}");
 
@@ -103,29 +142,5 @@ public class Interpretation : ILanguageObject{
         clone.SubstituteTerm(variable, constantToElement);
         clone.SetParentToParentOf(sentence.Parent); //remove quantifier
         return clone;
-    }
-    
-    public override bool Equals(object? obj) {
-        return GetHashCode().Equals(obj?.GetHashCode());
-    }
-
-    public override int GetHashCode() {
-        var hash = 17;
-        foreach (var kv in _propositionAssignment) {
-            var (key, value) = kv;
-            hash = HashCode.Combine(hash ,key, value);
-        }
-
-        return hash;
-    }
-    
-    public override string ToString()
-    {
-        var sb = new StringBuilder();
-        foreach (var (key, value) in _propositionAssignment) {
-            sb.Append($"{key}={value}, ");
-        }
-
-        return sb.ToString();
     }
 }

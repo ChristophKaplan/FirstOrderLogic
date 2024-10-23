@@ -19,6 +19,7 @@ public interface ISentence : ILanguageObject {
     ISentence Negate();
     bool HasScopeConflict(List<Variable> boundVariables = default);
     bool IsCNF();
+    bool IsPropositional();
     bool IsDisjunctionOfLiterals();
     List<ISentence> GetLiterals();
     IPredicate GetPredicate();
@@ -136,6 +137,14 @@ public abstract class Sentence : ISentence {
         {
             IPredicate predicate => predicate,
             IComplexSentence => Children[0] as IPredicate,
+        };
+    }
+    
+    public bool IsPropositional() {
+        return this switch {
+            IProposition => true,
+            IComplexSentence complexSentence => complexSentence.Children.All(child => child.IsPropositional()),
+            _ => false
         };
     }
     
