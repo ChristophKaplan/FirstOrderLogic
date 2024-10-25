@@ -23,6 +23,7 @@ public interface ISentence : ILanguageObject {
     bool IsDisjunctionOfLiterals();
     List<ISentence> GetLiterals();
     IPredicate GetPredicate();
+    IProposition GetProposition();
 }
 
 public abstract class Sentence : ISentence {
@@ -132,11 +133,20 @@ public abstract class Sentence : ISentence {
     public IPredicate GetPredicate()
     {
         if(!IsLiteral) throw new Exception("Sentence is not a literal");
-        
         return this switch
         {
             IPredicate predicate => predicate,
             IComplexSentence => Children[0] as IPredicate,
+        };
+    }
+    
+    public IProposition GetProposition()
+    {
+        if(!IsLiteral) throw new Exception("Sentence is not a literal");
+        return this switch
+        {
+            IProposition proposition => proposition,
+            IComplexSentence => Children[0] as IProposition,
         };
     }
     

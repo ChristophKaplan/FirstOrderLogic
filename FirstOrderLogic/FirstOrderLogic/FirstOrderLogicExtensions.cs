@@ -37,7 +37,7 @@ public static class FirstOrderLogicExtensions
     }
 
     private delegate void TransformationDelegate(ref ISentence sentence);
-    public static ISentence Simplify(this FirstOrderLogic logic, ISentence sentence, out List<ISentence> steps) {
+    public static ISentence PrenexForm(this FirstOrderLogic logic, ISentence sentence, out List<ISentence> steps) {
         steps = new List<ISentence>();
         var clone = sentence.Clone();
         

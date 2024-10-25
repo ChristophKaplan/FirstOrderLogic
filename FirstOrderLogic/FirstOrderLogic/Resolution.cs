@@ -32,10 +32,10 @@ public class Resolution
         return resolvents;
     }
 
-    public bool Resolve(ISentence KB, ISentence consequence)
+    public bool Resolve(ISentence knowledgeBase, ISentence consequence)
     {
         consequence = consequence.Negate();
-        var joined = new ComplexSentence(KB, Connective.LogicSymbol.CONJUNCTION, consequence);
+        var joined = new ComplexSentence(knowledgeBase, Connective.LogicSymbol.CONJUNCTION, consequence);
         var clauses = joined.GetClauseSet();
         HashSet<Clause> set = new();
 

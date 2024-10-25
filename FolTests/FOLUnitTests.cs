@@ -1,3 +1,4 @@
+using System.Text;
 using FirstOrderLogic;
 using Helpers;
 
@@ -42,7 +43,7 @@ public class Tests
     [Test]
     public void Simplify() {
         var p = (ISentence)_firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
-        var p2 = _firstOrderLogic.Simplify(p, out var steps);
+        var p2 = _firstOrderLogic.PrenexForm(p, out var steps);
         var shouldbe = (ISentence)_firstOrderLogic.TryParse("((NOT P(x)) OR Q(y)) AND R(z)");
         
         Assert.That(p2, Is.EqualTo(shouldbe));
@@ -85,7 +86,7 @@ public class Tests
     public void ConjunctiveNormalForm()
     {
         var p = (ISentence)_firstOrderLogic.TryParse("NOT(P(x) => P(y))");
-        var p2 = _firstOrderLogic.Simplify(p, out var steps);
+        var p2 = _firstOrderLogic.PrenexForm(p, out var steps);
 
         Logger.Log(p.ToString());
         Logger.Log(p2.ToString());
@@ -98,7 +99,7 @@ public class Tests
     public void ClauseSet()
     {
         var p = (ISentence)_firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
-        var p2 = _firstOrderLogic.Simplify(p, out var steps);
+        var p2 = _firstOrderLogic.PrenexForm(p, out var steps);
         Logger.Log(p2 + " cnf:" + p2.IsCNF());
         var set = p2.GetClauseSet();
         Logger.Log(set.Aggregate("", (current, clause) => current + clause + "\n"));
@@ -136,12 +137,13 @@ public class Tests
     [Test] 
     public void Resolution()
     {
-        //TODO: remove quantifiers (check if we shoud run always skolemform)
-        var PpImpliesQ = (ISentence)_firstOrderLogic.TryParse("(Human(Sokrates) AND (FORALL x (Human(x) => Mortal(x))))");
-        var PpImpliesQ2 = _firstOrderLogic.Simplify(PpImpliesQ, out var steps);
-        var q = (ISentence)_firstOrderLogic.TryParse("Mortal(Sokrates)");
+        var sentence = (ISentence)_firstOrderLogic.TryParse("(Human(Sokrates) AND (FORALL x (Human(x) => Mortal(x))))");
+        var prenexForm = _firstOrderLogic.PrenexForm(sentence, out var steps);
+        var skolemForm = _firstOrderLogic.SkolemForm(prenexForm);
+        var consequence = (ISentence)_firstOrderLogic.TryParse("Mortal(Sokrates)");
         var resolution = new Resolution();
-        var b = resolution.Resolve(PpImpliesQ2, q);
+        
+        var b = resolution.Resolve(skolemForm, consequence);
         
         Assert.That(b, Is.EqualTo(true));
     }
@@ -153,5 +155,18 @@ public class Tests
         var prop = (ISentence)_firstOrderLogic.TryParse("A OR B AND C");
         Assert.That(fol.IsPropositional(), Is.EqualTo(false));
         Assert.That(prop.IsPropositional(), Is.EqualTo(true));
+    }
+
+    [Test]
+    public void WalkSat() {
+        var p = (ISentence)_firstOrderLogic.TryParse("(P => Q) AND R");
+        var prenexForm = _firstOrderLogic.PrenexForm(p, out var steps);
+
+        var sat = new SatSolvers();
+        var clauseSet = prenexForm.GetClauseSet();
+        var model = sat.WalkSAT(clauseSet, 0.5f, 100);
+        //Console.WriteLine($"{model} models {clauseSet.Aggregate(new StringBuilder(), (sb, clause) => sb.Append(clause).Append(" AND ")).ToString().TrimEnd(" AND ".ToCharArray())}");
+        
+        Assert.That(model.Evaluate(clauseSet), Is.EqualTo(true));
     }
 }

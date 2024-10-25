@@ -10,6 +10,14 @@ public class PossibleWorld : ILanguageObject{
         _propositionalAssignment = propositionalAssignment;
     }
     
+    public void Assign(IProposition proposition, bool value) {
+        _propositionalAssignment[proposition] = value;
+    }
+    
+    public void Switch(IProposition proposition) {
+        _propositionalAssignment[proposition] = !_propositionalAssignment[proposition];
+    }
+    
     public virtual bool Evaluate(ISentence sentence) {
         return sentence switch {
             AtomicSentence atomicSentence => Evaluate(atomicSentence),
@@ -46,6 +54,14 @@ public class PossibleWorld : ILanguageObject{
         throw new Exception($"Error: {proposition} not found in interpretation.");
     }
     
+    public bool Evaluate(List<Clause> clauseSet) {
+        return clauseSet.All(Evaluate);
+    }
+    
+    public bool Evaluate(Clause clause) {
+        return clause.Literals.Any(Evaluate);        
+    }
+    
     public override int GetHashCode() {
         var hash = 17;
         foreach (var kv in _propositionalAssignment) {
@@ -64,6 +80,10 @@ public class PossibleWorld : ILanguageObject{
         }
 
         return sb.ToString();
+    }
+
+    public PossibleWorld Clone() {
+        return new PossibleWorld(new Dictionary<IProposition, bool>(_propositionalAssignment));
     }
 }
 
