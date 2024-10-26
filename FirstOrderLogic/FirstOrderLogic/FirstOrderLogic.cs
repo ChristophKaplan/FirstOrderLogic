@@ -50,7 +50,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!|-"),
             new TokenDefinition<Terminal>(Terminal.Boolean, "TRUE|FALSE"),
             new TokenDefinition<Terminal>(Terminal.Quantifier, "FORALL|EXISTS"),
-            new TokenDefinition<Terminal>(Terminal.Identifier, "[a-zA-Z]+"),
+            new TokenDefinition<Terminal>(Terminal.Identifier, "[a-zA-Z0-9]+"),
         };
     }
 

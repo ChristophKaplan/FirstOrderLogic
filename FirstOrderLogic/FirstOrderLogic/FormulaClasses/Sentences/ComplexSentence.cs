@@ -3,6 +3,8 @@ namespace FirstOrderLogic;
 public interface IComplexSentence : ISentence{
     Connective Connective { get; }
     bool IsQuantifier { get; }
+    bool IsConjunction { get; }
+    bool IsDisjunction { get; }
     void FlipOperator();
     ISentence GetSiblingOf(ISentence sentence);
     Quantifier[] GetQuantifiers(Connective.LogicSymbol quantifier);
@@ -11,7 +13,8 @@ public interface IComplexSentence : ISentence{
 public class ComplexSentence : Sentence, IComplexSentence{
     public Connective Connective { get; }
     public bool IsQuantifier => Connective == Connective.LogicSymbol.EXISTENTIAL || Connective == Connective.LogicSymbol.UNIVERSAL;
-    
+    public bool IsConjunction => Connective == Connective.LogicSymbol.CONJUNCTION;
+    public bool IsDisjunction => Connective == Connective.LogicSymbol.DISJUNCTION;
     public ComplexSentence(ISentence p, Connective.LogicSymbol logicSymbol, ISentence q) {
         Connective = new Connective(logicSymbol);
         AddChild(p);

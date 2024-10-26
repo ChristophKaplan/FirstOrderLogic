@@ -1,3 +1,4 @@
+using Helpers;
 using LRParser.Language;
 
 namespace FirstOrderLogic;
@@ -102,9 +103,10 @@ public abstract class Sentence : ISentence {
             complexSentence.Connective == Connective.LogicSymbol.IMPLICATION || 
             complexSentence.Connective == Connective.LogicSymbol.BICONDITIONAL) {
             return false;
-        }
-
-        return complexSentence.Connective == Connective.LogicSymbol.DISJUNCTION ? complexSentence.Children.All(child => child.IsDisjunctionOfLiterals()) : Children.All(child => child.IsCNF());
+        } 
+        
+        var eval = complexSentence.Connective == Connective.LogicSymbol.DISJUNCTION ? complexSentence.Children.All(child => child.IsDisjunctionOfLiterals()) : Children.All(child => child.IsCNF());
+        return eval;
     }
 
     public bool IsDisjunctionOfLiterals() {
@@ -151,11 +153,16 @@ public abstract class Sentence : ISentence {
     }
     
     public bool IsPropositional() {
-        return this switch {
+        var b = this switch {
             IProposition => true,
             IComplexSentence complexSentence => complexSentence.Children.All(child => child.IsPropositional()),
             _ => false
         };
+
+        if (!b) {
+            Logger.Log($"{this} is not propositional");
+        }
+        return b;
     }
     
     public override bool Equals(object? obj) {

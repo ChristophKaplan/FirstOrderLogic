@@ -1,9 +1,20 @@
 using FirstOrderLogic;
 
 public static class TransformationFOL {
-    public enum EquivType { SimplifyConstants, DissolveImplication, PushNegation, DoubleNegation, Absorption, AssociationAndIdem, DissolveBiconditional, PullQuantifier, RemoveDuplicateQuantifier,
+    public enum EquivType {
+        SimplifyConstants, 
+        DissolveImplication, 
+        PushNegation, 
+        DoubleNegation, 
+        Absorption, 
+        AssociationAndIdem, 
+        DissolveBiconditional, 
+        PullQuantifier,
+        RemoveDuplicateQuantifier,
         RemoveQuantifier,
-        StandardizeVariables
+        StandardizeVariables,
+        DistributionOfDisjunction,
+        DistributionOfConjunction
     }
 
     private delegate void TransformAction<T>(ref T sentence);
@@ -13,7 +24,7 @@ public static class TransformationFOL {
             var childSentence = sentence.Children[i];
             BottomUpTransformation(ref childSentence, transformAction);
         }
-        
+
         transformAction(ref sentence);
     }
 
@@ -61,11 +72,16 @@ public static class TransformationFOL {
             case EquivType.StandardizeVariables:
                 BottomUpTransformation(ref sentence, StandardizeVariables);
                 break;
+            case EquivType.DistributionOfDisjunction:
+                BottomUpTransformation(ref sentence, DistributionOfDisjunction);
+                break;
+            case EquivType.DistributionOfConjunction:
+                BottomUpTransformation(ref sentence, DistributionOfConjunction);
+                break;
         }
     }
 
-    private static void StandardizeVariables(ref ISentence sentence)
-    {
+    private static void StandardizeVariables(ref ISentence sentence) {
         //check for quantifiers using same variable names and rename
         throw new NotImplementedException();
     }
@@ -76,24 +92,24 @@ public static class TransformationFOL {
             return;
         }
 
-        if(quantifiedSentence.Parent is not IComplexSentence { IsBinary: true } connectiveParent) {
+        if (quantifiedSentence.Parent is not IComplexSentence { IsBinary: true } connectiveParent) {
             return;
         }
 
         var sibling = connectiveParent.GetSiblingOf(quantifiedSentence);
-        
+
         var quantifierRemoved = new ComplexSentence(quantifiedSentence.Children[0], connectiveParent.Connective, sibling);
         var result = new ComplexSentence(quantifiedSentence.Connective, quantifierRemoved);
         result.SetParentToParentOf(connectiveParent);
         sentence = result;
     }
-    
+
     private static void RemoveDuplicateQuantifier(ref ISentence sentence) {
         if (sentence is not IComplexSentence { IsQuantifier: true } quantifiedSentence) {
             return;
         }
-        
-        if(quantifiedSentence.Children[0] is not IComplexSentence {IsQuantifier:true} childQuantified) {
+
+        if (quantifiedSentence.Children[0] is not IComplexSentence { IsQuantifier: true } childQuantified) {
             return;
         }
 
@@ -111,7 +127,7 @@ public static class TransformationFOL {
         if (sentence is not IComplexSentence complexSentence) {
             return;
         }
-        
+
         if (complexSentence.IsLiteral) {
             if (complexSentence.Children[0] is IAtomicSentence { IsNullaryConstant: true } constant) {
                 constant.Negate(); //push negation
@@ -122,11 +138,11 @@ public static class TransformationFOL {
             return;
         }
 
-        if (complexSentence.Connective.Symbol != Connective.LogicSymbol.CONJUNCTION || 
+        if (complexSentence.Connective.Symbol != Connective.LogicSymbol.CONJUNCTION ||
             complexSentence.Connective.Symbol != Connective.LogicSymbol.DISJUNCTION) {
             return;
         }
-        
+
         foreach (var child in sentence.Children) {
             if (child is not IAtomicSentence { IsNullaryConstant: true } atomicSentence) {
                 continue;
@@ -161,7 +177,7 @@ public static class TransformationFOL {
             sentence = and;
         }
     }
-    
+
     private static void DissolveImplication(ref ISentence sentence) {
         if (sentence is IComplexSentence { Connective.Symbol: Connective.LogicSymbol.IMPLICATION } implication) {
             var lhs = implication.Children[0];
@@ -266,14 +282,64 @@ public static class TransformationFOL {
         }
     }
 
-    private static void RemoveQuantifier(ref ISentence sentence)
-    {
+    private static void RemoveQuantifier(ref ISentence sentence) {
         if (sentence is not IComplexSentence { IsQuantifier: true } quantifiedSentence) {
             return;
         }
-        
+
         var child = quantifiedSentence.Children[0];
         child.SetParentToParentOf(quantifiedSentence);
         sentence = child;
+    }
+
+    private static void DistributionOfDisjunction(ref ISentence sentence) {
+        //A OR (B AND C) = (A OR B) AND (A OR C)
+        if (!sentence.IsBinary) return;
+        var complex = sentence as IComplexSentence;
+        var lhs = sentence.Children[0];
+        var rhs = sentence.Children[1];
+
+        if (complex.IsDisjunction) {
+            if (rhs is IComplexSentence { IsConjunction: true }) {
+                var newLHS = new ComplexSentence(lhs, Connective.LogicSymbol.DISJUNCTION, rhs.Children[0]);
+                var newRHS = new ComplexSentence(lhs, Connective.LogicSymbol.DISJUNCTION, rhs.Children[1]);
+                var and = new ComplexSentence(newLHS, Connective.LogicSymbol.CONJUNCTION, newRHS);
+                and.SetParentToParentOf(complex);
+                sentence = and;
+            }
+            else if (lhs is IComplexSentence { IsConjunction: true }) {
+                var newLHS = new ComplexSentence(lhs.Children[0], Connective.LogicSymbol.DISJUNCTION, rhs);
+                var newRHS = new ComplexSentence(lhs.Children[1], Connective.LogicSymbol.DISJUNCTION, rhs);
+                var and = new ComplexSentence(newLHS, Connective.LogicSymbol.CONJUNCTION, newRHS);
+                and.SetParentToParentOf(complex);
+                sentence = and;
+            }
+        }
+    }
+    
+    private static void DistributionOfConjunction(ref ISentence sentence) {
+        //A AND (B OR C) = (A AND B) OR (A AND C)
+
+        if (!sentence.IsBinary) return;
+        var complex = sentence as IComplexSentence;
+        var lhs = sentence.Children[0];
+        var rhs = sentence.Children[1];
+
+        if (complex.IsConjunction) {
+            if (rhs is IComplexSentence { IsDisjunction: true } rhsComplex) {
+                var newLHS = new ComplexSentence(lhs, Connective.LogicSymbol.CONJUNCTION, rhsComplex.Children[0]);
+                var newRHS = new ComplexSentence(lhs, Connective.LogicSymbol.CONJUNCTION, rhsComplex.Children[1]);
+                var or = new ComplexSentence(newLHS, Connective.LogicSymbol.DISJUNCTION, newRHS);
+                or.SetParentToParentOf(rhsComplex);
+                sentence = or;
+            }
+            else if (lhs is IComplexSentence { IsDisjunction: true }) {
+                var newLHS = new ComplexSentence(lhs.Children[0], Connective.LogicSymbol.CONJUNCTION, rhs);
+                var newRHS = new ComplexSentence(lhs.Children[1], Connective.LogicSymbol.CONJUNCTION, rhs);
+                var or = new ComplexSentence(newLHS, Connective.LogicSymbol.DISJUNCTION, newRHS);
+                or.SetParentToParentOf(lhs);
+                sentence = or;
+            }
+        }
     }
 }

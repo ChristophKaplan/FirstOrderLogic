@@ -37,7 +37,7 @@ public static class FirstOrderLogicExtensions
     }
 
     private delegate void TransformationDelegate(ref ISentence sentence);
-    public static ISentence PrenexForm(this FirstOrderLogic logic, ISentence sentence, out List<ISentence> steps) {
+    public static ISentence ToPrenexForm(this FirstOrderLogic logic, ISentence sentence, out List<ISentence> steps) {
         steps = new List<ISentence>();
         var clone = sentence.Clone();
         
@@ -64,10 +64,33 @@ public static class FirstOrderLogicExtensions
             }
         }
 
-        Logger.Log("simplification done.");
+        Logger.Log("pnf done.");
         return clone;
     }
-    
+
+    public static ISentence ToConjunctiveNormalForm(this FirstOrderLogic logic, ISentence sentence, out List<ISentence> steps) {
+        var pnf = ToPrenexForm(logic, sentence, out steps);
+        
+        var clone = pnf.Clone();
+        var transformations = new List<TransformationDelegate> {
+            (ref ISentence s) => TransformationFOL.Transform(TransformationFOL.EquivType.DistributionOfDisjunction, ref s)
+        };
+
+        while (true) {
+            var start = clone.Clone();
+            foreach (var transform in transformations) {
+                transform(ref clone);
+                steps.Add(clone.Clone());
+            }
+            if (start.Equals(clone)) {
+                break;
+            }
+        }
+        
+        if(!clone.IsCNF()) { throw new Exception("Sentence is not in CNF"); }
+        return clone;
+    }
+
     public static ISentence SkolemForm(this FirstOrderLogic logic, ISentence sentence) {
         var clone = sentence.Clone();
         

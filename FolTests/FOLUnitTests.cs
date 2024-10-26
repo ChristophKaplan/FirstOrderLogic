@@ -41,9 +41,9 @@ public class Tests
     }
 
     [Test]
-    public void Simplify() {
+    public void PrenexForm() {
         var p = (ISentence)_firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
-        var p2 = _firstOrderLogic.PrenexForm(p, out var steps);
+        var p2 = _firstOrderLogic.ToPrenexForm(p, out var steps);
         var shouldbe = (ISentence)_firstOrderLogic.TryParse("((NOT P(x)) OR Q(y)) AND R(z)");
         
         Assert.That(p2, Is.EqualTo(shouldbe));
@@ -85,8 +85,8 @@ public class Tests
     [Test]
     public void ConjunctiveNormalForm()
     {
-        var p = (ISentence)_firstOrderLogic.TryParse("NOT(P(x) => P(y))");
-        var p2 = _firstOrderLogic.PrenexForm(p, out var steps);
+        var p = (ISentence)_firstOrderLogic.TryParse("P(x) => (P(y) AND Q(z))");
+        var p2 = _firstOrderLogic.ToConjunctiveNormalForm(p, out var steps);
 
         Logger.Log(p.ToString());
         Logger.Log(p2.ToString());
@@ -99,7 +99,7 @@ public class Tests
     public void ClauseSet()
     {
         var p = (ISentence)_firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
-        var p2 = _firstOrderLogic.PrenexForm(p, out var steps);
+        var p2 = _firstOrderLogic.ToPrenexForm(p, out var steps);
         Logger.Log(p2 + " cnf:" + p2.IsCNF());
         var set = p2.GetClauseSet();
         Logger.Log(set.Aggregate("", (current, clause) => current + clause + "\n"));
@@ -138,7 +138,7 @@ public class Tests
     public void Resolution()
     {
         var sentence = (ISentence)_firstOrderLogic.TryParse("(Human(Sokrates) AND (FORALL x (Human(x) => Mortal(x))))");
-        var prenexForm = _firstOrderLogic.PrenexForm(sentence, out var steps);
+        var prenexForm = _firstOrderLogic.ToPrenexForm(sentence, out var steps);
         var skolemForm = _firstOrderLogic.SkolemForm(prenexForm);
         var consequence = (ISentence)_firstOrderLogic.TryParse("Mortal(Sokrates)");
         var resolution = new Resolution();
@@ -160,7 +160,7 @@ public class Tests
     [Test]
     public void WalkSat() {
         var p = (ISentence)_firstOrderLogic.TryParse("(P => Q) AND R");
-        var prenexForm = _firstOrderLogic.PrenexForm(p, out var steps);
+        var prenexForm = _firstOrderLogic.ToPrenexForm(p, out var steps);
 
         var sat = new SatSolvers();
         var clauseSet = prenexForm.GetClauseSet();
