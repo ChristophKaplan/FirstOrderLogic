@@ -35,7 +35,23 @@ public static class FirstOrderLogicExtensions
                 throw new Exception($"Unknown Logic Symbol: {lexValue}");
         }
     }
+    
+    public static ISentence ConnectSentences(this FirstOrderLogic logic, List<ISentence> sentences, Connective.LogicSymbol connective = Connective.LogicSymbol.CONJUNCTION) {
+        switch (sentences.Count) {
+            case 0:
+                throw new Exception("No sentences to connect.");
+            case 1:
+                return sentences[0];
+        }
 
+        var conjunct = new ComplexSentence(sentences[0], connective, sentences[1]);
+        for (var i = 2; i < sentences.Count; i++) {
+            conjunct = new ComplexSentence(conjunct,connective, sentences[i]);
+        }
+
+        return conjunct;
+    }
+    
     private delegate void TransformationDelegate(ref ISentence sentence);
     public static ISentence ToPrenexForm(this FirstOrderLogic logic, ISentence sentence, out List<ISentence> steps) {
         steps = new List<ISentence>();
@@ -141,5 +157,16 @@ public static class FirstOrderLogicExtensions
         }
         
         return clauseSet;
+    }
+
+    public static List<ISentence> GetInstancesOverTime(this ISentence sentence, int from, int to) {
+        var sentences = new List<ISentence>();
+        for (var i = from; i <= to; i++) {
+            var clone = sentence.Clone();
+            clone.AddTime(i);
+            sentences.Add(clone);
+        }
+
+        return sentences;
     }
 }

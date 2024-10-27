@@ -1,5 +1,6 @@
 using System.Text;
 using FirstOrderLogic;
+using FirstOrderLogic.Planning;
 using Helpers;
 
 namespace FolTests;
@@ -168,5 +169,24 @@ public class Tests
         //Console.WriteLine($"{model} models {clauseSet.Aggregate(new StringBuilder(), (sb, clause) => sb.Append(clause).Append(" AND ")).ToString().TrimEnd(" AND ".ToCharArray())}");
         
         Assert.That(model.Evaluate(clauseSet), Is.EqualTo(true));
+    }
+    
+    [Test]
+    public void GetInstancesOverTime() {
+        var action = (ISentence)_firstOrderLogic.TryParse("Cook^0 => HaveIngredient^0 AND Food^1");
+        var instancesOverTime = action.GetInstancesOverTime(0, 3);
+
+        foreach (var instance in instancesOverTime) {
+            Console.WriteLine(instance);
+        }
+        
+        Assert.That(instancesOverTime.Count, Is.EqualTo(4));
+    }
+    
+    [Test]
+    public void SatPlan() {
+        var satplan = new SATPLan();
+        satplan.SetUp();
+        Assert.That(true, Is.EqualTo(true));
     }
 }

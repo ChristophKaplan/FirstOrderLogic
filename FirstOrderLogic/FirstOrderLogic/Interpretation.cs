@@ -14,6 +14,10 @@ public class PossibleWorld : ILanguageObject{
         _propositionalAssignment[proposition] = value;
     }
     
+    public List<IProposition> GetPropositionsWhere(bool value) {
+        return _propositionalAssignment.Where(kv => kv.Value == value).Select(kv => kv.Key).ToList();
+    }
+    
     public void Switch(IProposition proposition) {
         _propositionalAssignment[proposition] = !_propositionalAssignment[proposition];
     }

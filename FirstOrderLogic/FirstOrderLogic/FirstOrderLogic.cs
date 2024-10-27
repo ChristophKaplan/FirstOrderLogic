@@ -1,3 +1,4 @@
+using System.Text;
 using LRParser.CFG;
 using LRParser.Language;
 using LRParser.Lexer;
@@ -16,7 +17,8 @@ public enum Terminal
     Negation,
     Boolean,
     Quantifier,
-    Biconditional
+    Biconditional,
+    TimeAttribute
 }
 
 public enum NonTerminal
@@ -36,6 +38,11 @@ public enum NonTerminal
 
 public class FirstOrderLogic : Language<Terminal, NonTerminal>
 {
+    public FirstOrderLogic() 
+    {
+        Console.OutputEncoding = Encoding.UTF8;
+    }
+    
     protected override TokenDefinition<Terminal>[] SetUpTokenDefinitions()
     {
         return new[]
@@ -50,7 +57,8 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             new TokenDefinition<Terminal>(Terminal.Negation, "NOT|!|-"),
             new TokenDefinition<Terminal>(Terminal.Boolean, "TRUE|FALSE"),
             new TokenDefinition<Terminal>(Terminal.Quantifier, "FORALL|EXISTS"),
-            new TokenDefinition<Terminal>(Terminal.Identifier, "[a-zA-Z0-9]+"),
+            new TokenDefinition<Terminal>(Terminal.TimeAttribute, "\\^[0-9]"),
+            new TokenDefinition<Terminal>(Terminal.Identifier, "[a-zA-Z]+"),
         };
     }
 
@@ -71,9 +79,11 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
         var ruleComplexSentenceExt = AddProductionRule(NonTerminal.ComplexSentenceUnary, NonTerminal.LogicalOperator, NonTerminal.Sentence);
 
         var ruleAtomicSentence = AddProductionRule(NonTerminal.AtomicSentence, Terminal.Identifier, NonTerminal.AtomicSentenceExt);
+        var ruleAtomicSentenceT = AddProductionRule(NonTerminal.AtomicSentence, Terminal.Identifier, NonTerminal.AtomicSentenceExt, Terminal.TimeAttribute);
         var ruleAtomicSentenceExtPred = AddProductionRule(NonTerminal.AtomicSentenceExt, Terminal.Open, NonTerminal.TermList, Terminal.Close);
         var ruleAtomicSentenceExtProp = AddProductionRule(NonTerminal.AtomicSentenceExt, SpecialTerminal.Epsilon);
 
+        
         var ruleTermList = AddProductionRule(NonTerminal.TermList, NonTerminal.Term, NonTerminal.TermListExt);
         var ruleTermListExt = AddProductionRule(NonTerminal.TermListExt, Terminal.Comma, NonTerminal.Term, NonTerminal.TermListExt);
         var ruleTermListExtEnd = AddProductionRule(NonTerminal.TermListExt, SpecialTerminal.Epsilon);
@@ -142,19 +152,16 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
 
         ruleAtomicSentence.SetSemanticAction((lhs, rhs) =>
         {
-            var symbol = ((LexValue)rhs[0].SyntheticAttribute).Value;
-
-            if (rhs[1].SyntheticAttribute != null)
-            {
-                var extArray = (ArrayValue)rhs[1].SyntheticAttribute;
-                var terms = extArray.Value.Select(lexValue => (Term)lexValue).ToArray();
-                lhs.SyntheticAttribute = new Predicate(symbol, terms);
-                return;
-            }
-
-            lhs.SyntheticAttribute = new Proposition(symbol);
+            lhs.SyntheticAttribute = GetAtomicSentence(rhs);
+        });
+        
+        ruleAtomicSentenceT.SetSemanticAction((lhs, rhs) =>
+        {
+            lhs.SyntheticAttribute = GetAtomicSentence(rhs);
         });
 
+
+        
         ruleAtomicSentenceExtPred.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
         ruleAtomicSentenceExtProp.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
         ruleTermExt.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
@@ -219,31 +226,47 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             lhs.SyntheticAttribute = term;
         });
 
-        ruleCon.SetSemanticAction((lhs, rhs) =>
-        {
-            lhs.SyntheticAttribute = new Connective( ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
-        });
-        ruleDis.SetSemanticAction((lhs, rhs) =>
-        {
-            lhs.SyntheticAttribute = new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
-        });
-        ruleImp.SetSemanticAction((lhs, rhs) =>
-        {
-            lhs.SyntheticAttribute = new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
-        });
-        ruleIFF.SetSemanticAction((lhs, rhs) =>
-        {
-            lhs.SyntheticAttribute = new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
-        });
-        ruleNeg.SetSemanticAction((lhs, rhs) =>
-        {
-            lhs.SyntheticAttribute = new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant());
-        });
+        ruleCon.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
+        ruleDis.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
+        ruleImp.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
+        ruleIFF.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
+        ruleNeg.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
     }
 
+    ILanguageObject GetConnective(Symbol[] rhs) => new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant()); 
+
+    ILanguageObject GetAtomicSentence(Symbol[] rhs) {
+        var symbol = ((LexValue)rhs[0].SyntheticAttribute).Value;
+
+        int? timeValue = null;
+        if (rhs.Length > 2)
+        {
+            var timeAttribute = ((LexValue)rhs[2].SyntheticAttribute).Value;
+            timeValue = int.Parse(timeAttribute[1..]);
+        }
+            
+        if (rhs[1].SyntheticAttribute != null)
+        {
+            var extArray = (ArrayValue)rhs[1].SyntheticAttribute;
+            var terms = extArray.Value.Select(lexValue => (Term)lexValue).ToArray();
+            return timeValue.HasValue ? new Predicate(symbol, terms, (int)timeValue) : new Predicate(symbol, terms);
+        }
+            
+        return timeValue.HasValue ? new Proposition(symbol, (int)timeValue) : new Proposition(symbol);
+    }
+    
     public override ILanguageObject TryParse(string input)
     {
         var langObj = base.TryParse(input);
         return langObj;
+    }
+    
+    public List<ILanguageObject> TryParse(List<string> inputList)
+    {
+        var langObjList = new List<ILanguageObject>();
+        foreach (var input in inputList) {
+            langObjList.Add(TryParse(input));
+        }
+        return langObjList;
     }
 }

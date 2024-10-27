@@ -5,8 +5,11 @@ public interface IProposition : IAtomicSentence { }
 public class Proposition : AtomicSentence, IProposition {
     public Proposition(string propositionSymbol) : base(propositionSymbol) {
     }
+    
+    public Proposition(string propositionSymbol, int time) : base(propositionSymbol, time) {
+    }
 
-    public Proposition(IProposition other) : base(other) {
+    private Proposition(IProposition other) : base(other) {
     }
     
     public override ISentence Clone() => new Proposition(this);
@@ -15,6 +18,4 @@ public class Proposition : AtomicSentence, IProposition {
     public override void SubstituteTerm(Term term, Term replacement) {
         //no terms
     }
-
-    public override string ToString() => Symbol;
 }

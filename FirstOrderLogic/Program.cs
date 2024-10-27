@@ -1,8 +1,7 @@
-using System.Text;
+using FirstOrderLogic;
 using FirstOrderLogic.Planning;
 
-Console.OutputEncoding = Encoding.UTF8;
 
-var firstOrderLogic = new FirstOrderLogic.FirstOrderLogic();
-SATPLan sATPLan = new();
-sATPLan.DO();
+
+var satplan = new SATPLan();
+satplan.SetUp();

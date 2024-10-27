@@ -12,6 +12,7 @@ public interface ISentence : ILanguageObject {
     int Arity { get; }
     bool IsLiteral { get; }
     bool IsNegation { get; }
+    bool IsImplication { get; }
     void AddChild(ISentence sentence);
     void InsertChild(int index, ISentence sentence);
     void SetParentToParentOf(ISentence parentOfThis);
@@ -25,6 +26,8 @@ public interface ISentence : ILanguageObject {
     List<ISentence> GetLiterals();
     IPredicate GetPredicate();
     IProposition GetProposition();
+    void AddTime(int i);
+    bool IsImplicationAndEqualPremise(ISentence premise);
 }
 
 public abstract class Sentence : ISentence {
@@ -38,7 +41,7 @@ public abstract class Sentence : ISentence {
     public bool IsLiteral => this is IAtomicSentence || 
                              (this is IComplexSentence { IsNegation: true } complex && complex.Children[0] is IAtomicSentence);
     public bool IsNegation => this is IComplexSentence complex && complex.Connective == Connective.LogicSymbol.NEGATION;
-    
+    public bool IsImplication => this is IComplexSentence complex && complex.Connective == Connective.LogicSymbol.IMPLICATION;
     public abstract void SubstituteTerm(Term term, Term replacement);
     public abstract ISentence Negate();
     public abstract ISentence Clone();
@@ -151,7 +154,27 @@ public abstract class Sentence : ISentence {
             IComplexSentence => Children[0] as IProposition,
         };
     }
-    
+
+    public void AddTime(int t) {
+        if (this is IAtomicSentence atomicSentence) {
+            atomicSentence.Time += t;
+        }
+        else {
+            foreach (var child in Children) {
+                child.AddTime(t);
+            }
+        }
+    }
+
+    public bool IsImplicationAndEqualPremise(ISentence premise) {
+        if (!IsImplication) {
+            return false;
+        }
+
+        var complexSentence = (IComplexSentence)this;
+        return complexSentence.Children[0].Equals(premise);
+    }
+
     public bool IsPropositional() {
         var b = this switch {
             IProposition => true,

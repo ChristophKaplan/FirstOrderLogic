@@ -16,8 +16,12 @@ public class Predicate : AtomicSentence, IPredicate {
     public Predicate(string predicateSymbol, Term[] terms) : base(predicateSymbol) {
         Terms = terms;
     }
+    
+    public Predicate(string predicateSymbol, Term[] terms, int time) : base(predicateSymbol, time) {
+        Terms = terms;
+    }
 
-    public Predicate(IPredicate other) : base(other) {
+    private Predicate(IPredicate other) : base(other) {
         Terms = new Term[other.Terms.Length];
         for (int i = 0; i < other.Terms.Length; i++) {
             Terms[i] = other.Terms[i].Clone();
@@ -66,6 +70,6 @@ public class Predicate : AtomicSentence, IPredicate {
     }
 
     public override string ToString() {
-        return $"{Symbol}({string.Join<Term>(",", Terms)})";
+        return $"{Symbol}({string.Join<Term>(",", Terms)}){(Time.HasValue ? $"^{Time}" : "")}";
     }
 }

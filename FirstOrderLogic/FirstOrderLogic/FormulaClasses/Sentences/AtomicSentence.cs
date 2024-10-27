@@ -3,6 +3,7 @@ namespace FirstOrderLogic;
 public interface IAtomicSentence : ISentence
 {
     string Symbol { get; set; }
+    public int? Time { get; set; }
     bool IsNullaryConstant { get; }
     bool Tautology { get; }
     bool Contradiction { get; }
@@ -11,19 +12,28 @@ public interface IAtomicSentence : ISentence
 public abstract class AtomicSentence : Sentence, IAtomicSentence
 {
     public string Symbol { get; set; }
+    public int? Time { get; set; }
     public bool IsNullaryConstant => Tautology || Contradiction;
     public bool Tautology => Symbol.Equals(Connective.SymbolToString(Connective.LogicSymbol.TRUE));
     public bool Contradiction => Symbol.Equals(Connective.SymbolToString(Connective.LogicSymbol.FALSE));
 
-    public AtomicSentence(string symbol)
+    protected AtomicSentence(string symbol)
     {
         Symbol = symbol;
+        Time = null;
+    }
+    
+    protected AtomicSentence(string symbol, int time)
+    {
+        Symbol = symbol;
+        Time = time;
     }
 
-    public AtomicSentence(IAtomicSentence other)
+    protected AtomicSentence(IAtomicSentence other)
     {
         Parent = null; //other.Parent;
         Symbol = other.Symbol;
+        Time = other.Time;
     }
 
     public override ISentence Negate()
@@ -52,12 +62,12 @@ public abstract class AtomicSentence : Sentence, IAtomicSentence
             return false;
         }
 
-        return Symbol.Equals(((AtomicSentence)obj).Symbol);
+        return Symbol.Equals(((AtomicSentence)obj).Symbol) && Time == ((AtomicSentence)obj).Time;
     }
     
     public override int GetHashCode() {
-        return Symbol.GetHashCode();
+        return HashCode.Combine(Symbol, Time);
     }
 
-    public override string ToString() => Symbol;
+    public override string ToString() => $"{Symbol}{(Time.HasValue ? $"^{Time}" : "")}";
 }
