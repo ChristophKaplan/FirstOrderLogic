@@ -51,11 +51,31 @@ public class SATPLan {
     }
 
     private PossibleWorld Solve(ISentence cnf){
-        var clauseSet = cnf.GetClauseSet();
-        return _satSolvers.WalkSAT(clauseSet, 0.5f, 100);
+        var clauseSet = cnf.GetClauseSet(); 
+        var model = _satSolvers.WalkSAT(clauseSet, 0.5f, 1000);
+        if(model == null) {
+            throw new Exception("No model found");
+        }
+
+        foreach (var clause in clauseSet)
+        {
+            if (model.Evaluate(clause))
+            {
+                Logger.Log("clause: "+clause);
+            }   
+        }
+        return model;
     }
 
     private List<ISentence> Extract(PossibleWorld model) {
+
+        foreach (var transition in transitionTimeInstances)
+        {
+            if(model.Evaluate(transition)) {
+                Logger.Log("Transition: "+transition);
+            }
+        }
+        
         var actions = new List<ISentence>();
 
         foreach (var assigment in model._propositionalAssignment.Keys) {

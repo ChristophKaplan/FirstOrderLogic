@@ -6,7 +6,7 @@ var satplan = new SATPLan();
 
 var given = new List<string>() {
     "HaveIngredients^0", 
-    "Cook^0", 
+    "Cook^0",
     "NOT Food^0", 
     "Hungry^0",
 };
