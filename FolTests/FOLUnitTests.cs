@@ -186,7 +186,7 @@ public class Tests
     [Test]
     public void SatPlan() {
         var satplan = new SATPLan();
-        satplan.SetUp();
+        satplan.PrepareCNF();
         Assert.That(true, Is.EqualTo(true));
     }
 }

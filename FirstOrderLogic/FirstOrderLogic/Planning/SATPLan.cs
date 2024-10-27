@@ -8,8 +8,11 @@ namespace FirstOrderLogic.Planning;
 public class SATPLan {
     readonly FirstOrderLogic _firstOrderLogic = new ();
     readonly SatSolvers _satSolvers = new ();
+    List<ISentence> transitionTimeInstances = new ();
+    int toTime = 2;
     
-    public void SetUp() {
+    public (List<ISentence> given, List<ISentence> transitions, List<ISentence> goal) Parse()
+    {
         var given = new List<string>() {
             "HaveIngredients^0", 
             "Cook^0", 
@@ -26,26 +29,34 @@ public class SATPLan {
             "NOT (Hungry^2)",
         };
 
-        var givenParsed = _firstOrderLogic.TryParse(given);
-        var transitionsParsed = _firstOrderLogic.TryParse(transitions);
-        var goalParsed = _firstOrderLogic.TryParse(goal);
+        var givenParsed = _firstOrderLogic.TryParse(given).Select(c => (ISentence)c).ToList();
+        var transitionsParsed = _firstOrderLogic.TryParse(transitions).Select(c => (ISentence)c).ToList();
+        var goalParsed = _firstOrderLogic.TryParse(goal).Select(c => (ISentence)c).ToList();
         
-        int toTime = 2;
-        var transitionInstances = new List<ISentence>();
-        foreach (var trans in transitionsParsed) {
-            var range = ((ISentence)trans).GetInstancesOverTime(0, toTime);
-            transitionInstances.AddRange(range);
+        return (givenParsed, transitionsParsed, goalParsed);
+    }
+
+    public ISentence PrepareCNF(List<ISentence> given, List<ISentence> transitions, List<ISentence> goal)
+    {
+        transitionTimeInstances.Clear();
+        
+        foreach (var trans in transitions)
+        {
+            var range = trans.GetInstancesOverTime(0, toTime);
+            transitionTimeInstances.AddRange(range);
         }
 
-        //to CNF
-        var all = new List<ISentence>();
-        all.AddRange(givenParsed.Select(s => (ISentence)s));
-        all.AddRange(transitionInstances);
-        all.AddRange(goalParsed.Select(s => (ISentence)s));
-        var kb = _firstOrderLogic.ConnectSentences(all);
-        var cnf = _firstOrderLogic.ToConjunctiveNormalForm(kb, out var steps);
+        var allSentences = new List<ISentence>();
+        allSentences.AddRange(given);
+        allSentences.AddRange(transitionTimeInstances);
+        allSentences.AddRange(goal);
         
-        //solve
+        var connected = _firstOrderLogic.ConnectSentences(allSentences);
+        var cnf = _firstOrderLogic.ToConjunctiveNormalForm(connected, out var steps);
+        return cnf;
+    }
+
+    public void Run(ISentence cnf){
         var clauseSet = cnf.GetClauseSet();
         var model = _satSolvers.WalkSAT(clauseSet, 0.5f, 100);
 
@@ -54,7 +65,7 @@ public class SATPLan {
 
         var actions = new List<ISentence>();
         foreach (var trueAssigment in trueAssigments) {
-            if (IsAction(trueAssigment, transitionInstances)) {
+            if (IsAction(trueAssigment, transitionTimeInstances)) {
                 actions.Add(trueAssigment);
             }
         }
