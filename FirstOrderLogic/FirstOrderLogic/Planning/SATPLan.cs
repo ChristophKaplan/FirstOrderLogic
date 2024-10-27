@@ -8,27 +8,23 @@ namespace FirstOrderLogic.Planning;
 public class SATPLan {
     readonly FirstOrderLogic _firstOrderLogic = new ();
     readonly SatSolvers _satSolvers = new ();
-    List<ISentence> transitionTimeInstances = new ();
-    int toTime = 2;
+    readonly List<ISentence> transitionTimeInstances = new ();
+    readonly int toTime = 2;
+    readonly int fromTime = 0;
     
-    public (List<ISentence> given, List<ISentence> transitions, List<ISentence> goal) Parse()
+    public List<ISentence> Run(List<string> given, List<string> transitions, List<string> goal) {
+        var parsed = Parse(given, transitions, goal);
+        var merged = InstantiateAndMerge(parsed.given, parsed.transitions, parsed.goal);
+        var cnf = _firstOrderLogic.ToConjunctiveNormalForm(merged, out var steps);
+        var model = Solve(cnf);
+        var actions = Extract(model);
+        
+        Debug(model, cnf);
+        return actions;
+    }
+    
+    private (List<ISentence> given, List<ISentence> transitions, List<ISentence> goal) Parse(List<string> given, List<string> transitions, List<string> goal)
     {
-        var given = new List<string>() {
-            "HaveIngredients^0", 
-            "Cook^0", 
-            "NOT Food^0", 
-            "Hungry^0",
-        };
-        
-        var transitions = new List<string>() {
-            "Cook^0 => (HaveIngredients^0 AND Food^1)",
-            "Eat^0 => (Food^0 AND NOT (Hungry^1))",
-        };
-        
-        var goal = new List<string>() {
-            "NOT (Hungry^2)",
-        };
-
         var givenParsed = _firstOrderLogic.TryParse(given).Select(c => (ISentence)c).ToList();
         var transitionsParsed = _firstOrderLogic.TryParse(transitions).Select(c => (ISentence)c).ToList();
         var goalParsed = _firstOrderLogic.TryParse(goal).Select(c => (ISentence)c).ToList();
@@ -36,13 +32,13 @@ public class SATPLan {
         return (givenParsed, transitionsParsed, goalParsed);
     }
 
-    public ISentence PrepareCNF(List<ISentence> given, List<ISentence> transitions, List<ISentence> goal)
+    private ISentence InstantiateAndMerge(List<ISentence> given, List<ISentence> transitions, List<ISentence> goal)
     {
         transitionTimeInstances.Clear();
         
         foreach (var trans in transitions)
         {
-            var range = trans.GetInstancesOverTime(0, toTime);
+            var range = trans.GetInstancesOverTime(fromTime, toTime);
             transitionTimeInstances.AddRange(range);
         }
 
@@ -51,37 +47,40 @@ public class SATPLan {
         allSentences.AddRange(transitionTimeInstances);
         allSentences.AddRange(goal);
         
-        var connected = _firstOrderLogic.ConnectSentences(allSentences);
-        var cnf = _firstOrderLogic.ToConjunctiveNormalForm(connected, out var steps);
-        return cnf;
+        return _firstOrderLogic.ConnectSentences(allSentences);
     }
 
-    public void Run(ISentence cnf){
+    private PossibleWorld Solve(ISentence cnf){
         var clauseSet = cnf.GetClauseSet();
-        var model = _satSolvers.WalkSAT(clauseSet, 0.5f, 100);
+        return _satSolvers.WalkSAT(clauseSet, 0.5f, 100);
+    }
 
-        //extract plan
-        var trueAssigments = model.GetPropositionsWhere(true); //consider negation
-
+    private List<ISentence> Extract(PossibleWorld model) {
         var actions = new List<ISentence>();
-        foreach (var trueAssigment in trueAssigments) {
-            if (IsAction(trueAssigment, transitionTimeInstances)) {
-                actions.Add(trueAssigment);
+
+        foreach (var assigment in model._propositionalAssignment.Keys) {
+            if (IsAction(assigment, transitionTimeInstances)) {
+
+                if (model._propositionalAssignment[assigment]) {
+                    actions.Add(assigment);
+                }
             }
         }
-
-        foreach (var action in actions) {
-            Logger.Log(action.ToString());
-        }
+        
+        return actions;
     }
 
-    private bool IsAction(IProposition trueAssigment, List<ISentence> transitionInstances) {
+    private bool IsAction(IProposition premise, List<ISentence> transitionInstances) {
         foreach (var instance in transitionInstances) {
-            if (instance.IsImplicationAndEqualPremise(trueAssigment)) {
+            if (instance.IsImplicationAndEqualPremise(premise)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private void Debug(PossibleWorld model, ISentence cnf) {
+        Logger.Log($"{model} models {cnf}");
     }
 }

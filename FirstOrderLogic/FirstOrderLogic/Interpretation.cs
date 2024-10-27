@@ -5,17 +5,13 @@ using Helpers;
 namespace FirstOrderLogic;
 
 public class PossibleWorld : ILanguageObject{
-    private readonly Dictionary<IProposition, bool> _propositionalAssignment = new();
+    public readonly Dictionary<IProposition, bool> _propositionalAssignment = new();
     public PossibleWorld(Dictionary<IProposition, bool> propositionalAssignment) {
         _propositionalAssignment = propositionalAssignment;
     }
     
     public void Assign(IProposition proposition, bool value) {
         _propositionalAssignment[proposition] = value;
-    }
-    
-    public List<IProposition> GetPropositionsWhere(bool value) {
-        return _propositionalAssignment.Where(kv => kv.Value == value).Select(kv => kv.Key).ToList();
     }
     
     public void Switch(IProposition proposition) {

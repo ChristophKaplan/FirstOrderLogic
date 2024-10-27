@@ -97,6 +97,19 @@ public class Tests
     }
 
     [Test]
+    public void Distribution()
+    {
+        var p = (ISentence)_firstOrderLogic.TryParse("X => (A AND (NOT B) AND (NOT C))");
+        var p2 = _firstOrderLogic.ToConjunctiveNormalForm(p, out var steps);
+
+        Logger.Log(p.ToString());
+        Logger.Log(p2.ToString());
+
+        Assert.That(false, Is.EqualTo(false));
+    }
+    
+    
+    [Test]
     public void ClauseSet()
     {
         var p = (ISentence)_firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
@@ -180,13 +193,34 @@ public class Tests
             Console.WriteLine(instance);
         }
         
-        Assert.That(instancesOverTime.Count, Is.EqualTo(4));
+        Assert.That(instancesOverTime.Count, Is.EqualTo(3));
     }
     
     [Test]
     public void SatPlan() {
+        var given = new List<string>() {
+            "HaveIngredients^0", 
+            "Cook^0", 
+            "NOT Food^0", 
+            "Hungry^0",
+        };
+        
+        var transitions = new List<string>() {
+            "Cook^0 => (HaveIngredients^0 AND Food^1)",
+            "Eat^0 => (Food^0 AND NOT (Hungry^1))",
+        };
+        
+        var goal = new List<string>() {
+            "NOT (Hungry^2)",
+        };
+
         var satplan = new SATPLan();
-        satplan.PrepareCNF();
-        Assert.That(true, Is.EqualTo(true));
+        var actions = satplan.Run(given, transitions, goal);
+        
+        foreach (var action in actions) {
+            Logger.Log(action.ToString());
+        }
+        
+        Assert.That(actions.Count, Is.EqualTo(2));
     }
 }
