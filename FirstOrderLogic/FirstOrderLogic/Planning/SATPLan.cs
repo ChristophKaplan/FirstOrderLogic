@@ -11,7 +11,7 @@ public class SATPLan {
     readonly List<ISentence> transitionTimeInstances = new ();
     readonly int toTime = 2;
     readonly int fromTime = 0;
-    
+    private List<Clause> clauseSet;
     public List<ISentence> Run(List<string> given, List<string> transitions, List<string> goal) {
         var parsed = Parse(given, transitions, goal);
         var merged = InstantiateAndMerge(parsed.given, parsed.transitions, parsed.goal);
@@ -51,8 +51,8 @@ public class SATPLan {
     }
 
     private PossibleWorld Solve(ISentence cnf){
-        var clauseSet = cnf.GetClauseSet();
-        return _satSolvers.WalkSAT(clauseSet, 0.5f, 100);
+        clauseSet = cnf.GetClauseSet();
+        return _satSolvers.WalkSAT(clauseSet, 0.5f, 10000);
     }
 
     private List<ISentence> Extract(PossibleWorld model) {
@@ -81,6 +81,28 @@ public class SATPLan {
     }
 
     private void Debug(PossibleWorld model, ISentence cnf) {
-        Logger.Log($"{model} models {cnf}");
+
+        foreach (var (key, value) in model._propositionalAssignment.OrderBy(kv => kv.Key.Time)) {
+            var c = ConsoleColor.Red;
+            if(model._propositionalAssignment[key]) c = ConsoleColor.Green;
+            Console.ForegroundColor = c;
+            Console.WriteLine($"{key}={value}");
+            Console.ResetColor();
+        }
+        Console.WriteLine("\n");
+        foreach (var clause in clauseSet) {
+
+            Console.Write("{");
+            foreach (var lit in clause.Literals) {
+                var c = ConsoleColor.Red;
+                if(model.Evaluate(lit)) c = ConsoleColor.Green;
+                Console.ForegroundColor = c;
+                Console.Write($"{lit},");
+                Console.ResetColor();
+            }
+            Console.Write("}\n");
+        }
+        
+        Console.WriteLine("\n\n");
     }
 }
