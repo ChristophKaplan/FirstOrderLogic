@@ -1,7 +1,10 @@
 using FirstOrderLogic;
-using FirstOrderLogic.Planning;
+using FirstOrderLogic.Planning.GraphPlan;
 using Helpers;
+using Action = FirstOrderLogic.Planning.GraphPlan.Action;
 
+
+/*
 var satplan = new SATPLan();
 
 var given = new List<string>() {
@@ -29,3 +32,22 @@ var actions = satplan.Run(given, transitions, goal);
 foreach (var action in actions) {
     Logger.Log(action.ToString());
 }
+*/
+
+FirstOrderLogic.FirstOrderLogic logic = new FirstOrderLogic.FirstOrderLogic();
+
+var habenKuchen = (ISentence)logic.TryParse("Haben(Kuchen)");
+var notHabenKuchen = (ISentence)logic.TryParse("NOT (Haben(Kuchen))");
+var gegessenKuchen = (ISentence)logic.TryParse("Gegessen(Kuchen)");
+var notGegessenKuchen = (ISentence)logic.TryParse("NOT (Gegessen(Kuchen))");
+
+var initialState = new List<ISentence>() { habenKuchen, notGegessenKuchen };
+var goals = new List<ISentence>() { habenKuchen, gegessenKuchen };
+
+var actions = new List<Action>() {
+    new Action("Essen(Kuchen)", new List<ISentence>(){habenKuchen}, new List<ISentence>() {notHabenKuchen, gegessenKuchen}),
+    new Action("Backen(Kuchen)", new List<ISentence>(){notHabenKuchen}, new List<ISentence>() {habenKuchen})
+};
+        
+var graph = new Graph(initialState, goals, actions);
+Logger.Log(graph.ToString());
