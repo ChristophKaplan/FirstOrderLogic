@@ -1,3 +1,5 @@
+using Helpers;
+
 namespace FirstOrderLogic.Planning.GraphPlan;
 
 public class GraphPlan {
@@ -5,9 +7,10 @@ public class GraphPlan {
         var graph = new Graph(initialState, goals, actions);
         var nogoods = new List<ISentence>();
 
-        int tl = 0;
+        int levelIndex = 0;
         while (true) {
-            if (graph.StateNotMutex(tl, goals)) {
+            if (graph.StateNotMutex(levelIndex, goals)) {
+                Logger.Log(graph.ToString());
                 var solution = graph.ExtractSolution(goals, graph.NumLevels, nogoods);
                 if (solution != null) {
                     return solution;
@@ -15,11 +18,12 @@ public class GraphPlan {
             }
 
             if (graph.Balanced()) {
+                Logger.Log(graph.ToString());
                 return null;
             }
 
             graph.ExpandGraph();
-            tl++;
+            levelIndex++;
         }
     }
 }

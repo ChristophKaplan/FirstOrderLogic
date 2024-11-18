@@ -49,5 +49,5 @@ var actions = new List<Action>() {
     new Action("Backen(Kuchen)", new List<ISentence>(){notHabenKuchen}, new List<ISentence>() {habenKuchen})
 };
         
-var graph = new Graph(initialState, goals, actions);
-Logger.Log(graph.ToString());
+var graph = new GraphPlan();
+graph.Run(initialState, goals, actions);
