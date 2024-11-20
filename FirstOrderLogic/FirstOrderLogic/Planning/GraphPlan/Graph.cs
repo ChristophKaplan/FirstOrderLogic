@@ -1,4 +1,5 @@
 using System.Text;
+using Helpers;
 
 namespace FirstOrderLogic.Planning.GraphPlan;
 
@@ -119,19 +120,85 @@ public class Graph
 
     public bool StateNotMutex(int i, List<ISentence> goals)
     {
-        var elementAt =
-            _nodes.FirstOrDefault(n => n.Key.Type == 'S' && n.Key.Level == i);
+        var elementAt = _nodes.FirstOrDefault(n => n.Key.Type == 'S' && n.Key.Level == i);
+        var stateNodes = elementAt.Value.Select(n => (StateNode)n).ToList();
 
-        List<StateNode> state = elementAt.Value.Select(n => (StateNode)n).ToList();
-        var hasAllGoals = state.All(s => goals.Contains(s.Literal));
-        return hasAllGoals && !state.Any(s => s.MutexRelation.Count > 0);
+        var stateNodesSubset = new List<StateNode>();
+        foreach (var goal in goals) {
+            stateNodesSubset.AddRange(stateNodes.Where(node => node.Literal.Equals(goal)));
+        }
+
+        if (stateNodesSubset.Count != goals.Count) {
+            return false;
+        }
+
+        List<StateNode> stateNodesSubsetConflictFree = new List<StateNode>();
+        foreach (var stateNode in stateNodesSubset) {
+            var isMutex = stateNode.MutexRelation.Any(mutex => stateNodesSubset.Contains(mutex));
+            if (isMutex) {
+                return false;
+            }
+            stateNodesSubsetConflictFree.Add(stateNode);
+        }
+        
+        return true;
     }
 
     public List<ISentence> ExtractSolution(List<ISentence> goals, int numLevels, List<ISentence> nogoods)
     {
-        //
+        Logger.Log("Extracting solution");
+        
+        var elementAt = _nodes.LastOrDefault(n => n.Key.Type == 'S');
+        var state = elementAt.Value.Select(n => (StateNode)n).ToList();
+        var stateNodesSubset = new List<StateNode>();
+        foreach (var goal in goals) {
+            stateNodesSubset.AddRange(state.Where(s => s.Literal.Equals(goal)).ToList());
+        }
+        
+        var a = GetConflictFreeActionNodes(stateNodesSubset);
+        var b = GetConflictFreeStateNodes(a);
+        
+        return null;
     }
 
+    public List<StateNode> GetConflictFreeStateNodes(List<ActionNode> actionNodes) {
+        var stateNodesSubset = new List<StateNode>();
+        foreach (var actionNode in actionNodes) {
+            stateNodesSubset.AddRange(actionNode.InEdges.Select(n => (StateNode)n).ToList());
+        }
+        
+        var stateNodesSubsetConflictFree = new List<StateNode>();
+        foreach (var stateNode in stateNodesSubset) {
+            var isMutex = stateNode.MutexRelation.Any(mutex => stateNodesSubset.Contains(mutex));
+            if (isMutex) {
+                continue;
+            }
+            stateNodesSubsetConflictFree.Add(stateNode);
+        }
+        
+        return stateNodesSubsetConflictFree;
+    }
+
+
+    private List<ActionNode> GetConflictFreeActionNodes(List<StateNode> satNodes) {
+
+        var actionNodesSubset = new List<ActionNode>();
+        foreach (var node in satNodes) {
+            actionNodesSubset.AddRange(node.InEdges.Select(n => (ActionNode)n).ToList());
+        }
+
+        var actionNodesSubsetConflictFree = new List<ActionNode>();
+        foreach (var actionNode in actionNodesSubset) {
+            var isMutex = actionNode.MutexRelation.Any(mutex => actionNodesSubset.Contains(mutex));
+            if (isMutex) {
+                continue;
+            }
+            actionNodesSubsetConflictFree.Add(actionNode);
+        }
+        
+        return actionNodesSubsetConflictFree;
+    }
+    
     public bool Balanced()
     {
         var count = _nodes.Count;
@@ -148,10 +215,16 @@ public class Graph
         }
 
         var prevState = _nodes.ElementAt(count - 3);
+        var balanced = EqualLit(prevState.Value.Select(n => (StateNode)n).ToList(), lastState.Value.Select(n => (StateNode)n).ToList());
+        
+        return balanced;
+    }
 
-        return prevState.Value.All(prevStateNode =>
-            lastState.Value.Any(lastStateNode =>
-                ((StateNode)prevStateNode).Literal.Equals(((StateNode)lastStateNode).Literal)));
+    private bool EqualLit(List<StateNode> stateA, List<StateNode> stateB)
+    {
+        var aSubsetB = stateA.All(a => stateB.Any(b => a.EqualLiteral(b)));
+        var bSubsetA = stateB.All(b => stateA.Any(a => b.EqualLiteral(a)));
+        return aSubsetB && bSubsetA;
     }
 
     public void ExpandGraph()

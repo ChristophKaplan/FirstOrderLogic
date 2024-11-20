@@ -18,6 +18,7 @@ public class GraphPlan {
             }
 
             if (graph.Balanced()) {
+                Logger.Log("Balanced");
                 Logger.Log(graph.ToString());
                 return null;
             }

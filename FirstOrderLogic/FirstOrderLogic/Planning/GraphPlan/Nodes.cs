@@ -65,4 +65,8 @@ public class StateNode : Node {
         
         return false;
     }
+    
+    public bool EqualLiteral(StateNode stateNode) {
+        return Literal.Equals(stateNode.Literal);
+    }
 }
