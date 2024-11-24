@@ -35,7 +35,7 @@ public class Graph
         _actions = actions;
 
         var initialLayer = new Layer('S', 0);
-        foreach (var sentence in initialState)
+        foreach (var sentence in _initialState)
         {
             var stateNode = new StateNode(initialLayer, sentence);
             TryAddToLayer(initialLayer, stateNode);
@@ -122,84 +122,92 @@ public class Graph
     {
         var elementAt = _nodes.FirstOrDefault(n => n.Key.Type == 'S' && n.Key.Level == i);
         var stateNodes = elementAt.Value.Select(n => (StateNode)n).ToList();
-
-        var stateNodesSubset = new List<StateNode>();
-        foreach (var goal in goals) {
-            stateNodesSubset.AddRange(stateNodes.Where(node => node.Literal.Equals(goal)));
-        }
-
-        if (stateNodesSubset.Count != goals.Count) {
-            return false;
-        }
-
-        List<StateNode> stateNodesSubsetConflictFree = new List<StateNode>();
-        foreach (var stateNode in stateNodesSubset) {
-            var isMutex = stateNode.MutexRelation.Any(mutex => stateNodesSubset.Contains(mutex));
-            if (isMutex) {
-                return false;
-            }
-            stateNodesSubsetConflictFree.Add(stateNode);
-        }
-        
-        return true;
+        var state = GetConflictFreeStateFromGoals(stateNodes, goals);
+        return state != null;
     }
 
-    public List<ISentence> ExtractSolution(List<ISentence> goals, int numLevels, List<ISentence> nogoods)
+    public List<Action> ExtractSolution(int numLevels, List<(int level, List<Node> subGoalState)> nogoods)
     {
-        Logger.Log("Extracting solution");
-        
         var elementAt = _nodes.LastOrDefault(n => n.Key.Type == 'S');
-        var state = elementAt.Value.Select(n => (StateNode)n).ToList();
-        var stateNodesSubset = new List<StateNode>();
-        foreach (var goal in goals) {
-            stateNodesSubset.AddRange(state.Where(s => s.Literal.Equals(goal)).ToList());
+        var lastState = elementAt.Value.Select(n => (StateNode)n).ToList();
+        
+        var conflictFreeStateFromGoals = GetConflictFreeStateFromGoals(lastState, _goal);
+
+        var isSat = false;
+        var currentState = conflictFreeStateFromGoals;
+        var solution = new List<Action>();
+        
+        while (!isSat) {
+            var actions = GetConflictFreeSubsetOfIncomingNodes(currentState);
+            
+            if(actions.Count == 0) {
+                nogoods.Add(new (numLevels, currentState));
+                return null;
+            }
+            
+            currentState = GetConflictFreeSubsetOfIncomingNodes(actions);
+            
+            isSat = currentState.All(s => s.Layer.Level == 0);
+            solution.AddRange(actions.Select(n => (ActionNode)n).Select(n => n.Action));
         }
-        
-        var a = GetConflictFreeActionNodes(stateNodesSubset);
-        var b = GetConflictFreeStateNodes(a);
-        
-        return null;
+
+        solution.Reverse();
+        return solution;
     }
 
-    public List<StateNode> GetConflictFreeStateNodes(List<ActionNode> actionNodes) {
-        var stateNodesSubset = new List<StateNode>();
-        foreach (var actionNode in actionNodes) {
-            stateNodesSubset.AddRange(actionNode.InEdges.Select(n => (StateNode)n).ToList());
-        }
-        
-        var stateNodesSubsetConflictFree = new List<StateNode>();
-        foreach (var stateNode in stateNodesSubset) {
-            var isMutex = stateNode.MutexRelation.Any(mutex => stateNodesSubset.Contains(mutex));
-            if (isMutex) {
-                continue;
-            }
-            stateNodesSubsetConflictFree.Add(stateNode);
-        }
-        
-        return stateNodesSubsetConflictFree;
-    }
-
-
-    private List<ActionNode> GetConflictFreeActionNodes(List<StateNode> satNodes) {
-
-        var actionNodesSubset = new List<ActionNode>();
-        foreach (var node in satNodes) {
-            actionNodesSubset.AddRange(node.InEdges.Select(n => (ActionNode)n).ToList());
-        }
-
-        var actionNodesSubsetConflictFree = new List<ActionNode>();
-        foreach (var actionNode in actionNodesSubset) {
-            var isMutex = actionNode.MutexRelation.Any(mutex => actionNodesSubset.Contains(mutex));
-            if (isMutex) {
-                continue;
-            }
-            actionNodesSubsetConflictFree.Add(actionNode);
-        }
-        
-        return actionNodesSubsetConflictFree;
+    private (List<Node> stateNodes, List<Node> actionNodes) GetLayer(int i) {
+        var stateNodes = _nodes.FirstOrDefault(n => n.Key.Type == 'S' && n.Key.Level == i).Value;
+        var actionNodes = _nodes.FirstOrDefault(n => n.Key.Type == 'A' && n.Key.Level == i).Value;
+        return (stateNodes, actionNodes);
     }
     
-    public bool Balanced()
+    private List<Node> GetIncomingNodes(List<Node> nodes) {
+        var subset = new List<Node>();
+        foreach (var node in nodes) {
+            subset.AddRange(node.InEdges.Select(n => n).ToList());
+        }
+
+        return subset;
+    }
+    
+    private List<Node> GetConflictFreeSubsetOfIncomingNodes(List<Node> node) {
+        var incomingNodes = GetIncomingNodes(node);
+        return GetConflictFreeSubset(incomingNodes);
+    }
+    
+    private List<Node> GetConflictFreeStateFromGoals(List<StateNode> state, List<ISentence> goals) {
+        var stateNodesSubset = GetSatisfiedState(state, goals);
+        
+        if (stateNodesSubset == null) {
+            return null;
+        }
+        
+        return GetConflictFreeSubset(stateNodesSubset);
+    }
+    
+    private List<Node> GetConflictFreeSubset(List<Node> nodes) {
+        var subsetConflictFree = new List<Node>();
+        foreach (var actionNode in nodes) {
+            var isMutex = actionNode.MutexRelation.Any(nodes.Contains);
+            if (isMutex) {
+                continue;
+            }
+            subsetConflictFree.Add(actionNode);
+        }
+        
+        return subsetConflictFree;
+    }
+    
+    private List<Node> GetSatisfiedState(List<StateNode> state, List<ISentence> satSentences) {
+        var nodesSubset = new List<Node>();
+        foreach (var sentence in satSentences) {
+            nodesSubset.AddRange(state.Where(node => node.Literal.Equals(sentence)));
+        }
+
+        return nodesSubset.Count != satSentences.Count ? null : nodesSubset;
+    }
+    
+    public bool Stabilized()
     {
         var count = _nodes.Count;
 

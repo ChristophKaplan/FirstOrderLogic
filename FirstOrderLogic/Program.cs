@@ -41,12 +41,12 @@ var notHabenKuchen = (ISentence)logic.TryParse("NOT (Haben(Kuchen))");
 var gegessenKuchen = (ISentence)logic.TryParse("Gegessen(Kuchen)");
 var notGegessenKuchen = (ISentence)logic.TryParse("NOT (Gegessen(Kuchen))");
 
-var initialState = new List<ISentence>() { habenKuchen, notGegessenKuchen };
-var goals = new List<ISentence>() { habenKuchen, gegessenKuchen };
+var initialState = new List<ISentence>() { notHabenKuchen, notGegessenKuchen };
+var goals = new List<ISentence>() { gegessenKuchen };
 
 var actions = new List<Action>() {
-    new Action("Essen(Kuchen)", new List<ISentence>(){habenKuchen}, new List<ISentence>() {notHabenKuchen, gegessenKuchen}),
-    new Action("Backen(Kuchen)", new List<ISentence>(){notHabenKuchen}, new List<ISentence>() {habenKuchen})
+    new ("Essen(Kuchen)", new List<ISentence>(){habenKuchen}, new List<ISentence>() {notHabenKuchen, gegessenKuchen}),
+    new ("Backen(Kuchen)", new List<ISentence>(){notHabenKuchen}, new List<ISentence>() {habenKuchen})
 };
         
 var graph = new GraphPlan();
