@@ -13,6 +13,7 @@ public interface ISentence : ILanguageObject {
     bool IsLiteral { get; }
     bool IsNegation { get; }
     bool IsImplication { get; }
+    bool IsNegationOf(ISentence other);
     void AddChild(ISentence sentence);
     void InsertChild(int index, ISentence sentence);
     void SetParentToParentOf(ISentence parentOfThis);
@@ -45,7 +46,20 @@ public abstract class Sentence : ISentence {
     public abstract void SubstituteTerm(Term term, Term replacement);
     public abstract ISentence Negate();
     public abstract ISentence Clone();
-    
+    public bool IsNegationOf(ISentence other) {
+        if (IsNegation && !other.IsNegation && Children[0].Equals(other))
+        {
+            return true;
+        }
+
+        if (other.IsNegation && !IsNegation && Equals(other.Children[0]))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public void AddChild(ISentence sentence) {
         Children.Add(sentence);
         sentence.Parent = this;
