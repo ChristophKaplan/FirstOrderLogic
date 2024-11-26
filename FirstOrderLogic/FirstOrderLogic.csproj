@@ -5,11 +5,12 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>PropositionalLogic</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="ConsoleTables" Version="2.6.1" />
+      <PackageReference Include="LRParser" Version="1.0.0" />
       <PackageReference Include="NUnit" Version="4.2.2" />
     </ItemGroup>
 
