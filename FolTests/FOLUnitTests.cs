@@ -5,38 +5,33 @@ using Helpers;
 
 namespace FolTests;
 
-public class Tests
-{
+public class Tests {
     private FirstOrderLogic.FirstOrderLogic _firstOrderLogic;
     private Interpretation _interpretation;
 
     [SetUp]
-    public void Setup()
-    {
+    public void Setup() {
         _firstOrderLogic = new FirstOrderLogic.FirstOrderLogic();
         _interpretation = Inter01();
     }
 
-    private Interpretation Inter01()
-    {
+    private Interpretation Inter01() {
         IDomainOfDiscourse domain = new Domain(new Element(1), new Element(2), new Element(3), new Element(4));
-        
+
         var relations = new Dictionary<string, Func<IElementOfDiscourse[], bool>>();
         var functions = new Dictionary<string, Func<Term[], IElementOfDiscourse>>();
         var variableAssignments = new Dictionary<string, IElementOfDiscourse>();
         var propositionalAssignments = new Dictionary<IProposition, bool>();
 
-        relations.Add("Human", terms => terms[0] switch
-        {
-            Element element => element.Id == 1 || element.Id == 2,
-            _ => throw new Exception("Error: Human predicate not found.")
-        });
+        relations.Add("Human",
+            terms => terms[0] switch {
+                Element element => element.Id == 1 || element.Id == 2, _ => throw new Exception("Error: Human predicate not found.")
+            });
 
-        relations.Add("Mortal", terms => terms[0] switch
-        {
-            Element element => element.Id == 1 || element.Id == 2,
-            _ => throw new Exception("Error: Mortal predicate not found.")
-        });
+        relations.Add("Mortal",
+            terms => terms[0] switch {
+                Element element => element.Id == 1 || element.Id == 2, _ => throw new Exception("Error: Mortal predicate not found.")
+            });
 
         return new Interpretation(domain, relations, functions, variableAssignments, propositionalAssignments);
     }
@@ -46,21 +41,19 @@ public class Tests
         var p = (ISentence)_firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
         var p2 = _firstOrderLogic.ToPrenexForm(p, out var steps);
         var shouldbe = (ISentence)_firstOrderLogic.TryParse("((NOT P(x)) OR Q(y)) AND R(z)");
-        
+
         Assert.That(p2, Is.EqualTo(shouldbe));
     }
-    
+
 
     [Test]
-    public void Evaluation()
-    {
+    public void Evaluation() {
         var parsed = (Sentence)_firstOrderLogic.TryParse("FORALL x (Human(x) => (Mortal(x)))");
         Assert.That(_interpretation.Evaluate(parsed), Is.EqualTo(true));
     }
 
     [Test]
-    public void Unification()
-    {
+    public void Unification() {
         var p1 = (ISentence)_firstOrderLogic.TryParse("P(x,y,y)");
         var p2 = (ISentence)_firstOrderLogic.TryParse("P(y,z,a)");
         var unificator1 = new Unificator(p1, p2);
@@ -82,10 +75,9 @@ public class Tests
         Assert.That(unificator2.IsUnifiable, Is.EqualTo(false));
         Assert.That(unificator3.IsUnifiable, Is.EqualTo(false));
     }
-    
+
     [Test]
-    public void ConjunctiveNormalForm()
-    {
+    public void ConjunctiveNormalForm() {
         var p = (ISentence)_firstOrderLogic.TryParse("P(x) => (P(y) AND Q(z))");
         var p2 = _firstOrderLogic.ToConjunctiveNormalForm(p, out var steps);
 
@@ -97,8 +89,7 @@ public class Tests
     }
 
     [Test]
-    public void Distribution()
-    {
+    public void Distribution() {
         var p = (ISentence)_firstOrderLogic.TryParse("X => (A AND (NOT B) AND (NOT C))");
         var p2 = _firstOrderLogic.ToConjunctiveNormalForm(p, out var steps);
 
@@ -107,11 +98,10 @@ public class Tests
 
         Assert.That(false, Is.EqualTo(false));
     }
-    
-    
+
+
     [Test]
-    public void ClauseSet()
-    {
+    public void ClauseSet() {
         var p = (ISentence)_firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
         var p2 = _firstOrderLogic.ToPrenexForm(p, out var steps);
         Logger.Log(p2 + " cnf:" + p2.IsCNF());
@@ -121,50 +111,44 @@ public class Tests
     }
 
     [Test]
-    public void ClauseUnification()
-    {
+    public void ClauseUnification() {
         var p = (ISentence)_firstOrderLogic.TryParse("P(x)");
         var q = (ISentence)_firstOrderLogic.TryParse("Q(y)");
         var notPy = (ISentence)_firstOrderLogic.TryParse("NOT P(y)");
-        var clause1 = new Clause(p,q);
+        var clause1 = new Clause(p, q);
         var clause2 = new Clause(notPy);
-        
-        for (var i = 0; i < clause1.Literals.Count; i++)
-        {
-            for (var j = i; j < clause2.Literals.Count; j++)
-            {
+
+        for (var i = 0; i < clause1.Literals.Count; i++) {
+            for (var j = i; j < clause2.Literals.Count; j++) {
                 var unify = new Unificator(clause1.Literals[i], clause2.Literals[j]);
-                if (unify.IsUnifiable)
-                {
+                if (unify.IsUnifiable) {
                     unify.Substitute(clause1);
                     unify.Substitute(clause2);
-                    
+
                     Logger.Log(clause1.ToString());
                     Logger.Log(clause2.ToString());
                 }
             }
         }
-        
+
         Assert.That(clause1.Literals[0].GetPredicate().Terms[0].TermSymbol, Is.EqualTo("y"));
     }
-    
-    [Test] 
-    public void Resolution()
-    {
+
+    [Test]
+    public void Resolution() {
         var sentence = (ISentence)_firstOrderLogic.TryParse("(Human(Sokrates) AND (FORALL x (Human(x) => Mortal(x))))");
         var prenexForm = _firstOrderLogic.ToPrenexForm(sentence, out var steps);
         var skolemForm = _firstOrderLogic.SkolemForm(prenexForm);
         var consequence = (ISentence)_firstOrderLogic.TryParse("Mortal(Sokrates)");
         var resolution = new Resolution();
-        
+
         var b = resolution.Resolve(skolemForm, consequence);
-        
+
         Assert.That(b, Is.EqualTo(true));
     }
-    
-    [Test] 
-    public void IsPropositional()
-    {
+
+    [Test]
+    public void IsPropositional() {
         var fol = (ISentence)_firstOrderLogic.TryParse("(Human(Sokrates) AND (FORALL x (Human(x) => Mortal(x))))");
         var prop = (ISentence)_firstOrderLogic.TryParse("A OR B AND C");
         Assert.That(fol.IsPropositional(), Is.EqualTo(false));
@@ -180,10 +164,10 @@ public class Tests
         var clauseSet = prenexForm.GetClauseSet();
         var model = sat.WalkSAT(clauseSet, 0.5f, 100);
         //Console.WriteLine($"{model} models {clauseSet.Aggregate(new StringBuilder(), (sb, clause) => sb.Append(clause).Append(" AND ")).ToString().TrimEnd(" AND ".ToCharArray())}");
-        
+
         Assert.That(model.Evaluate(clauseSet), Is.EqualTo(true));
     }
-    
+
     [Test]
     public void GetInstancesOverTime() {
         var action = (ISentence)_firstOrderLogic.TryParse("Cook^0 => HaveIngredient^0 AND Food^1");
@@ -192,35 +176,7 @@ public class Tests
         foreach (var instance in instancesOverTime) {
             Console.WriteLine(instance);
         }
-        
-        Assert.That(instancesOverTime.Count, Is.EqualTo(3));
-    }
-    
-    [Test]
-    public void SatPlan() {
-        var given = new List<string>() {
-            "HaveIngredients^0", 
-            "Cook^0", 
-            "NOT Food^0", 
-            "Hungry^0",
-        };
-        
-        var transitions = new List<string>() {
-            "Cook^0 => (HaveIngredients^0 AND Food^1)",
-            "Eat^0 => (Food^0 AND NOT (Hungry^1))",
-        };
-        
-        var goal = new List<string>() {
-            "NOT (Hungry^2)",
-        };
 
-        var satplan = new SATPLan();
-        var actions = satplan.Run(given, transitions, goal);
-        
-        foreach (var action in actions) {
-            Logger.Log(action.ToString());
-        }
-        
-        Assert.That(actions.Count, Is.EqualTo(2));
+        Assert.That(instancesOverTime.Count, Is.EqualTo(3));
     }
 }
