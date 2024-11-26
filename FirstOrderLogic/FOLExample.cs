@@ -2,7 +2,7 @@ using FirstOrderLogic;
 
 class FirstOrderLogicExample
 {
-    static void Run(string[] args)
+    static void Main(string[] args)
     {
         FirstOrderLogic.FirstOrderLogic logic = new FirstOrderLogic.FirstOrderLogic();
         

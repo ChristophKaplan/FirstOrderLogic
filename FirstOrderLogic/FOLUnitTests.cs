@@ -1,6 +1,5 @@
-using System.Text;
+global using NUnit.Framework;
 using FirstOrderLogic;
-using FirstOrderLogic.Planning;
 using Helpers;
 
 namespace FolTests;
