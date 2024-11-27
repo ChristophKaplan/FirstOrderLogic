@@ -8,14 +8,19 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Christoph Kaplan</Authors>
         <Copyright>Christoph Kaplan</Copyright>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
+        <IsPackable>true</IsPackable>
+        <Title>First Order Logic</Title>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ConsoleTables" Version="2.6.1" />
-      <PackageReference Include="LRParser" Version="1.0.0" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
       <PackageReference Include="NUnit" Version="4.2.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="LRParser">
+        <HintPath>..\..\LRParser\LRParser\bin\Debug\net9.0\LRParser.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
