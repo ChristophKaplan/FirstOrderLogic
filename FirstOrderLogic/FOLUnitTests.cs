@@ -69,10 +69,16 @@ public class Tests {
         var p6 = (ISentence)_firstOrderLogic.TryParse("P(f(g(y)),z,z)");
         var unificator3 = new Unificator(p5, p6);
         Logger.Log(unificator3.ToString());
-
+        
+        var r1 = (ISentence)_firstOrderLogic.TryParse("R(x)");
+        var s1 = (ISentence)_firstOrderLogic.TryParse("S(x)");
+        var unificator4 = new Unificator(r1, s1);
+        Logger.Log(unificator4.ToString());
+        
         Assert.That(unificator1.IsUnifiable, Is.EqualTo(true));
         Assert.That(unificator2.IsUnifiable, Is.EqualTo(false));
         Assert.That(unificator3.IsUnifiable, Is.EqualTo(false));
+        Assert.That(unificator4.IsUnifiable, Is.EqualTo(false));
     }
 
     [Test]

@@ -23,6 +23,11 @@ namespace FirstOrderLogic
             var pred2 = lit2.GetPredicate();
             var len = lit1.Arity;
 
+            if(pred1.Symbol != pred2.Symbol || lit1.Arity != pred2.Arity)
+            {
+                return false;
+            }
+            
             for (var i = len - 1; i >= 0; i--)
             {
                 //terms sind falschrum?
