@@ -13,7 +13,7 @@ public interface ISentence : ILanguageObject {
     bool IsLiteral { get; }
     bool IsNegation { get; }
     bool IsImplication { get; }
-    bool IsNegationOf(ISentence other);
+    bool IsNegationOf(ISentence other, bool onlyPredSignature = false);
     void AddChild(ISentence sentence);
     void InsertChild(int index, ISentence sentence);
     void SetParentToParentOf(ISentence parentOfThis);
@@ -46,18 +46,15 @@ public abstract class Sentence : ISentence {
     public abstract void SubstituteTerm(Term term, Term replacement);
     public abstract ISentence Negate();
     public abstract ISentence Clone();
-    public bool IsNegationOf(ISentence other) {
-        if (IsNegation && !other.IsNegation && Children[0].Equals(other))
-        {
-            return true;
-        }
-
-        if (other.IsNegation && !IsNegation && Equals(other.Children[0]))
-        {
-            return true;
-        }
-
+    
+    public bool IsNegationOf(ISentence other, bool onlyPredSignature = false) {
+        if (IsNegation && !other.IsNegation && Compare(Children[0],other)) return true;
+        if (other.IsNegation && !IsNegation && Compare(this,other.Children[0])) return true;
         return false;
+
+        bool Compare(ISentence A, ISentence B) {
+            return onlyPredSignature ? A.GetPredicate().EqualSignature(B.GetPredicate()) : A.Equals(B);
+        }
     }
 
     public void AddChild(ISentence sentence) {
