@@ -6,7 +6,8 @@ namespace FirstOrderLogic
     {
         private readonly Dictionary<Variable, Term> _substitutions = new();
         public readonly bool IsUnifiable;
-
+        public bool IsEmpty => _substitutions.Count == 0;
+        
         public Unificator(ISentence s1, ISentence s2)
         {
             IsUnifiable = UnifyLiteral(s1, s2);
