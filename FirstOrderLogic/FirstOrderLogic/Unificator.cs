@@ -7,7 +7,27 @@ namespace FirstOrderLogic
         private readonly Dictionary<Variable, Term> _substitutions = new();
         public readonly bool IsUnifiable;
         public bool IsEmpty => _substitutions.Count == 0;
+
+        public override bool Equals(object? obj) {
+            if (obj is Unificator unificator) {
+                if (unificator._substitutions.Count != _substitutions.Count) return false;
+                foreach (var (key, value) in _substitutions) {
+                    if (!unificator._substitutions.TryGetValue(key, out var otherValue) || !value.Equals(otherValue)) return false;
+                }
+                return true;
+            }
+            return false;
+        }
         
+        public override int GetHashCode() {
+            var hash = 17;
+            foreach (var (key, value) in _substitutions) {
+                hash = hash * 31 + key.GetHashCode();
+                hash = hash * 31 + value.GetHashCode();
+            }
+            return hash;
+        }
+
         public Unificator(ISentence s1, ISentence s2)
         {
             IsUnifiable = UnifyLiteral(s1, s2);

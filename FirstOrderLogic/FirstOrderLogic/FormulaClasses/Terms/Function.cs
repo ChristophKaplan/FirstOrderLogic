@@ -31,7 +31,7 @@ public class Function : Term {
     }
     
     public override bool Equals(object? obj) {
-        if (obj == null || GetType() != obj.GetType()) {
+        if (obj == null || obj is not Term || obj is Variable) {
             return false;
         }
 

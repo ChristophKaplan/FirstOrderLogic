@@ -29,6 +29,8 @@ public interface ISentence : ILanguageObject {
     IProposition GetProposition();
     void AddTime(int i);
     bool IsImplicationAndEqualPremise(ISentence premise);
+    public bool Equals(object? obj);
+    public int GetHashCode();
 }
 
 public abstract class Sentence : ISentence {
