@@ -4,15 +4,15 @@ namespace FirstOrderLogic
 {
     public class Unificator
     {
-        private readonly Dictionary<Variable, Term> _substitutions = new();
+        public Dictionary<Variable, Term> Substitutions {get; private set; } = new();
         public readonly bool IsUnifiable;
-        public bool IsEmpty => _substitutions.Count == 0;
-
+        public bool IsEmpty => Substitutions.Count == 0;
+        
         public override bool Equals(object? obj) {
             if (obj is Unificator unificator) {
-                if (unificator._substitutions.Count != _substitutions.Count) return false;
-                foreach (var (key, value) in _substitutions) {
-                    if (!unificator._substitutions.TryGetValue(key, out var otherValue) || !value.Equals(otherValue)) return false;
+                if (unificator.Substitutions.Count != Substitutions.Count) return false;
+                foreach (var (key, value) in Substitutions) {
+                    if (!unificator.Substitutions.TryGetValue(key, out var otherValue) || !value.Equals(otherValue)) return false;
                 }
                 return true;
             }
@@ -21,13 +21,19 @@ namespace FirstOrderLogic
         
         public override int GetHashCode() {
             var hash = 17;
-            foreach (var (key, value) in _substitutions) {
+            foreach (var (key, value) in Substitutions) {
                 hash = hash * 31 + key.GetHashCode();
                 hash = hash * 31 + value.GetHashCode();
             }
             return hash;
         }
 
+        public Unificator(Dictionary<Variable, Term> substitutions)
+        {
+            Substitutions = substitutions;
+            IsUnifiable = true;
+        }
+        
         public Unificator(ISentence s1, ISentence s2)
         {
             IsUnifiable = UnifyLiteral(s1, s2);
@@ -107,12 +113,12 @@ namespace FirstOrderLogic
 
         private bool UnifyVar(Variable var, Term term)
         {
-            if (_substitutions.TryGetValue(var, out var subVar))
+            if (Substitutions.TryGetValue(var, out var subVar))
             {
                 return UnifyTerm(subVar, term);
             }
 
-            if (term is Variable termVar && _substitutions.TryGetValue(termVar, out var subTerm))
+            if (term is Variable termVar && Substitutions.TryGetValue(termVar, out var subTerm))
             {
                 return UnifyTerm(var, subTerm);
             }
@@ -123,19 +129,19 @@ namespace FirstOrderLogic
                 return false;
             }
 
-            _substitutions.Add(var, term);
+            Substitutions.Add(var, term);
             return true;
         }
 
         public override string ToString()
         {
-            if (_substitutions.Count == 0)
+            if (Substitutions.Count == 0)
             {
                 return $"No substitutions ,IsUnifiable: {IsUnifiable}";
             }
 
             var sb = new StringBuilder();
-            foreach (var (variable, term) in _substitutions)
+            foreach (var (variable, term) in Substitutions)
             {
                 sb.Append($"[{variable}/{term}], ");
             }
@@ -160,9 +166,9 @@ namespace FirstOrderLogic
                 throw new Exception("unifactor is not usable!");
             }
 
-            foreach (var var in _substitutions.Keys)
+            foreach (var var in Substitutions.Keys)
             {
-                sentence.SubstituteTerm(var, _substitutions[var]);
+                sentence.SubstituteTerm(var, Substitutions[var]);
             }
         }
     }
