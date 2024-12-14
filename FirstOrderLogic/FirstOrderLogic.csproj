@@ -19,7 +19,7 @@
 
     <ItemGroup>
       <Reference Include="LRParser">
-        <HintPath>..\..\LRParser\LRParser\bin\Debug\net9.0\LRParser.dll</HintPath>
+        <HintPath>..\..\LRParser\LRParser\bin\Release\net9.0\LRParser.dll</HintPath>
       </Reference>
     </ItemGroup>
 
