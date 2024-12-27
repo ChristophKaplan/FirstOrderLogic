@@ -74,12 +74,12 @@ public class PossibleWorld : ILanguageObject{
     
     public override string ToString()
     {
-        var sb = new StringBuilder();
+        var output = new StringBuilder();
         foreach (var (key, value) in _propositionalAssignment) {
-            sb.Append($"{key}={value}, ");
+            output.Append($"{key}={value}, ");
         }
 
-        return sb.ToString();
+        return output.ToString();
     }
 
     public PossibleWorld Clone() {

@@ -216,7 +216,7 @@ public static class TransformationFOL {
         if (sentence is IComplexSentence { IsNegation: true } negation) {
             if (negation.Children[0] is IComplexSentence { IsNegation: true } doubleNegation) {
                 var i = negation.Parent.Children.IndexOf(negation);
-                negation.Parent.Children[i] = doubleNegation.Children[0];
+                negation.Parent.Children[i] = doubleNegation.Children[0]; //is this atomic or complex ?
             }
         }
     }
@@ -270,6 +270,8 @@ public static class TransformationFOL {
             lhs.SetParentToParentOf(sentence);
             sentence = lhs;
         }
+
+        return;
 
         bool IsEquivOperator(Connective.LogicSymbol o1, Connective.LogicSymbol o2) {
             switch (o1) {

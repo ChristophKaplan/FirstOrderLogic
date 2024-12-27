@@ -1,6 +1,6 @@
 using FirstOrderLogic;
 
-FirstOrderLogic.FirstOrderLogic logic = new FirstOrderLogic.FirstOrderLogic();
+var logic = new FirstOrderLogic.FirstOrderLogic();
 
 var sentence = (ISentence)logic.TryParse("(Human(Sokrates) AND (FORALL x (Human(x) => Mortal(x))))");
 var prenexForm = logic.ToPrenexForm(sentence, out var steps);

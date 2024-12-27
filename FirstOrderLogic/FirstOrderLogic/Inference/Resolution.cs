@@ -37,7 +37,7 @@ public class Resolution
         consequence = consequence.Negate();
         var joined = new ComplexSentence(knowledgeBase, Connective.LogicSymbol.CONJUNCTION, consequence);
         var clauses = joined.GetClauseSet();
-        HashSet<Clause> set = new();
+        var set = new HashSet<Clause>();
 
         while (true)
         {
@@ -46,7 +46,7 @@ public class Resolution
                 for (var j = i; j < clauses.Count; j++)
                 {
                     var possibleResolvents = GetResolvents(clauses[i], clauses[j]);
-                    if (possibleResolvents.Any(r => r.IsEmptyClause()))
+                    if (possibleResolvents.Any(resolvent => resolvent.IsEmptyClause()))
                     {
                         return true;
                     }

@@ -189,20 +189,21 @@ public abstract class Sentence : ISentence {
     }
 
     public bool IsPropositional() {
-        var b = this switch {
+        var isPropositional = this switch {
             IProposition => true,
             IComplexSentence complexSentence => complexSentence.Children.All(child => child.IsPropositional()),
             _ => false
         };
 
-        if (!b) {
+        if (!isPropositional) {
             Logger.Log($"{this} is not propositional");
         }
-        return b;
+        
+        return isPropositional;
     }
     
     public override bool Equals(object? obj) {
-        if (obj == null || GetType() != obj.GetType()) {
+        if (obj == null || GetType() != obj.GetType()) { //TODO: what if we compare atomic pred with complex pred
             return false;
         }
         

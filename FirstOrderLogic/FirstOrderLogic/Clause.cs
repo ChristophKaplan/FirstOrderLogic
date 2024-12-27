@@ -1,8 +1,8 @@
 ﻿namespace FirstOrderLogic;
 
 public class Clause
-{ 
-    public List<ISentence> Literals{ get; private set; }
+{
+    public List<ISentence> Literals { get; } = new();
     
     public Clause(params ISentence[] literals)
     {
@@ -10,63 +10,66 @@ public class Clause
         Literals = new List<ISentence>(literals);
     }
     
-    public void AddLiteral(ISentence l)
+    public void AddLiteral(ISentence literal)
     {
-        if (Literals == null) Literals = new List<ISentence>();
-        if (Literals.Contains(l)) return;
-        
-        if (!l.IsLiteral)
+        if (!literal.IsLiteral)
         {
-            throw new Exception("is not a literal");
+            throw new Exception($"{literal} is not a literal");
         }
-        
-        Literals.Add(l);
+
+        if (Literals.Contains(literal))
+        {
+            return;
+        }
+
+        Literals.Add(literal);
     }
     
     public override string ToString()
     {
-        return Literals.Aggregate("{", (current, l) => current + l + ", ")+ "}";
+        return Literals.Aggregate("{", (current, lit) => current + lit + ", ")+ "}";
     }
 }
 
 public class Resolvent : Clause {
-    private readonly Clause _parentClause1;
-    private readonly Clause _parentClause2;
-
-    public bool IsEmptyClause() => Literals == null || Literals.Count == 0;
+    private readonly Clause _clauseA;
+    private readonly Clause _clauseB;
+    public bool IsEmptyClause() => Literals.Count == 0;
 
     public Resolvent(Clause clause1, Clause clause2, params ISentence[] literals) : base(literals) {
-        _parentClause1 = clause1;
-        _parentClause2 = clause2;
+        _clauseA = clause1;
+        _clauseB = clause2;
     }
     
     public string ResolventAsString() {
         var s = "";
-        s += $"k1: {_parentClause1}\n";
-        s += $"k2: {_parentClause2}\n";
+        s += $"C_A: {_clauseA}\n";
+        s += $"C_B: {_clauseB}\n";
         s += "-----------------------\n";
-        s += $"res: {ToString()}\n";
+        s += $"Res: {ToString()}\n";
         return s;
     }
     
     public string TraceResolution() {
-        var s = "";
+        var output = "";
 
-        if (_parentClause1 is Resolvent) {
-            var parent1 = (Resolvent)_parentClause1;
-            s += parent1.TraceResolution() + "\n";
+        if (_clauseA is Resolvent parent1) {
+            output += parent1.TraceResolution() + "\n";
         }
 
-        if (_parentClause2 is Resolvent) {
-            var parent2 = (Resolvent)_parentClause2;
-            s += parent2.TraceResolution() + "\n";
+        if (_clauseB is Resolvent parent2) {
+            output += parent2.TraceResolution() + "\n";
         }
 
         if (this is Resolvent)
-            s += ResolventAsString() + "\n";
+        {
+            output += ResolventAsString() + "\n";
+        }
         else
-            s += "literal:\n" + ToString() + "\n";
+        {
+            output += "literal:\n" + ToString() + "\n";
+        }
 
-        return s;
+        return output;
     }
 }

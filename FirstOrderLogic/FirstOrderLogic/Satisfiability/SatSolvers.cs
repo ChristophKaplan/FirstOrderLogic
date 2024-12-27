@@ -46,7 +46,7 @@ public class SatSolvers {
     }
     
     private Dictionary<IProposition, bool> GetRandomAssigmentFor(List<Clause> clauses) {
-        Dictionary<IProposition, bool> assignment = new();
+        var assignment = new Dictionary<IProposition, bool>();
         foreach (var clause in clauses) {
             foreach (var literal in clause.Literals) {
                 var proposition = literal.GetProposition();

@@ -4,32 +4,44 @@ namespace FirstOrderLogic
 {
     public class Unificator
     {
-        public Dictionary<Variable, Term> Substitutions {get; private set; } = new();
+        public Dictionary<Variable, Term> Substitutions {get; } = new();
         public readonly bool IsUnifiable;
         public bool IsEmpty => Substitutions.Count == 0;
         
         public override bool Equals(object? obj) {
-            if (obj is Unificator unificator) {
-                if (unificator.Substitutions.Count != Substitutions.Count) return false;
-                foreach (var (key, value) in Substitutions) {
-                    if (!unificator.Substitutions.TryGetValue(key, out var otherValue) || !value.Equals(otherValue)) return false;
-                }
-                return true;
+            if (obj is not Unificator unificator)
+            {
+                return false;
             }
-            return false;
+
+            if (unificator.Substitutions.Count != Substitutions.Count)
+            {
+                return false;
+            }
+            
+            foreach (var (key, value) in Substitutions) {
+                if (!unificator.Substitutions.TryGetValue(key, out var otherValue) || !value.Equals(otherValue)) return false;
+            }
+            
+            return true;
         }
         
         public override int GetHashCode() {
-            var hash = 17;
-            foreach (var (key, value) in Substitutions) {
-                hash = hash * 31 + key.GetHashCode();
-                hash = hash * 31 + value.GetHashCode();
+            var hash = 0;
+            foreach (var (key, value) in Substitutions)
+            {
+                hash = HashCode.Combine(hash, key, value);
             }
             return hash;
         }
 
         public Unificator(Dictionary<Variable, Term> substitutions)
         {
+            if (substitutions.Count == 0)
+            {
+                throw new Exception("Unificator: missing substitutions");
+            }
+            
             Substitutions = substitutions;
             IsUnifiable = true;
         }
@@ -57,7 +69,7 @@ namespace FirstOrderLogic
             
             for (var i = len - 1; i >= 0; i--)
             {
-                //terms sind falschrum?
+                //TODO: terms sind reversed?
                 if (!UnifyTerm(pred1.Terms[i], pred2.Terms[i]))
                 {
                     return false;
@@ -163,7 +175,7 @@ namespace FirstOrderLogic
         {
             if (!IsUnifiable)
             {
-                throw new Exception("unifactor is not usable!");
+                throw new Exception("Unifactor is not usable!");
             }
 
             foreach (var var in Substitutions.Keys)
