@@ -1,4 +1,5 @@
 global using NUnit.Framework;
+using System.Text;
 using FirstOrderLogic;
 using Helpers;
 
@@ -184,4 +185,16 @@ public class Tests {
 
         Assert.That(instancesOverTime.Count, Is.EqualTo(3));
     }
+    
+    
+    [Test]
+    public void TestUTF8() {
+        var input = "¬ At(Work)";
+        var parsed = (ISentence)_firstOrderLogic.TryParse(input);
+        Logger.Log($"Parsed sentence: {parsed}");
+
+        var expected = new ComplexSentence(new Connective(Connective.LogicSymbol.NEGATION), new Predicate("At", new Term[] { new Constant("Work") }));
+        Assert.That(parsed.ToString(), Is.EqualTo(expected.ToString()));
+    }
+    
 }
