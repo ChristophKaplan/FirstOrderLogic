@@ -60,9 +60,9 @@ namespace FirstOrderLogic
 
             var pred1 = lit1.GetPredicate();
             var pred2 = lit2.GetPredicate();
-            var len = lit1.Arity;
+            var len = pred1.Arity;
 
-            if(pred1.Symbol != pred2.Symbol || lit1.Arity != pred2.Arity)
+            if(pred1.Symbol != pred2.Symbol || pred1.Arity != pred2.Arity)
             {
                 return false;
             }

@@ -9,7 +9,6 @@ public interface ISentence : ILanguageObject {
     bool IsBinary { get; }
     bool IsUnary { get; }
     bool IsNullary { get; }
-    int Arity { get; }
     bool IsLiteral { get; }
     bool IsNegation { get; }
     bool IsImplication { get; }
@@ -40,7 +39,6 @@ public abstract class Sentence : ISentence {
     public bool IsBinary => Children.Count == 2;
     public bool IsUnary => Children.Count == 1;
     public bool IsNullary => Children.Count == 0;
-    public virtual int Arity => Children.Count;
     public bool IsLiteral => this is IAtomicSentence || 
                              (this is IComplexSentence { IsNegation: true } complex && complex.Children[0] is IAtomicSentence);
     public bool IsNegation => this is IComplexSentence complex && complex.Connective == Connective.LogicSymbol.NEGATION;

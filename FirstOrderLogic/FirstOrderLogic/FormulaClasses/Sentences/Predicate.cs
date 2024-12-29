@@ -5,11 +5,12 @@ public interface IPredicate : IAtomicSentence {
     Variable[] GetVariables();
     bool HasBoundVariables();
     bool EqualSignature(IPredicate other);
+    int Arity { get; }
 }
 
 public class Predicate : AtomicSentence, IPredicate {
     public Term[] Terms { get; }
-    public override int Arity => Terms.Length;
+    public int Arity => Terms.Length;
     public override ISentence Clone() => new Predicate(this);
     public bool EqualSignature(IPredicate other) => Symbol == other.Symbol && Arity == other.Arity;
 
