@@ -15,6 +15,7 @@ public static class FirstOrderLogicExtensions
                 return Connective.LogicSymbol.CONJUNCTION;
             case "NOT":
             case "!":
+            case "-":
             case "~":
             case "\u00ac":
                 return Connective.LogicSymbol.NEGATION;
