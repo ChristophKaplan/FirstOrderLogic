@@ -58,7 +58,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             new TokenDefinition<Terminal>(Terminal.Boolean, "TRUE|FALSE"),
             new TokenDefinition<Terminal>(Terminal.Quantifier, "FORALL|EXISTS"),
             new TokenDefinition<Terminal>(Terminal.TimeAttribute, "\\^[0-9]"),
-            new TokenDefinition<Terminal>(Terminal.Identifier, "[a-zA-Z]+"),
+            new TokenDefinition<Terminal>(Terminal.Identifier, "[a-zA-Z0-9]+"),
         };
     }
 
@@ -218,7 +218,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             }
             else
             {
-                var variableList = new[] { "x", "y", "z", "w" };
+                var variableList = new[] { "x", "y", "z", "w"};
                 var isVariable = variableList.Contains(symbol);
                 term = isVariable ? new Variable(symbol) : new Constant(symbol);
             }
