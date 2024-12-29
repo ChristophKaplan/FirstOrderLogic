@@ -177,9 +177,9 @@ namespace FirstOrderLogic
                 throw new Exception("Unifactor is not usable!");
             }
 
-            foreach (var var in Substitutions.Keys)
+            foreach (var pair in Substitutions)
             {
-                sentence.SubstituteTerm(var, Substitutions[var]);
+                sentence.SubstituteTerm(pair.Key, pair.Value);
             }
         }
     }

@@ -21,21 +21,36 @@ public class Function : Term {
     
     public void SubstituteTerm(Term term, Term replacement) {
         for (var i = 0; i < Terms.Length; i++) {
-            if (Terms[i].Equals(term)) {
+            var curTerm = Terms[i];
+            if (curTerm.Equals(term)) {
                 Terms[i] = replacement;
             }
-            else if(Terms[i] is Function function) {
+            else if(curTerm is Function function) {
                 function.SubstituteTerm(term, replacement);
             }
         }
     }
     
     public override bool Equals(object? obj) {
-        if (obj == null || obj is not Term || obj is Variable) {
+        if (obj is not Function other || obj is Variable) {
             return false;
         }
-
-        return EqualSignature((Function)obj) && Terms.SequenceEqual(((Function)obj).Terms);
+        
+        if(!EqualSignature(other)) {
+            return false;
+        }
+        
+        if (Terms.Length != other.Terms.Length) {
+            return false;
+        }
+        
+        for (var i = 0; i < Terms.Length; i++) {
+            if (!Terms[i].Equals(other.Terms[i])) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     public override int GetHashCode() {

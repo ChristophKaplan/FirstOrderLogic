@@ -30,11 +30,13 @@ public class Predicate : AtomicSentence, IPredicate {
     }
 
     public override void SubstituteTerm(Term term, Term replacement) {
-        for (var i = 0; i < Terms.Length; i++) {
-            if (Terms[i].Equals(term)) {
+        for (var i = 0; i < Terms.Length; i++)
+        {
+            var curTerm = Terms[i];
+            if (curTerm.Equals(term)) {
                 Terms[i] = replacement;
             }
-            else if(Terms[i] is Function function) {
+            else if(curTerm is Function function) {
                 function.SubstituteTerm(term, replacement);
             }
         }
@@ -62,7 +64,23 @@ public class Predicate : AtomicSentence, IPredicate {
     }
 
     public override bool Equals(object? obj) {
-        return base.Equals(obj) && Terms.SequenceEqual(((Predicate)obj).Terms);
+        if (!base.Equals(obj)) {
+            return false;
+        }
+        
+        var other = obj as Predicate;
+        
+        if (Terms.Length != other.Terms.Length) {
+            return false;
+        }
+        
+        for (var i = 0; i < Terms.Length; i++) {
+            if (!Terms[i].Equals(other.Terms[i])) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     public override int GetHashCode() {

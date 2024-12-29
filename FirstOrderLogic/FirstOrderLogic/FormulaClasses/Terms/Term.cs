@@ -19,11 +19,10 @@ public abstract class Term : ILanguageObject {
     }
 
     public override bool Equals(object? obj) {
-        if (obj == null || GetType() != obj.GetType()) {
+        if (obj is not Term other) {
             return false;
         }
-
-        return TermSymbol.Equals(((Term)obj).TermSymbol);
+        return TermSymbol.Equals(other.TermSymbol);
     }
     
     public override int GetHashCode() {

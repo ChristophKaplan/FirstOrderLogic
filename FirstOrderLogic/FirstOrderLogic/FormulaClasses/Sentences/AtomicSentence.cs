@@ -62,7 +62,8 @@ public abstract class AtomicSentence : Sentence, IAtomicSentence
             return false;
         }
 
-        return Symbol.Equals(((AtomicSentence)obj).Symbol) && Time == ((AtomicSentence)obj).Time;
+        var other = obj as AtomicSentence;
+        return Symbol.Equals(other.Symbol) && Time == other.Time;
     }
     
     public override int GetHashCode() {
