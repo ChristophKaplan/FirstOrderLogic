@@ -159,8 +159,6 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
         {
             lhs.SyntheticAttribute = GetAtomicSentence(rhs);
         });
-
-
         
         ruleAtomicSentenceExtPred.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
         ruleAtomicSentenceExtProp.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
@@ -173,12 +171,11 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             if (rhs[1].SyntheticAttribute == null)
             {
                 lhs.SyntheticAttribute = new ArrayValue(firstTerm);
-                ;
                 return;
             }
 
             var ext = (ArrayValue)rhs[1].SyntheticAttribute;
-            ext.Add(firstTerm);
+            ext.Insert(firstTerm, 0);
             lhs.SyntheticAttribute = ext;
         });
 
@@ -193,7 +190,7 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
             }
 
             var ext = (ArrayValue)rhs[2].SyntheticAttribute;
-            ext.Add(firstTerm);
+            ext.Insert(firstTerm, 0);
             lhs.SyntheticAttribute = ext;
         });
 

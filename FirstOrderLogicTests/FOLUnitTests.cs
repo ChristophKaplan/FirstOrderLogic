@@ -44,12 +44,21 @@ public class Tests {
 
         Assert.That(p2, Is.EqualTo(shouldbe));
     }
-
-
+    
     [Test]
     public void Evaluation() {
         var parsed = (Sentence)_firstOrderLogic.TryParse("FORALL x (Human(x) => (Mortal(x)))");
         Assert.That(_interpretation.Evaluate(parsed), Is.EqualTo(true));
+    }
+
+
+    [Test]
+    public void TermOrder()
+    {
+        var p1 = (Predicate)_firstOrderLogic.TryParse("P(a,b,c)");
+        Assert.That(p1.Terms[0].TermSymbol, Is.EqualTo("a"));
+        Assert.That(p1.Terms[1].TermSymbol, Is.EqualTo("b"));
+        Assert.That(p1.Terms[2].TermSymbol, Is.EqualTo("c"));
     }
 
     [Test]
