@@ -1,6 +1,6 @@
 namespace FirstOrderLogic;
 
-public class Function : Term {
+public class Function : Term, IEquatable<Function> {
     public readonly Term[] Terms;
     public int Arity => Terms.Length;
     public bool IsConstant => Arity == 0;
@@ -20,22 +20,20 @@ public class Function : Term {
     }
     
     public void SubstituteTerm(Term term, Term replacement) {
-        for (var i = 0; i < Terms.Length; i++) {
-            var curTerm = Terms[i];
+        var terms = Terms;
+        var length = terms.Length;
+        for (var i = 0; i < length; i++) {
+            var curTerm = terms[i];
             if (curTerm.Equals(term)) {
-                Terms[i] = replacement;
-            }
-            else if(curTerm is Function function) {
+                terms[i] = replacement;
+            } else if (curTerm is Function function) {
                 function.SubstituteTerm(term, replacement);
             }
         }
     }
-    
-    public override bool Equals(object? obj) {
-        if (obj is not Function other || obj is Variable) {
-            return false;
-        }
-        
+
+    public bool Equals(Function? other)
+    {
         if(!EqualSignature(other)) {
             return false;
         }
@@ -52,12 +50,22 @@ public class Function : Term {
         
         return true;
     }
-    
-    public override int GetHashCode() {
-        return TermSymbol.GetHashCode();
+
+    public override bool Equals(object? obj)
+    {
+        return obj is Function other && Equals(other);
     }
     
-    public bool EqualSignature(Function other) => TermSymbol.Equals(other.TermSymbol) && Arity == other.Arity;
+    public override int GetHashCode() {
+        var hash = new HashCode();
+        hash.Add(TermSymbol);
+        foreach (var term in Terms) {
+            hash.Add(term);
+        }
+        return hash.ToHashCode();
+    }
+    
+    public bool EqualSignature(Function other) => Arity == other.Arity && TermSymbol.Equals(other.TermSymbol);
     
     public override string ToString() {
         return IsConstant ? base.ToString() : $"{base.ToString()}({string.Join<Term>(",", Terms)})";

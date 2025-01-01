@@ -74,8 +74,6 @@ public class Tests {
         Logger.Log(unificator2.ToString());
 
         var p5 = (ISentence)_firstOrderLogic.TryParse("P(f(x),a,x)");
-        var l = p5.GetPredicate();
-        l.Terms[1] = new Constant("a");
         var p6 = (ISentence)_firstOrderLogic.TryParse("P(f(g(y)),z,z)");
         var unificator3 = new Unificator(p5, p6);
         Logger.Log(unificator3.ToString());

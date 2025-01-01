@@ -30,13 +30,13 @@ public class Predicate : AtomicSentence, IPredicate {
     }
 
     public override void SubstituteTerm(Term term, Term replacement) {
-        for (var i = 0; i < Terms.Length; i++)
-        {
-            var curTerm = Terms[i];
+        var terms = Terms;
+        var length = terms.Length;
+        for (var i = 0; i < length; i++) {
+            var curTerm = terms[i];
             if (curTerm.Equals(term)) {
-                Terms[i] = replacement;
-            }
-            else if(curTerm is Function function) {
+                terms[i] = replacement;
+            } else if (curTerm is Function function) {
                 function.SubstituteTerm(term, replacement);
             }
         }
