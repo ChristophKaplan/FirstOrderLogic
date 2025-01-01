@@ -4,11 +4,16 @@ namespace FirstOrderLogic
 {
     public class Unificator
     {
-        public Dictionary<Variable, Term> Substitutions {get; } = new();
+        private readonly int _hashcode;
+        public readonly Dictionary<Variable, Term> Substitutions = new();
         public readonly bool IsUnifiable;
         public bool IsEmpty => Substitutions.Count == 0;
         
         public override bool Equals(object? obj) {
+            if (ReferenceEquals(this, obj)) {
+                return true;
+            }
+            
             if (obj is not Unificator unificator)
             {
                 return false;
@@ -16,6 +21,10 @@ namespace FirstOrderLogic
 
             if (unificator.Substitutions.Count != Substitutions.Count)
             {
+                return false;
+            }
+
+            if (unificator.GetHashCode() != GetHashCode()) {
                 return false;
             }
             
@@ -27,7 +36,11 @@ namespace FirstOrderLogic
         }
         
         public override int GetHashCode() {
-            var hash = 0;
+            return _hashcode;
+        }
+        
+        private int CalcHashCode() {
+            var hash = 17;
             foreach (var (key, value) in Substitutions)
             {
                 hash = HashCode.Combine(hash, key, value);
@@ -44,11 +57,13 @@ namespace FirstOrderLogic
             
             Substitutions = substitutions;
             IsUnifiable = true;
+            _hashcode = CalcHashCode();
         }
         
         public Unificator(ISentence s1, ISentence s2)
         {
             IsUnifiable = UnifyLiteral(s1, s2);
+            _hashcode = CalcHashCode();
         }
         
         private bool UnifyLiteral(ISentence lit1, ISentence lit2)

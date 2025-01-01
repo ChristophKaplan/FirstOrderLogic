@@ -1,4 +1,3 @@
-using System.Reflection;
 using LRParser.Language;
 
 namespace FirstOrderLogic;
@@ -6,7 +5,7 @@ namespace FirstOrderLogic;
 public abstract class Term : ILanguageObject {
     public readonly string TermSymbol;
 
-    public Term(string termSymbol) {
+    protected Term(string termSymbol) {
         TermSymbol = termSymbol;
     }
     
@@ -19,6 +18,10 @@ public abstract class Term : ILanguageObject {
     }
 
     public override bool Equals(object? obj) {
+        if(ReferenceEquals(this, obj)) {
+            return true;
+        }
+        
         if (obj is not Term other) {
             return false;
         }
