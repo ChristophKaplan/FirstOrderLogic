@@ -1,23 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <LangVersion>latest</LangVersion>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <LangVersion>11</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.2"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
-        <PackageReference Include="NUnit" Version="4.2.2"/>
-        <PackageReference Include="NUnit.Analyzers" Version="4.3.0"/>
-        <PackageReference Include="NUnit3TestAdapter" Version="4.6.0"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Using Include="NUnit.Framework"/>
+        <Using Include="NUnit.Framework" />
     </ItemGroup>
 
     <ItemGroup>
@@ -26,8 +18,15 @@
 
     <ItemGroup>
       <Reference Include="LRParser">
-        <HintPath>..\..\LRParser\LRParser\bin\Release\net9.0\LRParser.dll</HintPath>
+        <HintPath>..\..\LRParser\LRParser\bin\Release\netcoreapp3.1\LRParser.dll</HintPath>
       </Reference>
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
+      <PackageReference Include="NUnit" Version="3.13.3" />
+      <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    </ItemGroup>
+    
 
 </Project>

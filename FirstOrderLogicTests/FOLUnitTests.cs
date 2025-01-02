@@ -1,5 +1,4 @@
 global using NUnit.Framework;
-using System.Text;
 using FirstOrderLogic;
 using Helpers;
 
