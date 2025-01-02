@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LogHelper;
 using LRParser.Language;
 
 namespace FirstOrderLogic {
@@ -83,7 +84,7 @@ namespace FirstOrderLogic {
                 }
             }
 
-            Logger.Logger.Log("pnf done.");
+            Logger.Log("pnf done.");
             return clone;
         }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using LogHelper;
 using LRParser.Language;
 
 namespace FirstOrderLogic {
@@ -156,7 +157,7 @@ namespace FirstOrderLogic {
             var constantToElement = new Constant($"{variable}_element_{element.Id}");
 
             if (!_functions.TryAdd(constantToElement.TermSymbol, _ => element)) {
-                Logger.Logger.Log("");
+                Logger.Log("");
             }
         
             var clone = sentence.Clone(); 

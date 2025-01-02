@@ -1,8 +1,9 @@
-global using NUnit.Framework;
+using NUnit.Framework;
 using System;
 using FirstOrderLogic;
 using System.Collections.Generic;
 using System.Linq;
+using LogHelper;
 
 namespace FolTests {
     public class Tests {
@@ -66,22 +67,22 @@ namespace FolTests {
             var p1 = (ISentence)_firstOrderLogic.TryParse("P(x,y,y)");
             var p2 = (ISentence)_firstOrderLogic.TryParse("P(y,z,a)");
             var unificator1 = new Unificator(p1, p2);
-            Logger.Logger.Log(unificator1.ToString());
+            Logger.Log(unificator1.ToString());
 
             var p3 = (ISentence)_firstOrderLogic.TryParse("P(x,y,y)");
             var p4 = (ISentence)_firstOrderLogic.TryParse("P(f(y),y,x)");
             var unificator2 = new Unificator(p3, p4);
-            Logger.Logger.Log(unificator2.ToString());
+            Logger.Log(unificator2.ToString());
 
             var p5 = (ISentence)_firstOrderLogic.TryParse("P(f(x),a,x)");
             var p6 = (ISentence)_firstOrderLogic.TryParse("P(f(g(y)),z,z)");
             var unificator3 = new Unificator(p5, p6);
-            Logger.Logger.Log(unificator3.ToString());
+            Logger.Log(unificator3.ToString());
         
             var r1 = (ISentence)_firstOrderLogic.TryParse("R(x)");
             var s1 = (ISentence)_firstOrderLogic.TryParse("S(x)");
             var unificator4 = new Unificator(r1, s1);
-            Logger.Logger.Log(unificator4.ToString());
+            Logger.Log(unificator4.ToString());
         
             Assert.That(unificator1.IsUnifiable, Is.EqualTo(true));
             Assert.That(unificator2.IsUnifiable, Is.EqualTo(false));
@@ -94,8 +95,8 @@ namespace FolTests {
             var p = (ISentence)_firstOrderLogic.TryParse("P(x) => (P(y) AND Q(z))");
             var p2 = _firstOrderLogic.ToConjunctiveNormalForm(p, out var steps);
 
-            Logger.Logger.Log(p.ToString());
-            Logger.Logger.Log(p2.ToString());
+            Logger.Log(p.ToString());
+            Logger.Log(p2.ToString());
 
             Assert.That(p.IsCNF(), Is.EqualTo(false));
             Assert.That(p2.IsCNF(), Is.EqualTo(true));
@@ -106,8 +107,8 @@ namespace FolTests {
             var p = (ISentence)_firstOrderLogic.TryParse("X => (A AND (NOT B) AND (NOT C))");
             var p2 = _firstOrderLogic.ToConjunctiveNormalForm(p, out var steps);
 
-            Logger.Logger.Log(p.ToString());
-            Logger.Logger.Log(p2.ToString());
+            Logger.Log(p.ToString());
+            Logger.Log(p2.ToString());
 
             Assert.That(false, Is.EqualTo(false));
         }
@@ -117,9 +118,9 @@ namespace FolTests {
         public void ClauseSet() {
             var p = (ISentence)_firstOrderLogic.TryParse("(P(x) => Q(y)) AND R(z)");
             var p2 = _firstOrderLogic.ToPrenexForm(p, out var steps);
-            Logger.Logger.Log(p2 + " cnf:" + p2.IsCNF());
+            Logger.Log(p2 + " cnf:" + p2.IsCNF());
             var set = p2.GetClauseSet();
-            Logger.Logger.Log(set.Aggregate("", (current, clause) => current + clause + "\n"));
+            Logger.Log(set.Aggregate("", (current, clause) => current + clause + "\n"));
             Assert.That(set.Count, Is.EqualTo(2));
         }
 
@@ -138,8 +139,8 @@ namespace FolTests {
                         unify.Substitute(clause1);
                         unify.Substitute(clause2);
 
-                        Logger.Logger.Log(clause1.ToString());
-                        Logger.Logger.Log(clause2.ToString());
+                        Logger.Log(clause1.ToString());
+                        Logger.Log(clause2.ToString());
                     }
                 }
             }
@@ -198,7 +199,7 @@ namespace FolTests {
         public void TestUTF8() {
             var input = "¬ At(Work)";
             var parsed = (ISentence)_firstOrderLogic.TryParse(input);
-            Logger.Logger.Log($"Parsed sentence: {parsed}");
+            Logger.Log($"Parsed sentence: {parsed}");
 
             var expected = new ComplexSentence(new Connective(Connective.LogicSymbol.NEGATION), new Predicate("At", new Term[] { new Constant("Work") }));
             Assert.That(parsed.ToString(), Is.EqualTo(expected.ToString()));

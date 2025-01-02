@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <OutputType>Library</OutputType>
+        <TargetFramework>netstandard2.1</TargetFramework>
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -14,21 +14,12 @@
         <LangVersion>9</LangVersion>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)' == 'Unity'">
-        <DefineConstants>UNITY_5_3_OR_NEWER</DefineConstants>
-    </PropertyGroup>
-    
-    <ItemGroup>
-      <PackageReference Include="NUnit" Version="3.13.3" />
-    </ItemGroup>
-
     <ItemGroup>
       <Reference Include="Logger">
         <HintPath>..\..\Logger\Logger\bin\Release\netstandard2.1\Logger.dll</HintPath>
       </Reference>
       <Reference Include="LRParser">
-        <HintPath>..\..\LRParser\LRParser\bin\Release\netcoreapp3.1\LRParser.dll</HintPath>
+        <HintPath>..\..\LRParser\LRParser\bin\Release\netstandard2.1\LRParser.dll</HintPath>
       </Reference>
     </ItemGroup>
-
 </Project>

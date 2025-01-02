@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LogHelper;
 using LRParser.Language;
 
 namespace FirstOrderLogic {
@@ -195,7 +196,7 @@ namespace FirstOrderLogic {
             };
 
             if (!isPropositional) {
-                Logger.Logger.Log($"{this} is not propositional");
+                Logger.Log($"{this} is not propositional");
             }
         
             return isPropositional;
