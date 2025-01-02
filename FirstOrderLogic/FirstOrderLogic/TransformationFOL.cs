@@ -1,3 +1,4 @@
+using System;
 using FirstOrderLogic;
 
 public static class TransformationFOL {
@@ -167,9 +168,9 @@ public static class TransformationFOL {
     }
 
     private static void DissolveBiconditional(ref ISentence sentence) {
-        if (sentence is IComplexSentence { Connective.Symbol: Connective.LogicSymbol.BICONDITIONAL } implication) {
-            var lhs = implication.Children[0];
-            var rhs = implication.Children[1];
+        if (sentence is IComplexSentence complexSentence && complexSentence.Connective == Connective.LogicSymbol.BICONDITIONAL) {
+            var lhs = complexSentence.Children[0];
+            var rhs = complexSentence.Children[1];
             var lhsImplication = new ComplexSentence(lhs, Connective.LogicSymbol.IMPLICATION, rhs);
             var rhsImplication = new ComplexSentence(rhs, Connective.LogicSymbol.IMPLICATION, lhs);
             var and = new ComplexSentence(lhsImplication, Connective.LogicSymbol.CONJUNCTION, rhsImplication);
@@ -179,9 +180,9 @@ public static class TransformationFOL {
     }
 
     private static void DissolveImplication(ref ISentence sentence) {
-        if (sentence is IComplexSentence { Connective.Symbol: Connective.LogicSymbol.IMPLICATION } implication) {
-            var lhs = implication.Children[0];
-            var rhs = implication.Children[1];
+        if (sentence is IComplexSentence complexSentence && complexSentence.Connective == Connective.LogicSymbol.IMPLICATION) {
+            var lhs = complexSentence.Children[0];
+            var rhs = complexSentence.Children[1];
             var notLhs = new ComplexSentence(Connective.LogicSymbol.NEGATION, lhs);
             var or = new ComplexSentence(notLhs, Connective.LogicSymbol.DISJUNCTION, rhs);
             or.SetParentToParentOf(sentence);

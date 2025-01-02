@@ -1,9 +1,9 @@
-namespace FirstOrderLogic;
-
-public class Element : IElementOfDiscourse {
-    public int Id { get; }
+namespace FirstOrderLogic {
+    public class Element : IElementOfDiscourse {
+        public int Id { get; }
     
-    public Element(int id) {
-        Id = id;
+        public Element(int id) {
+            Id = id;
+        }
     }
 }

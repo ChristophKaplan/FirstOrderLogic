@@ -1,58 +1,61 @@
+using System;
+using System.Collections.Generic;
 using LRParser.Language;
+using System.Linq;
 
-namespace FirstOrderLogic;
+namespace FirstOrderLogic {
+    public abstract class Term : ILanguageObject {
+        public readonly string TermSymbol;
 
-public abstract class Term : ILanguageObject {
-    public readonly string TermSymbol;
-
-    protected Term(string termSymbol) {
-        TermSymbol = termSymbol;
-    }
-    
-    public Term Clone() {
-        return this switch {
-            Variable variable => new Variable(variable),
-            Function function => new Function(function),
-            _ => throw new Exception($"Unknown Term Type: {this}")
-        };
-    }
-
-    public override bool Equals(object? obj) {
-        if(ReferenceEquals(this, obj)) {
-            return true;
+        protected Term(string termSymbol) {
+            TermSymbol = termSymbol;
         }
-        
-        if (obj is not Term other) {
-            return false;
+    
+        public Term Clone() {
+            return this switch {
+                Variable variable => new Variable(variable),
+                Function function => new Function(function),
+                _ => throw new Exception($"Unknown Term Type: {this}")
+            };
         }
-        return TermSymbol.Equals(other.TermSymbol);
-    }
-    
-    public override int GetHashCode() {
-        return TermSymbol.GetHashCode();
-    }
 
-    public override string ToString() {
-        return TermSymbol;
-    }
-    
-    public Variable[] GetVariables() {
-        switch (this) {
-            case Variable variable:
-                return new[] { variable };
-            case Function function: {
-                var variables = new List<Variable>();
-                foreach (var term in function.Terms) {
-                    variables.AddRange(term.GetVariables());
-                }
-                return variables.ToArray();
+        public override bool Equals(object? obj) {
+            if(ReferenceEquals(this, obj)) {
+                return true;
             }
-            default:
-                return Array.Empty<Variable>();
+        
+            if (obj is not Term other) {
+                return false;
+            }
+            return TermSymbol.Equals(other.TermSymbol);
         }
-    }
     
-    public bool Occurs(Variable variable) {
-        return GetVariables().Contains(variable);
+        public override int GetHashCode() {
+            return TermSymbol.GetHashCode();
+        }
+
+        public override string ToString() {
+            return TermSymbol;
+        }
+    
+        public Variable[] GetVariables() {
+            switch (this) {
+                case Variable variable:
+                    return new[] { variable };
+                case Function function: {
+                    var variables = new List<Variable>();
+                    foreach (var term in function.Terms) {
+                        variables.AddRange(term.GetVariables());
+                    }
+                    return variables.ToArray();
+                }
+                default:
+                    return Array.Empty<Variable>();
+            }
+        }
+    
+        public bool Occurs(Variable variable) {
+            return GetVariables().Contains(variable);
+        }
     }
 }

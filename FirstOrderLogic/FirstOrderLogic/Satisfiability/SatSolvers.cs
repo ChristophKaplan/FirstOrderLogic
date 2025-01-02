@@ -1,59 +1,63 @@
-namespace FirstOrderLogic;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-public class SatSolvers {
-    readonly Random _random = new();
-    public PossibleWorld WalkSAT(List<Clause> clauses, float p, int maxFlips) {
-        if(!IsPropositional(clauses)) throw new Exception("WalkSAT only works with propositional logic");
+namespace FirstOrderLogic {
+    public class SatSolvers {
+        readonly Random _random = new();
+        public PossibleWorld WalkSAT(List<Clause> clauses, float p, int maxFlips) {
+            if(!IsPropositional(clauses)) throw new Exception("WalkSAT only works with propositional logic");
         
-        var model = new PossibleWorld(GetRandomAssigmentFor(clauses));
+            var model = new PossibleWorld(GetRandomAssigmentFor(clauses));
 
-        for (var i = 0; i < maxFlips; i++) {
-            var eval = model.Evaluate(clauses);
-            if (eval) return model;
+            for (var i = 0; i < maxFlips; i++) {
+                var eval = model.Evaluate(clauses);
+                if (eval) return model;
             
-            var clause = GetRandomUnsatisfiedClause(clauses, model);
+                var clause = GetRandomUnsatisfiedClause(clauses, model);
          
-            if (_random.NextDouble() < p) {
-                var literal = clauses[_random.Next(0, clauses.Count)].Literals[0];
-                model.Switch(literal.GetProposition());
-            } else {
-                var bestModel = model.Clone();
-                var bestModelScore = 0;
-                foreach (var literal in clause.Literals) {
-                    var newModel = model.Clone();
-                    newModel.Switch(literal.GetProposition());
-                    var newModelScore = clauses.Count(cls => newModel.Evaluate(cls));
-                    if (newModelScore > bestModelScore) {
-                        bestModel = newModel;
-                        bestModelScore = newModelScore;
+                if (_random.NextDouble() < p) {
+                    var literal = clauses[_random.Next(0, clauses.Count)].Literals[0];
+                    model.Switch(literal.GetProposition());
+                } else {
+                    var bestModel = model.Clone();
+                    var bestModelScore = 0;
+                    foreach (var literal in clause.Literals) {
+                        var newModel = model.Clone();
+                        newModel.Switch(literal.GetProposition());
+                        var newModelScore = clauses.Count(cls => newModel.Evaluate(cls));
+                        if (newModelScore > bestModelScore) {
+                            bestModel = newModel;
+                            bestModelScore = newModelScore;
+                        }
                     }
-                }
                 
-                model = bestModel;
+                    model = bestModel;
+                }
             }
+
+            return !model.Evaluate(clauses) ? null : model;
         }
 
-        return !model.Evaluate(clauses) ? null : model;
-    }
+        private bool IsPropositional(List<Clause> clauses) {
+            return clauses.All(clause => clause.Literals.All(lit => lit.IsPropositional()));
+        }
 
-    private bool IsPropositional(List<Clause> clauses) {
-        return clauses.All(clause => clause.Literals.All(lit => lit.IsPropositional()));
-    }
-
-    private Clause GetRandomUnsatisfiedClause(List<Clause> clauses, PossibleWorld model) {
-        var unsatisfiedClauses = clauses.Where(clause => !model.Evaluate(clause)).ToList();
-        return unsatisfiedClauses[new Random().Next(0, unsatisfiedClauses.Count)];
-    }
+        private Clause GetRandomUnsatisfiedClause(List<Clause> clauses, PossibleWorld model) {
+            var unsatisfiedClauses = clauses.Where(clause => !model.Evaluate(clause)).ToList();
+            return unsatisfiedClauses[new Random().Next(0, unsatisfiedClauses.Count)];
+        }
     
-    private Dictionary<IProposition, bool> GetRandomAssigmentFor(List<Clause> clauses) {
-        var assignment = new Dictionary<IProposition, bool>();
-        foreach (var clause in clauses) {
-            foreach (var literal in clause.Literals) {
-                var proposition = literal.GetProposition();
-                assignment.TryAdd(proposition, new Random().Next(0, 2) == 1);
+        private Dictionary<IProposition, bool> GetRandomAssigmentFor(List<Clause> clauses) {
+            var assignment = new Dictionary<IProposition, bool>();
+            foreach (var clause in clauses) {
+                foreach (var literal in clause.Literals) {
+                    var proposition = literal.GetProposition();
+                    assignment.TryAdd(proposition, new Random().Next(0, 2) == 1);
+                }
             }
-        }
         
-        return assignment;
+            return assignment;
+        }
     }
 }

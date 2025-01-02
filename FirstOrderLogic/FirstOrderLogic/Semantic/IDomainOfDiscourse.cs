@@ -1,5 +1,7 @@
-namespace FirstOrderLogic;
+using System.Collections.Generic;
 
-public interface IDomainOfDiscourse {
-    public List<IElementOfDiscourse> Elements { get; }
+namespace FirstOrderLogic {
+    public interface IDomainOfDiscourse {
+        public List<IElementOfDiscourse> Elements { get; }
+    }
 }

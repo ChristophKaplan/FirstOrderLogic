@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Christoph Kaplan</Authors>
@@ -11,14 +11,21 @@
         <Version>1.0.2</Version>
         <IsPackable>true</IsPackable>
         <Title>First Order Logic</Title>
-        <LangVersion>11</LangVersion>
+        <LangVersion>9</LangVersion>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)' == 'Unity'">
+        <DefineConstants>UNITY_5_3_OR_NEWER</DefineConstants>
+    </PropertyGroup>
+    
     <ItemGroup>
       <PackageReference Include="NUnit" Version="3.13.3" />
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="Logger">
+        <HintPath>..\..\Logger\Logger\bin\Release\netstandard2.1\Logger.dll</HintPath>
+      </Reference>
       <Reference Include="LRParser">
         <HintPath>..\..\LRParser\LRParser\bin\Release\netcoreapp3.1\LRParser.dll</HintPath>
       </Reference>

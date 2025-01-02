@@ -1,5 +1,5 @@
-namespace FirstOrderLogic;
-
-public interface IElementOfDiscourse {
-    public int Id{ get; }
+namespace FirstOrderLogic {
+    public interface IElementOfDiscourse {
+        public int Id{ get; }
+    }
 }
