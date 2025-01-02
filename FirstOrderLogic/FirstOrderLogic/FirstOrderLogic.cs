@@ -40,7 +40,9 @@ public class FirstOrderLogic : Language<Terminal, NonTerminal>
 {
     public FirstOrderLogic() 
     {
+#if !UNITY_5_3_OR_NEWER
         Console.OutputEncoding = Encoding.UTF8;
+#endif
     }
     
     protected override TokenDefinition<Terminal>[] SetUpTokenDefinitions()
