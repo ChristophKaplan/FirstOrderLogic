@@ -19,13 +19,6 @@
         <ProjectReference Include="..\FirstOrderLogic\FirstOrderLogic.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Reference Include="Logger">
-            <HintPath>..\..\Logger\Logger\bin\Release\netstandard2.1\Logger.dll</HintPath>
-        </Reference>
-        <Reference Include="LRParser">
-            <HintPath>..\..\LRParser\LRParser\bin\Release\netstandard2.1\LRParser.dll</HintPath>
-        </Reference>
-    </ItemGroup>
+
 
 </Project>
