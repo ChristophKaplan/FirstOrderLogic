@@ -25,13 +25,17 @@ namespace FolTests {
             var propositionalAssignments = new Dictionary<IProposition, bool>();
 
             relations.Add("Human",
-                terms => terms[0] switch {
-                    Element element => element.Id == 1 || element.Id == 2, _ => throw new Exception("Error: Human predicate not found.")
+                terms => terms[0] switch
+                {
+                    Element element => element.Id == 1 || element.Id == 2,
+                    _ => throw new Exception("Error: Human predicate not found.")
                 });
 
             relations.Add("Mortal",
-                terms => terms[0] switch {
-                    Element element => element.Id == 1 || element.Id == 2, _ => throw new Exception("Error: Mortal predicate not found.")
+                terms => terms[0] switch
+                {
+                    Element element => element.Id == 1 || element.Id == 2,
+                    _ => throw new Exception("Error: Mortal predicate not found.")
                 });
 
             return new Interpretation(domain, relations, functions, variableAssignments, propositionalAssignments);

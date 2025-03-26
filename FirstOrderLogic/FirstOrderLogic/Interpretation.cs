@@ -107,6 +107,8 @@ namespace FirstOrderLogic {
             _variableAssigment = variableAssigment;
         }
     
+        public IElementOfDiscourse EvaluateTerm(Term term) => Evaluate(term);
+        
         public override bool Evaluate(ISentence sentence) {
             if(sentence.HasScopeConflict()) {
                 throw new Exception("Error: Sentence has scope conflict.");
