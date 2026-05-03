@@ -29,10 +29,7 @@ namespace FirstOrderLogic {
         AtomicSentence,
         Term,
         TermList,
-        TermListExt,
-        TermExt,
         Sentence,
-        AtomicSentenceExt,
         ComplexSentence,
         LogicalOperator,
         ComplexSentenceUnary
@@ -113,65 +110,57 @@ namespace FirstOrderLogic {
                 return new ArrayValue(connective, sentences);
             }, NonTerminal.ComplexSentenceUnary, NonTerminal.LogicalOperator, NonTerminal.Sentence);
 
-            AddRule(GetAtomicSentence, NonTerminal.AtomicSentence, Terminal.Identifier, NonTerminal.AtomicSentenceExt);
-            AddRule(GetAtomicSentence, NonTerminal.AtomicSentence, Terminal.Identifier, NonTerminal.AtomicSentenceExt, Terminal.TimeAttribute);
-            AddRule(rhs => rhs[1].Attribute, NonTerminal.AtomicSentenceExt, Terminal.Open, NonTerminal.TermList, Terminal.Close);
-            AddRule(rhs => rhs[0].Attribute, NonTerminal.AtomicSentenceExt, InternalSymbol.Epsilon);
-
             AddRule(rhs =>
             {
-                var firstTerm = rhs[0].Attribute;
-
-                if (rhs[1].Attribute == null)
-                {
-                    return new ArrayValue(firstTerm);
-                }
-
-                var ext = (ArrayValue)rhs[1].Attribute;
-                ext.Insert(firstTerm, 0);
-                return ext;
-            }, NonTerminal.TermList, NonTerminal.Term, NonTerminal.TermListExt);
-
-            AddRule(rhs =>
-            {
-                var firstTerm = rhs[1].Attribute;
-
-                if (rhs[2].Attribute == null)
-                {
-                    return new ArrayValue(firstTerm);
-                }
-
-                var ext = (ArrayValue)rhs[2].Attribute;
-                ext.Insert(firstTerm, 0);
-                return ext;
-            }, NonTerminal.TermListExt, Terminal.Comma, NonTerminal.Term, NonTerminal.TermListExt);
-
-            AddRule(rhs => new ArrayValue(Array.Empty<ILanguageObject>()), NonTerminal.TermListExt, InternalSymbol.Epsilon);
+                var symbol = ((LexValue)rhs[0].Attribute).Value;
+                return new Proposition(symbol);
+            }, NonTerminal.AtomicSentence, Terminal.Identifier);
 
             AddRule(rhs =>
             {
                 var symbol = ((LexValue)rhs[0].Attribute).Value;
+                var timeValue = int.Parse(((LexValue)rhs[1].Attribute).Value[1..]);
+                return new Proposition(symbol, timeValue);
+            }, NonTerminal.AtomicSentence, Terminal.Identifier, Terminal.TimeAttribute);
 
-                ILanguageObject term;
+            AddRule(rhs =>
+            {
+                var symbol = ((LexValue)rhs[0].Attribute).Value;
+                var terms = ((ArrayValue)rhs[2].Attribute).Value.Select(lo => (Term)lo).ToArray();
+                return new Predicate(symbol, terms);
+            }, NonTerminal.AtomicSentence, Terminal.Identifier, Terminal.Open, NonTerminal.TermList, Terminal.Close);
 
-                if (rhs[1].Attribute != null)
-                {
-                    var extArray = (ArrayValue)rhs[1].Attribute;
-                    var terms = extArray.Value.Select(lexValue => (Term)lexValue).ToArray();
-                    term = new Function(symbol, terms);
-                }
-                else
-                {
-                    var variableList = new[] { "x", "y", "z", "w" };
-                    var isVariable = variableList.Contains(symbol);
-                    term = isVariable ? (ILanguageObject)new Variable(symbol) : new Constant(symbol);
-                }
+            AddRule(rhs =>
+            {
+                var symbol = ((LexValue)rhs[0].Attribute).Value;
+                var terms = ((ArrayValue)rhs[2].Attribute).Value.Select(lo => (Term)lo).ToArray();
+                var timeValue = int.Parse(((LexValue)rhs[4].Attribute).Value[1..]);
+                return new Predicate(symbol, terms, timeValue);
+            }, NonTerminal.AtomicSentence, Terminal.Identifier, Terminal.Open, NonTerminal.TermList, Terminal.Close, Terminal.TimeAttribute);
 
-                return term;
-            }, NonTerminal.Term, Terminal.Identifier, NonTerminal.TermExt);
+            AddRule(rhs => new ArrayValue(rhs[0].Attribute), NonTerminal.TermList, NonTerminal.Term);
+            AddRule(rhs =>
+            {
+                var list = (ArrayValue)rhs[0].Attribute;
+                list.Add(rhs[2].Attribute);
+                return list;
+            }, NonTerminal.TermList, NonTerminal.TermList, Terminal.Comma, NonTerminal.Term);
 
-            AddRule(rhs => rhs[1].Attribute, NonTerminal.TermExt, Terminal.Open, NonTerminal.TermList, Terminal.Close);
-            AddRule(rhs => rhs[0].Attribute, NonTerminal.TermExt, InternalSymbol.Epsilon);
+            AddRule(rhs =>
+            {
+                var symbol = ((LexValue)rhs[0].Attribute).Value;
+                var variableList = new[] { "x", "y", "z", "w" };
+                return variableList.Contains(symbol)
+                    ? (ILanguageObject)new Variable(symbol)
+                    : new Constant(symbol);
+            }, NonTerminal.Term, Terminal.Identifier);
+
+            AddRule(rhs =>
+            {
+                var symbol = ((LexValue)rhs[0].Attribute).Value;
+                var terms = ((ArrayValue)rhs[2].Attribute).Value.Select(lo => (Term)lo).ToArray();
+                return new Function(symbol, terms);
+            }, NonTerminal.Term, Terminal.Identifier, Terminal.Open, NonTerminal.TermList, Terminal.Close);
 
             AddRule(GetConnective, NonTerminal.LogicalOperator, Terminal.Conjunction);
             AddRule(GetConnective, NonTerminal.LogicalOperator, Terminal.Disjunction);
@@ -181,26 +170,6 @@ namespace FirstOrderLogic {
         }
 
         ILanguageObject GetConnective(Symbol[] rhs) => new Connective(((LexValue)rhs[0].Attribute).ToLogicalConstant());
-
-        ILanguageObject GetAtomicSentence(Symbol[] rhs) {
-            var symbol = ((LexValue)rhs[0].Attribute).Value;
-
-            int? timeValue = null;
-            if (rhs.Length > 2)
-            {
-                var timeAttribute = ((LexValue)rhs[2].Attribute).Value;
-                timeValue = int.Parse(timeAttribute[1..]);
-            }
-            
-            if (rhs[1].Attribute != null)
-            {
-                var extArray = (ArrayValue)rhs[1].Attribute;
-                var terms = extArray.Value.Select(lexValue => (Term)lexValue).ToArray();
-                return timeValue.HasValue ? new Predicate(symbol, terms, (int)timeValue) : new Predicate(symbol, terms);
-            }
-            
-            return timeValue.HasValue ? new Proposition(symbol, (int)timeValue) : new Proposition(symbol);
-        }
     
         public override ILanguageObject TryParse(string input)
         {
