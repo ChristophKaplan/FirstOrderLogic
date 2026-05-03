@@ -61,187 +61,140 @@ namespace FirstOrderLogic {
 
         protected override void SetUpGrammar()
         {
-            var ruleStart = AddProductionRule(SpecialNonTerminal.Start, NonTerminal.LangObject);
-            var ruleLangObj = AddProductionRule(NonTerminal.LangObject, NonTerminal.Sentence);
+            AddRule(rhs => rhs[0].Attribute, NonTerminal.LangObject, NonTerminal.Sentence);
 
-            var ruleSentence = AddProductionRule(NonTerminal.Sentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
-            var ruleSentenceComp = AddProductionRule(NonTerminal.Sentence, NonTerminal.ComplexSentence);
-            var ruleSentenceAtom = AddProductionRule(NonTerminal.Sentence, NonTerminal.AtomicSentence);
-            var ruleSentenceBoolean = AddProductionRule(NonTerminal.Sentence, Terminal.Boolean);
-        
-            var ruleSentenceQuantifier = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Quantifier, Terminal.Identifier, NonTerminal.Sentence);
-            var ruleComplexSentenceAtomic = AddProductionRule(NonTerminal.ComplexSentence, NonTerminal.AtomicSentence, NonTerminal.ComplexSentenceUnary);
-            var ruleComplexSentenceBraces = AddProductionRule(NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, NonTerminal.ComplexSentenceUnary);
-            var ruleComplexSentenceNegation = AddProductionRule(NonTerminal.ComplexSentence, NonTerminal.ComplexSentenceUnary);
-            var ruleComplexSentenceExt = AddProductionRule(NonTerminal.ComplexSentenceUnary, NonTerminal.LogicalOperator, NonTerminal.Sentence);
-
-            var ruleAtomicSentence = AddProductionRule(NonTerminal.AtomicSentence, Terminal.Identifier, NonTerminal.AtomicSentenceExt);
-            var ruleAtomicSentenceT = AddProductionRule(NonTerminal.AtomicSentence, Terminal.Identifier, NonTerminal.AtomicSentenceExt, Terminal.TimeAttribute);
-            var ruleAtomicSentenceExtPred = AddProductionRule(NonTerminal.AtomicSentenceExt, Terminal.Open, NonTerminal.TermList, Terminal.Close);
-            var ruleAtomicSentenceExtProp = AddProductionRule(NonTerminal.AtomicSentenceExt, SpecialTerminal.Epsilon);
-
-        
-            var ruleTermList = AddProductionRule(NonTerminal.TermList, NonTerminal.Term, NonTerminal.TermListExt);
-            var ruleTermListExt = AddProductionRule(NonTerminal.TermListExt, Terminal.Comma, NonTerminal.Term, NonTerminal.TermListExt);
-            var ruleTermListExtEnd = AddProductionRule(NonTerminal.TermListExt, SpecialTerminal.Epsilon);
-
-            var ruleTermVarOrConstOrFunc = AddProductionRule(NonTerminal.Term, Terminal.Identifier, NonTerminal.TermExt);
-            var ruleTermExt = AddProductionRule(NonTerminal.TermExt, Terminal.Open, NonTerminal.TermList, Terminal.Close);
-            var ruleTermExtEnd = AddProductionRule(NonTerminal.TermExt, SpecialTerminal.Epsilon);
-
-            var ruleCon = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Conjunction);
-            var ruleDis = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Disjunction);
-            var ruleImp = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Implication);
-            var ruleIFF = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Biconditional);
-            var ruleNeg = AddProductionRule(NonTerminal.LogicalOperator, Terminal.Negation);
-
-            ruleStart.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-            ruleLangObj.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-            ruleSentence.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
-            ruleSentenceComp.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-            ruleSentenceAtom.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-            ruleSentenceBoolean.SetSemanticAction((lhs, rhs) =>
+            AddRule(rhs => rhs[1].Attribute, NonTerminal.Sentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close);
+            AddRule(rhs => rhs[0].Attribute, NonTerminal.Sentence, NonTerminal.ComplexSentence);
+            AddRule(rhs => rhs[0].Attribute, NonTerminal.Sentence, NonTerminal.AtomicSentence);
+            AddRule(rhs =>
             {
-                var boolean = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
-                lhs.SyntheticAttribute = new Proposition(boolean.ToString());
-            });
-            
-            ruleSentenceQuantifier.SetSemanticAction((lhs, rhs) =>
-            {
-                var quantifierSymbol = ((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant();
-                var variableString = ((LexValue)rhs[1].SyntheticAttribute).Value;
-                var sentence = (Sentence)rhs[2].SyntheticAttribute;
-                lhs.SyntheticAttribute = new ComplexSentence(new Quantifier(quantifierSymbol, new Variable(variableString)), sentence);
-            });
+                var boolean = ((LexValue)rhs[0].Attribute).ToLogicalConstant();
+                return new Proposition(boolean.ToString());
+            }, NonTerminal.Sentence, Terminal.Boolean);
 
-            ruleComplexSentenceAtomic.SetSemanticAction((lhs, rhs) =>
+            AddRule(rhs =>
             {
-                var atomic = (Sentence)rhs[0].SyntheticAttribute;
-                var extArray = (ArrayValue)rhs[1].SyntheticAttribute;
+                var quantifierSymbol = ((LexValue)rhs[0].Attribute).ToLogicalConstant();
+                var variableString = ((LexValue)rhs[1].Attribute).Value;
+                var sentence = (Sentence)rhs[2].Attribute;
+                return new ComplexSentence(new Quantifier(quantifierSymbol, new Variable(variableString)), sentence);
+            }, NonTerminal.ComplexSentence, Terminal.Quantifier, Terminal.Identifier, NonTerminal.Sentence);
+
+            AddRule(rhs =>
+            {
+                var atomic = (Sentence)rhs[0].Attribute;
+                var extArray = (ArrayValue)rhs[1].Attribute;
                 var connective = (Connective)extArray.Value[0];
                 var sentence = (Sentence)extArray.Value[1];
-                lhs.SyntheticAttribute = new ComplexSentence(atomic, connective, sentence);
-            });
+                return new ComplexSentence(atomic, connective, sentence);
+            }, NonTerminal.ComplexSentence, NonTerminal.AtomicSentence, NonTerminal.ComplexSentenceUnary);
 
-            ruleComplexSentenceBraces.SetSemanticAction((lhs, rhs) =>
+            AddRule(rhs =>
             {
-                var atomic = (Sentence)rhs[1].SyntheticAttribute;
-                var extArray = (ArrayValue)rhs[3].SyntheticAttribute;
+                var atomic = (Sentence)rhs[1].Attribute;
+                var extArray = (ArrayValue)rhs[3].Attribute;
                 var connective = (Connective)extArray.Value[0];
                 var sentence = (Sentence)extArray.Value[1];
-                lhs.SyntheticAttribute = new ComplexSentence(atomic, connective, sentence);
-            });
+                return new ComplexSentence(atomic, connective, sentence);
+            }, NonTerminal.ComplexSentence, Terminal.Open, NonTerminal.Sentence, Terminal.Close, NonTerminal.ComplexSentenceUnary);
 
-            ruleComplexSentenceExt.SetSemanticAction((lhs, rhs) =>
+            AddRule(rhs =>
             {
-                var connective = (Connective)rhs[0].SyntheticAttribute;
-                var sentences = (Sentence)rhs[1].SyntheticAttribute;
-                lhs.SyntheticAttribute = new ArrayValue(connective, sentences);
-            });
-
-            ruleComplexSentenceNegation.SetSemanticAction((lhs, rhs) =>
-            {
-                var extArray = (ArrayValue)rhs[0].SyntheticAttribute;
+                var extArray = (ArrayValue)rhs[0].Attribute;
                 var negation = (Connective)extArray.Value[0];
                 var sentence = (Sentence)extArray.Value[1];
-                lhs.SyntheticAttribute = new ComplexSentence(negation, sentence);
-            });
+                return new ComplexSentence(negation, sentence);
+            }, NonTerminal.ComplexSentence, NonTerminal.ComplexSentenceUnary);
 
-            ruleAtomicSentence.SetSemanticAction((lhs, rhs) =>
+            AddRule(rhs =>
             {
-                lhs.SyntheticAttribute = GetAtomicSentence(rhs);
-            });
-        
-            ruleAtomicSentenceT.SetSemanticAction((lhs, rhs) =>
-            {
-                lhs.SyntheticAttribute = GetAtomicSentence(rhs);
-            });
-        
-            ruleAtomicSentenceExtPred.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
-            ruleAtomicSentenceExtProp.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
-            ruleTermExt.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[1].SyntheticAttribute; });
+                var connective = (Connective)rhs[0].Attribute;
+                var sentences = (Sentence)rhs[1].Attribute;
+                return new ArrayValue(connective, sentences);
+            }, NonTerminal.ComplexSentenceUnary, NonTerminal.LogicalOperator, NonTerminal.Sentence);
 
-            ruleTermList.SetSemanticAction((lhs, rhs) =>
-            {
-                var firstTerm = rhs[0].SyntheticAttribute;
+            AddRule(GetAtomicSentence, NonTerminal.AtomicSentence, Terminal.Identifier, NonTerminal.AtomicSentenceExt);
+            AddRule(GetAtomicSentence, NonTerminal.AtomicSentence, Terminal.Identifier, NonTerminal.AtomicSentenceExt, Terminal.TimeAttribute);
+            AddRule(rhs => rhs[1].Attribute, NonTerminal.AtomicSentenceExt, Terminal.Open, NonTerminal.TermList, Terminal.Close);
+            AddRule(rhs => rhs[0].Attribute, NonTerminal.AtomicSentenceExt, InternalSymbol.Epsilon);
 
-                if (rhs[1].SyntheticAttribute == null)
+            AddRule(rhs =>
+            {
+                var firstTerm = rhs[0].Attribute;
+
+                if (rhs[1].Attribute == null)
                 {
-                    lhs.SyntheticAttribute = new ArrayValue(firstTerm);
-                    return;
+                    return new ArrayValue(firstTerm);
                 }
 
-                var ext = (ArrayValue)rhs[1].SyntheticAttribute;
+                var ext = (ArrayValue)rhs[1].Attribute;
                 ext.Insert(firstTerm, 0);
-                lhs.SyntheticAttribute = ext;
-            });
+                return ext;
+            }, NonTerminal.TermList, NonTerminal.Term, NonTerminal.TermListExt);
 
-            ruleTermListExt.SetSemanticAction((lhs, rhs) =>
+            AddRule(rhs =>
             {
-                var firstTerm = rhs[1].SyntheticAttribute;
+                var firstTerm = rhs[1].Attribute;
 
-                if (rhs[2].SyntheticAttribute == null)
+                if (rhs[2].Attribute == null)
                 {
-                    lhs.SyntheticAttribute = new ArrayValue(firstTerm);
-                    return;
+                    return new ArrayValue(firstTerm);
                 }
 
-                var ext = (ArrayValue)rhs[2].SyntheticAttribute;
+                var ext = (ArrayValue)rhs[2].Attribute;
                 ext.Insert(firstTerm, 0);
-                lhs.SyntheticAttribute = ext;
-            });
+                return ext;
+            }, NonTerminal.TermListExt, Terminal.Comma, NonTerminal.Term, NonTerminal.TermListExt);
 
-            ruleTermListExtEnd.SetSemanticAction((lhs, rhs) =>
+            AddRule(rhs => new ArrayValue(Array.Empty<ILanguageObject>()), NonTerminal.TermListExt, InternalSymbol.Epsilon);
+
+            AddRule(rhs =>
             {
-                lhs.SyntheticAttribute = new ArrayValue(Array.Empty<ILanguageObject>());
-            });
+                var symbol = ((LexValue)rhs[0].Attribute).Value;
 
-            ruleTermExtEnd.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = rhs[0].SyntheticAttribute; });
+                ILanguageObject term;
 
-            ruleTermVarOrConstOrFunc.SetSemanticAction((lhs, rhs) =>
-            {
-                var symbol = ((LexValue)rhs[0].SyntheticAttribute).Value;
-
-                var term = default(ILanguageObject);
-
-                if (rhs[1].SyntheticAttribute != null)
+                if (rhs[1].Attribute != null)
                 {
-                    var extArray = (ArrayValue)rhs[1].SyntheticAttribute;
+                    var extArray = (ArrayValue)rhs[1].Attribute;
                     var terms = extArray.Value.Select(lexValue => (Term)lexValue).ToArray();
                     term = new Function(symbol, terms);
                 }
                 else
                 {
-                    var variableList = new[] { "x", "y", "z", "w"};
+                    var variableList = new[] { "x", "y", "z", "w" };
                     var isVariable = variableList.Contains(symbol);
-                    term = isVariable ? new Variable(symbol) : new Constant(symbol);
+                    term = isVariable ? (ILanguageObject)new Variable(symbol) : new Constant(symbol);
                 }
 
-                lhs.SyntheticAttribute = term;
-            });
+                return term;
+            }, NonTerminal.Term, Terminal.Identifier, NonTerminal.TermExt);
 
-            ruleCon.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
-            ruleDis.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
-            ruleImp.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
-            ruleIFF.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
-            ruleNeg.SetSemanticAction((lhs, rhs) => { lhs.SyntheticAttribute = GetConnective(rhs); });
+            AddRule(rhs => rhs[1].Attribute, NonTerminal.TermExt, Terminal.Open, NonTerminal.TermList, Terminal.Close);
+            AddRule(rhs => rhs[0].Attribute, NonTerminal.TermExt, InternalSymbol.Epsilon);
+
+            AddRule(GetConnective, NonTerminal.LogicalOperator, Terminal.Conjunction);
+            AddRule(GetConnective, NonTerminal.LogicalOperator, Terminal.Disjunction);
+            AddRule(GetConnective, NonTerminal.LogicalOperator, Terminal.Implication);
+            AddRule(GetConnective, NonTerminal.LogicalOperator, Terminal.Biconditional);
+            AddRule(GetConnective, NonTerminal.LogicalOperator, Terminal.Negation);
         }
 
-        ILanguageObject GetConnective(Symbol[] rhs) => new Connective(((LexValue)rhs[0].SyntheticAttribute).ToLogicalConstant()); 
+        ILanguageObject GetConnective(Symbol[] rhs) => new Connective(((LexValue)rhs[0].Attribute).ToLogicalConstant());
 
         ILanguageObject GetAtomicSentence(Symbol[] rhs) {
-            var symbol = ((LexValue)rhs[0].SyntheticAttribute).Value;
+            var symbol = ((LexValue)rhs[0].Attribute).Value;
 
             int? timeValue = null;
             if (rhs.Length > 2)
             {
-                var timeAttribute = ((LexValue)rhs[2].SyntheticAttribute).Value;
+                var timeAttribute = ((LexValue)rhs[2].Attribute).Value;
                 timeValue = int.Parse(timeAttribute[1..]);
             }
             
-            if (rhs[1].SyntheticAttribute != null)
+            if (rhs[1].Attribute != null)
             {
-                var extArray = (ArrayValue)rhs[1].SyntheticAttribute;
+                var extArray = (ArrayValue)rhs[1].Attribute;
                 var terms = extArray.Value.Select(lexValue => (Term)lexValue).ToArray();
                 return timeValue.HasValue ? new Predicate(symbol, terms, (int)timeValue) : new Predicate(symbol, terms);
             }
